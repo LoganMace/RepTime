@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import { Platform } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
@@ -10,19 +10,9 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <>
-      {/* <SideNav isOpen={isDrawerOpen} onClose={() => setDrawerOpen(false)} /> */}
-      {/* <View style={{ position: "absolute", top: 30, left: 20, zIndex: 1 }}>
-        <Icon
-          name="menu"
-          size={40}
-          color={Colors[colorScheme ?? "light"].text}
-          onPress={() => setDrawerOpen(!isDrawerOpen)}
-        />
-      </View> */}
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,

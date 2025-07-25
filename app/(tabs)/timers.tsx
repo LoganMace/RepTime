@@ -186,6 +186,7 @@ export default function TimersScreen() {
           <TextInput
             style={styles.timerNameInput}
             placeholder="Timer Name"
+            placeholderTextColor="#999"
             value={timerName}
             onChangeText={setTimerName}
           />
@@ -413,6 +414,7 @@ export default function TimersScreen() {
                     setTempRounds(parseInt(itemValue))
                   }
                   style={styles.picker}
+                  itemStyle={{ color: "white" }}
                 >
                   {roundOptions.map((round) => (
                     <Picker.Item
@@ -437,6 +439,7 @@ export default function TimersScreen() {
                     setTempSets(parseInt(itemValue))
                   }
                   style={styles.picker}
+                  itemStyle={{ color: "white" }}
                 >
                   {setOptions.map((set) => (
                     <Picker.Item
@@ -555,11 +558,12 @@ const styles = StyleSheet.create({
   },
   timerNameInput: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#555",
     borderRadius: 8,
     padding: 10,
     fontSize: 24,
-    backgroundColor: "#fff",
+    backgroundColor: "#333",
+    color: "#fff",
     minWidth: 200,
   },
   scrollableContainer: {
@@ -592,15 +596,15 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingRight: 20,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#555",
     borderRadius: 10,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#333",
     minWidth: 120,
   },
   inputText: {
     paddingTop: 3,
     fontSize: 24,
-    color: "#333",
+    color: "#fff",
   },
 
   // Action Buttons
@@ -703,6 +707,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     flex: 1,
+    color: "white",
   },
   confirmButton: {
     marginTop: 24,

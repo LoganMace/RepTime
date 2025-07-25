@@ -145,7 +145,8 @@ export default function WorkoutsScreen() {
         <ThemedText style={[styles.inputLabel]}>Plan Name</ThemedText>
         <TextInput
           style={styles.workoutNameInput}
-          placeholder="Workout Name"
+          placeholder="Plan name"
+          placeholderTextColor="#999"
           value={workoutName}
           onChangeText={setWorkoutName}
         />
@@ -166,7 +167,8 @@ export default function WorkoutsScreen() {
                 </ThemedText>
                 <TextInput
                   style={styles.input}
-                  placeholder="Workout"
+                  placeholder="Workout name"
+                  placeholderTextColor="#999"
                   value={row.workout}
                   onChangeText={(v) => handleChange(idx, "workout", v)}
                 />
@@ -175,7 +177,8 @@ export default function WorkoutsScreen() {
                 <ThemedText style={styles.inputLabel}>Sets</ThemedText>
                 <TextInput
                   style={styles.input}
-                  placeholder="Sets"
+                  placeholder="0"
+                  placeholderTextColor="#999"
                   keyboardType="numeric"
                   value={row.sets}
                   onChangeText={(v) => handleChange(idx, "sets", v)}
@@ -185,7 +188,8 @@ export default function WorkoutsScreen() {
                 <ThemedText style={styles.inputLabel}>Reps</ThemedText>
                 <TextInput
                   style={styles.input}
-                  placeholder="Reps"
+                  placeholder="0"
+                  placeholderTextColor="#999"
                   keyboardType="numeric"
                   value={row.reps}
                   onChangeText={(v) => handleChange(idx, "reps", v)}
@@ -195,7 +199,8 @@ export default function WorkoutsScreen() {
                 <ThemedText style={styles.inputLabel}>Weight</ThemedText>
                 <TextInput
                   style={styles.input}
-                  placeholder="Weight"
+                  placeholder="0"
+                  placeholderTextColor="#999"
                   keyboardType="numeric"
                   value={row.weight}
                   onChangeText={(v) => handleChange(idx, "weight", v)}
@@ -205,7 +210,8 @@ export default function WorkoutsScreen() {
                 <ThemedText style={styles.inputLabel}>Work (s)</ThemedText>
                 <TextInput
                   style={styles.input}
-                  placeholder="Work (s)"
+                  placeholder="0"
+                  placeholderTextColor="#999"
                   keyboardType="numeric"
                   value={row.workTime}
                   onChangeText={(v) => handleChange(idx, "workTime", v)}
@@ -215,7 +221,8 @@ export default function WorkoutsScreen() {
                 <ThemedText style={styles.inputLabel}>Rest (s)</ThemedText>
                 <TextInput
                   style={styles.input}
-                  placeholder="Rest (s)"
+                  placeholder="0"
+                  placeholderTextColor="#999"
                   keyboardType="numeric"
                   value={row.restTime}
                   onChangeText={(v) => handleChange(idx, "restTime", v)}
@@ -358,11 +365,12 @@ const styles = StyleSheet.create({
   },
   workoutNameInput: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#555",
     borderRadius: 8,
     padding: 8,
     fontSize: 24,
-    backgroundColor: "#fff",
+    backgroundColor: "#333",
+    color: "#fff",
     marginBottom: 20,
     minWidth: 300,
     alignSelf: "center",
@@ -379,10 +387,11 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#555",
     borderRadius: 8,
     padding: 8,
-    backgroundColor: "#fff",
+    backgroundColor: "#333",
+    color: "#fff",
     fontSize: 24,
     justifyContent: "center",
     minWidth: 80,

@@ -1,6 +1,6 @@
+import { Picker } from "@react-native-picker/picker";
 import React, { useState } from "react";
 import { View } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 
 const TimePicker = ({
   onValueChange,
@@ -41,6 +41,7 @@ const TimePicker = ({
         selectedValue={minutes}
         onValueChange={handleMinutesChange}
         style={styles.picker}
+        itemStyle={{ color: "white" }}
       >
         {minuteOptions.map((minute) => (
           <Picker.Item
@@ -54,6 +55,7 @@ const TimePicker = ({
         selectedValue={seconds}
         onValueChange={handleSecondsChange}
         style={styles.picker}
+        itemStyle={{ color: "white" }}
       >
         {secondOptions.map((second) => (
           <Picker.Item
@@ -70,6 +72,7 @@ const TimePicker = ({
 const styles = {
   picker: {
     flex: 1,
+    color: "white",
   },
 };
 
