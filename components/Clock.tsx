@@ -269,8 +269,8 @@ const Clock = ({
 
   // Helper function to get total time for current phase
   const getTotalTimeForPhase = () => {
-    console.log("currentPhase: ", currentPhase);
-    switch (currentPhase) {
+    const phase = currentPhase === "paused" ? phaseBeforePause : currentPhase;
+    switch (phase) {
       case "getReady":
         return 10;
       case "work":
@@ -282,15 +282,6 @@ const Clock = ({
       default:
         return 0;
     }
-  };
-
-  // Helper function to get progress (0 to 1)
-  const getProgress = () => {
-    const totalTime = getTotalTimeForPhase();
-    console.log("totalTime: ", totalTime);
-    if (totalTime === 0) return 0;
-    // return Math.max(0, Math.min(1, (totalTime - timeLeft) / totalTime));
-    return 0.5;
   };
 
   // Helper function to get color based on phase
@@ -310,8 +301,7 @@ const Clock = ({
   };
 
   const getPhaseLabel = () => {
-    const phase = currentPhase === "paused" ? phaseBeforePause : currentPhase;
-    switch (phase) {
+    switch (currentPhase) {
       case "start":
         return "";
       case "work":
@@ -322,21 +312,19 @@ const Clock = ({
         return "Set Rest";
       case "getReady":
         return "Get Ready!";
+      case "paused":
+        return "Paused";
       case "done":
         return "Workout Complete!";
       default:
-        return phase;
+        return currentPhase;
     }
   };
   const phaseLabel = getPhaseLabel();
   const isPaused = currentPhase === "paused";
-
-  // const formatTime = (seconds: number) => {
-  //   if (seconds < 60) return `${seconds}`;
-  //   return `${Math.floor(seconds / 60)}:${(seconds % 60)
-  //     .toString()
-  //     .padStart(2, "0")}`;
-  // };
+  const phaseIdentifier =
+    currentPhase === "paused" ? phaseBeforePause : currentPhase;
+  const animationKey = `${currentSet}-${currentRound}-${phaseIdentifier}`;
 
   return (
     <Modal
@@ -351,71 +339,15 @@ const Clock = ({
           <Text style={styles.closeButtonText}>✕</Text>
         </TouchableOpacity>
 
-        {/* Label section */}
-        {/* <View style={styles.label}> */}
-        {/* {(currentPhase === "work" ||
-            currentPhase === "rest" ||
-            currentPhase === "paused" ||
-            currentPhase === "setRest") && (
-            <View style={styles.roundContainer}>
-              <Text style={styles.round}>
-                Set {currentSet}/{sets}
-              </Text>
-              <Text style={styles.round}>
-                Round {currentRound}/{rounds}
-              </Text>
-            </View>
-          )} */}
-        {/* <Text
-            style={[
-              styles.phase,
-              currentPhase === "work"
-                ? styles.work
-                : currentPhase === "rest"
-                ? styles.rest
-                : currentPhase === "setRest"
-                ? styles.rest // Or a new style for set rest
-                : currentPhase === "paused"
-                ? styles.paused
-                : styles.getReady,
-            ]}
-          >
-            {phaseLabel}
-          </Text> */}
-
-        {/* Display "Great Job!" when workout is done */}
-        {/* {currentPhase === "done" && (
-            <Text style={styles.phase}>Great Job!</Text>
-          )} */}
-        {/* </View> */}
-
-        {/* Time display */}
-        {/* {currentPhase !== "start" && currentPhase !== "done" && (
-          <Text
-            style={[
-              styles.time,
-              currentPhase === "work"
-                ? styles.work
-                : currentPhase === "rest"
-                ? styles.rest
-                : currentPhase === "setRest"
-                ? styles.rest // Or a new style for set rest
-                : currentPhase === "paused"
-                ? styles.paused
-                : styles.getReady,
-            ]}
-          >
-            {formatTime(timeLeft)}
-          </Text>
-        )} */}
-
         {/* Progress Circle */}
         {currentPhase !== "start" && currentPhase !== "done" && (
           <View style={styles.progressContainer}>
             <AnimatedCircleProgress
-              size={500}
-              strokeWidth={20}
-              progress={getProgress()}
+              key={animationKey}
+              size={600}
+              strokeWidth={24}
+              duration={getTotalTimeForPhase()}
+              isPaused={isPaused}
               color={getProgressColor()}
               backgroundColor="#2c2c2c"
             />
@@ -617,6 +549,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontFamily: "monospace",
     marginBottom: 12,
+    fontVariant: ["tabular-nums"],
   },
   roundText: {
     fontSize: 32,
