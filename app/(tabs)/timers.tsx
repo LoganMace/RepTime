@@ -57,11 +57,15 @@ export default function TimersScreen() {
   const [tempRest, setTempRest] = useState(restSeconds);
   const [tempSetRest, setTempSetRest] = useState(setRestTimeSeconds);
 
+  const isSaveDisabled =
+    !timerName.trim() || (workSeconds === 0 && restSeconds === 0);
+  const isStartDisabled = workSeconds === 0 && restSeconds === 0;
+
   const loadTimers = async () => {
     try {
       const timers = await AsyncStorage.getItem("timers");
       setSavedTimers(timers ? JSON.parse(timers) : []);
-    } catch (e) {
+    } catch {
       setSavedTimers([]);
     }
   };
@@ -278,20 +282,37 @@ export default function TimersScreen() {
         </ScrollView>
 
         <TouchableOpacity
-          onPress={() => {
-            handleStart();
-          }}
-          style={styles.sleekStartButton}
+          onPress={handleStart}
+          style={[
+            styles.sleekStartButton,
+            isStartDisabled && styles.disabledButton,
+          ]}
           activeOpacity={0.8}
+          disabled={isStartDisabled}
         >
-          <Text style={styles.sleekStartIcon}>▶ Start</Text>
+          <Text
+            style={[
+              styles.sleekStartIcon,
+              isStartDisabled && styles.disabledButtonText,
+            ]}
+          >
+            ▶ Start
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={saveTimer}
-          style={styles.saveButton}
+          style={[styles.saveButton, isSaveDisabled && styles.disabledButton]}
           activeOpacity={0.85}
+          disabled={isSaveDisabled}
         >
-          <Text style={styles.saveButtonText}>Save Timer</Text>
+          <Text
+            style={[
+              styles.saveButtonText,
+              isSaveDisabled && styles.disabledButtonText,
+            ]}
+          >
+            Save Timer
+          </Text>
         </TouchableOpacity>
 
         {/* Saved Timers Section */}
@@ -473,13 +494,48 @@ export default function TimersScreen() {
   );
 }
 
+// Define base styles as plain objects first to avoid referencing 'styles' in its own initializer
+const baseButton = {
+  height: 60,
+  borderRadius: 24,
+  justifyContent: "center",
+  alignItems: "center",
+  borderWidth: 2,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.18,
+  shadowRadius: 8,
+  elevation: 2,
+} as const;
+
+const baseButtonText = {
+  fontSize: 24,
+  fontWeight: "bold",
+  letterSpacing: 1,
+  textTransform: "uppercase",
+} as const;
+
 const styles = StyleSheet.create({
+  // Base Styles
+  baseButton,
+  baseButtonText,
+  disabledButton: {
+    backgroundColor: "#444",
+    borderColor: "#666",
+  },
+  disabledButtonText: {
+    color: "#666",
+  },
+
+  // Header
   headerImage: {
     color: "#808080",
     bottom: -90,
     left: -35,
     position: "absolute",
   },
+
+  // Main Container
   centeredContainer: {
     flex: 1,
     justifyContent: "flex-start",
@@ -489,6 +545,8 @@ const styles = StyleSheet.create({
   titleContainer: {
     marginBottom: 40,
   },
+
+  // Timer Creation Form
   timerNameContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -544,59 +602,36 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "#333",
   },
-  picker: {
-    flex: 1,
-  },
+
+  // Action Buttons
   sleekStartButton: {
+    ...baseButton,
     width: 220,
-    height: 60,
-    borderRadius: 24,
     backgroundColor: "lime",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 2,
     borderColor: "lime",
     marginTop: 10,
     marginBottom: 20,
     flexDirection: "row",
   },
   sleekStartIcon: {
-    textTransform: "uppercase",
-    fontSize: 24,
-    fontWeight: "bold",
-    letterSpacing: 1,
+    ...baseButtonText,
     color: "#222",
     marginLeft: 8,
   },
   saveButton: {
+    ...baseButton,
     backgroundColor: "#222",
-    borderRadius: 24,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
     borderColor: "#39FF14",
     marginTop: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 2,
     width: 300,
     alignSelf: "center",
   },
   saveButtonText: {
+    ...baseButtonText,
     color: "#39FF14",
-    fontSize: 24,
-    fontWeight: "bold",
-    letterSpacing: 1,
-    textTransform: "uppercase",
   },
+
+  // Saved Timers Section
   timerCardsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -621,9 +656,9 @@ const styles = StyleSheet.create({
     right: 10,
     flexDirection: "row",
     gap: 16,
-    minHeight: 44, // Ensure enough height for icons
-    minWidth: 100, // Ensure enough width for both icons
-    zIndex: 10, // Make sure it's above other content
+    minHeight: 44,
+    minWidth: 100,
+    zIndex: 10,
   },
   timerCardTitle: {
     color: "#39FF14",
@@ -642,6 +677,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  playButton: {
+    position: "absolute",
+    bottom: 12,
+    right: 12,
+    width: 60,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // Modal & Picker
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -655,6 +701,9 @@ const styles = StyleSheet.create({
     width: 320,
     alignItems: "center",
   },
+  picker: {
+    flex: 1,
+  },
   confirmButton: {
     marginTop: 24,
     backgroundColor: "#39FF14",
@@ -666,14 +715,5 @@ const styles = StyleSheet.create({
     color: "#222",
     fontSize: 20,
     fontWeight: "bold",
-  },
-  playButton: {
-    position: "absolute",
-    bottom: 12,
-    right: 12,
-    width: 60,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
