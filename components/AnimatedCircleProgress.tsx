@@ -1,11 +1,19 @@
 import React, { memo, useEffect } from "react";
-import { Animated } from "react-native";
+import { View } from "react-native";
+import Animated, {
+  cancelAnimation,
+  Easing,
+  useAnimatedProps,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import Svg, { Circle } from "react-native-svg";
 
 interface AnimatedCircleProgressProps {
   size: number;
   strokeWidth: number;
-  progress: number; // 0 to 1
+  duration: number; // The total duration of the animation in seconds
+  isPaused: boolean;
   color?: string;
   backgroundColor?: string;
 }
@@ -15,49 +23,71 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 function AnimatedCircleProgress({
   size,
   strokeWidth,
-  progress,
+  duration,
+  isPaused,
   color = "#3498db",
   backgroundColor = "#eee",
 }: AnimatedCircleProgressProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const animatedProgress = React.useRef(new Animated.Value(progress)).current;
+
+  const progressValue = useSharedValue(0);
 
   useEffect(() => {
-    Animated.timing(animatedProgress, {
-      toValue: progress,
-      duration: 250, // Faster animation
-      useNativeDriver: true,
-    }).start();
-  }, [progress, animatedProgress]);
+    // This effect handles starting, pausing, and resuming the animation.
+    if (isPaused) {
+      // If paused, cancel any ongoing animation. The progressValue will hold its current state.
+      cancelAnimation(progressValue);
+    } else {
+      // If not paused (i.e., playing or resuming), start the animation from its current value.
+      // Calculate the remaining duration based on the current progress.
+      const remainingProgress = 1 - progressValue.value;
+      const remainingDuration = duration * 1000 * remainingProgress;
 
-  const strokeDashoffset = animatedProgress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [circumference, 0],
+      progressValue.value = withTiming(1, {
+        duration: remainingDuration,
+        easing: Easing.linear,
+      });
+    }
+  }, [isPaused, duration, progressValue]);
+
+  const animatedProps = useAnimatedProps(() => {
+    // This maps the animated value (0 to 1) to the strokeDashoffset.
+    // As progressValue.value goes from 0 to 1, strokeDashoffset goes from 0 (full) to circumference (empty).
+    const strokeDashoffset = circumference * progressValue.value;
+    return {
+      strokeDashoffset,
+    };
   });
 
   return (
-    <Svg width={size} height={size}>
-      <Circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        stroke={backgroundColor}
-        strokeWidth={strokeWidth}
-        fill="none"
-      />
-      <AnimatedCircle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        stroke={color}
-        strokeWidth={strokeWidth}
-        fill="none"
-        strokeDasharray={`${circumference}, ${circumference}`}
-        strokeDashoffset={strokeDashoffset}
-        strokeLinecap="round"
-      />
-    </Svg>
+    <View>
+      <Svg
+        width={size}
+        height={size}
+        style={{ transform: [{ rotate: "-90deg" }] }}
+      >
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={backgroundColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        <AnimatedCircle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={color}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeDasharray={circumference}
+          animatedProps={animatedProps}
+          strokeLinecap="round"
+        />
+      </Svg>
+    </View>
   );
 }
 
