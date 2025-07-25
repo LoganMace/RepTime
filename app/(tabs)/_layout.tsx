@@ -1,14 +1,12 @@
 import { Tabs } from "expo-router";
 import React, { useState } from "react";
-import { Platform, View } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import { Platform } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import SideNav from "@/components/SideNav";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -16,15 +14,15 @@ export default function TabLayout() {
 
   return (
     <>
-      <SideNav isOpen={isDrawerOpen} onClose={() => setDrawerOpen(false)} />
-      <View style={{ position: "absolute", top: 30, left: 20, zIndex: 1 }}>
+      {/* <SideNav isOpen={isDrawerOpen} onClose={() => setDrawerOpen(false)} /> */}
+      {/* <View style={{ position: "absolute", top: 30, left: 20, zIndex: 1 }}>
         <Icon
           name="menu"
           size={40}
           color={Colors[colorScheme ?? "light"].text}
           onPress={() => setDrawerOpen(!isDrawerOpen)}
         />
-      </View>
+      </View> */}
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,

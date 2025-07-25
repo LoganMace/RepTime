@@ -1,16 +1,16 @@
+import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
   Animated,
-  StyleSheet,
-  View,
   Dimensions,
   PanResponder,
+  StyleSheet,
   Text,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import { useRouter } from "expo-router";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const DRAWER_WIDTH = SCREEN_WIDTH * 0.3;
@@ -101,6 +101,17 @@ const SideNav = ({
                 <Icon name="timer" size={28} style={styles.navIcon} />
                 <Text style={styles.navText}>Timers</Text>
               </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  router.push("/workouts");
+                  closeDrawer();
+                }}
+                style={styles.navItem}
+                activeOpacity={0.8}
+              >
+                <Icon name="fitness-center" size={28} style={styles.navIcon} />
+                <Text style={styles.navText}>Workouts</Text>
+              </TouchableOpacity>
             </View>
           </Animated.View>
         </View>
@@ -134,8 +145,6 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     borderTopRightRadius: 24,
     borderBottomRightRadius: 24,
-    borderRightWidth: 2,
-    borderColor: "lime",
   },
   header: {
     padding: 24,
@@ -144,7 +153,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
   },
   headerText: {
-    color: "lime",
+    color: "cyan",
     fontSize: 28,
     fontWeight: "bold",
     letterSpacing: 2,
@@ -169,7 +178,7 @@ const styles = StyleSheet.create({
   },
   navIcon: {
     marginRight: 18,
-    color: "lime",
+    color: "cyan",
   },
   navText: {
     fontSize: 20,

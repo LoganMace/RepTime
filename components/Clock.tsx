@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Modal, View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import * as Speech from "expo-speech";
 import { useAudioPlayer } from "expo-audio";
+import * as Speech from "expo-speech";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import AnimatedCircleProgress from "./AnimatedCircleProgress";
 
 type ClockProps = {
   visible: boolean;
@@ -266,6 +267,48 @@ const Clock = ({
     onClose();
   };
 
+  // Helper function to get total time for current phase
+  const getTotalTimeForPhase = () => {
+    console.log("currentPhase: ", currentPhase);
+    switch (currentPhase) {
+      case "getReady":
+        return 10;
+      case "work":
+        return workTime;
+      case "rest":
+        return restTime;
+      case "setRest":
+        return setRestTime;
+      default:
+        return 0;
+    }
+  };
+
+  // Helper function to get progress (0 to 1)
+  const getProgress = () => {
+    const totalTime = getTotalTimeForPhase();
+    console.log("totalTime: ", totalTime);
+    if (totalTime === 0) return 0;
+    // return Math.max(0, Math.min(1, (totalTime - timeLeft) / totalTime));
+    return 0.5;
+  };
+
+  // Helper function to get color based on phase
+  const getProgressColor = () => {
+    switch (currentPhase) {
+      case "work":
+        return "#e74c3c"; // Red for work
+      case "rest":
+        return "#2ecc71"; // Green for rest
+      case "setRest":
+        return "#3498db"; // Blue for set rest
+      case "getReady":
+        return "#f39c12"; // Orange for get ready
+      default:
+        return "#95a5a6"; // Gray for other phases
+    }
+  };
+
   const getPhaseLabel = () => {
     const phase = currentPhase === "paused" ? phaseBeforePause : currentPhase;
     switch (phase) {
@@ -288,12 +331,12 @@ const Clock = ({
   const phaseLabel = getPhaseLabel();
   const isPaused = currentPhase === "paused";
 
-  const formatTime = (seconds: number) => {
-    if (seconds < 60) return `${seconds}`;
-    return `${Math.floor(seconds / 60)}:${(seconds % 60)
-      .toString()
-      .padStart(2, "0")}`;
-  };
+  // const formatTime = (seconds: number) => {
+  //   if (seconds < 60) return `${seconds}`;
+  //   return `${Math.floor(seconds / 60)}:${(seconds % 60)
+  //     .toString()
+  //     .padStart(2, "0")}`;
+  // };
 
   return (
     <Modal
@@ -309,8 +352,8 @@ const Clock = ({
         </TouchableOpacity>
 
         {/* Label section */}
-        <View style={styles.label}>
-          {(currentPhase === "work" ||
+        {/* <View style={styles.label}> */}
+        {/* {(currentPhase === "work" ||
             currentPhase === "rest" ||
             currentPhase === "paused" ||
             currentPhase === "setRest") && (
@@ -322,8 +365,8 @@ const Clock = ({
                 Round {currentRound}/{rounds}
               </Text>
             </View>
-          )}
-          <Text
+          )} */}
+        {/* <Text
             style={[
               styles.phase,
               currentPhase === "work"
@@ -338,16 +381,16 @@ const Clock = ({
             ]}
           >
             {phaseLabel}
-          </Text>
+          </Text> */}
 
-          {/* Display "Great Job!" when workout is done */}
-          {currentPhase === "done" && (
+        {/* Display "Great Job!" when workout is done */}
+        {/* {currentPhase === "done" && (
             <Text style={styles.phase}>Great Job!</Text>
-          )}
-        </View>
+          )} */}
+        {/* </View> */}
 
         {/* Time display */}
-        {currentPhase !== "start" && currentPhase !== "done" && (
+        {/* {currentPhase !== "start" && currentPhase !== "done" && (
           <Text
             style={[
               styles.time,
@@ -364,6 +407,54 @@ const Clock = ({
           >
             {formatTime(timeLeft)}
           </Text>
+        )} */}
+
+        {/* Progress Circle */}
+        {currentPhase !== "start" && currentPhase !== "done" && (
+          <View style={styles.progressContainer}>
+            <AnimatedCircleProgress
+              size={500}
+              strokeWidth={20}
+              progress={getProgress()}
+              color={getProgressColor()}
+              backgroundColor="#2c2c2c"
+            />
+            <View style={styles.timerContent}>
+              <Text
+                style={[
+                  styles.phaseText,
+                  currentPhase === "work"
+                    ? styles.work
+                    : currentPhase === "rest"
+                    ? styles.rest
+                    : currentPhase === "setRest"
+                    ? styles.rest // Or a new style for set rest
+                    : currentPhase === "paused"
+                    ? styles.paused
+                    : styles.getReady,
+                ]}
+              >
+                {phaseLabel}
+                {/* {currentPhase === "done" && "Complete!"}
+                {currentPhase === "start" && "Ready"} */}
+              </Text>
+
+              <Text style={styles.timeText}>
+                {Math.floor(timeLeft / 60)
+                  .toString()
+                  .padStart(2, "0")}
+                :{(timeLeft % 60).toString().padStart(2, "0")}
+              </Text>
+
+              <Text style={styles.roundText}>
+                Round {currentRound} of {rounds}
+              </Text>
+
+              <Text style={styles.setLevelText}>
+                Set {currentSet} of {sets}
+              </Text>
+            </View>
+          </View>
         )}
 
         {/* Play button for starting the timer */}
@@ -502,6 +593,39 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 1,
     textTransform: "uppercase",
+  },
+  progressContainer: {
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 60,
+  },
+  timerContent: {
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  phaseText: {
+    fontSize: 64,
+    fontWeight: "600",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  timeText: {
+    fontSize: 120,
+    fontWeight: "bold",
+    color: "#fff",
+    fontFamily: "monospace",
+    marginBottom: 12,
+  },
+  roundText: {
+    fontSize: 32,
+    color: "#ccc",
+    marginBottom: 4,
+  },
+  setLevelText: {
+    fontSize: 30,
+    color: "#999",
   },
 });
 
