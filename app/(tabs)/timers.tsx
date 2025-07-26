@@ -1,3 +1,4 @@
+import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import {
@@ -26,6 +27,8 @@ function toTotalSeconds(minutes: string, seconds: string) {
 }
 
 export default function TimersScreen() {
+  const { getStyles, isMobile } = useResponsiveStyles();
+
   const [timerName, setTimerName] = useState("");
   const [selectedRounds, setSelectedRounds] = useState(1);
   const [workSeconds, setWorkSeconds] = useState(0);
@@ -60,6 +63,8 @@ export default function TimersScreen() {
   const isSaveDisabled =
     !timerName.trim() || (workSeconds === 0 && restSeconds === 0);
   const isStartDisabled = workSeconds === 0 && restSeconds === 0;
+
+  const styles = getStyles(mobileStyles, tabletStyles);
 
   const loadTimers = async () => {
     try {
@@ -193,6 +198,7 @@ export default function TimersScreen() {
         </View>
         <ScrollView contentContainerStyle={styles.scrollableContainer}>
           <View style={styles.inputRow}>
+            {/* <View style={isMobile ? styles.inputColumn : styles.inputRow}> */}
             {/* Rounds Picker */}
             <View style={styles.sectionContainer}>
               <View style={styles.rowContainer}>
@@ -246,6 +252,7 @@ export default function TimersScreen() {
           </View>
 
           <View style={styles.inputRow}>
+            {/* <View style={isMobile ? styles.inputColumn : styles.inputRow}> */}
             {/* Sets Picker */}
             <View style={styles.sectionContainer}>
               <View style={styles.rowContainer}>
@@ -518,7 +525,7 @@ const baseButtonText = {
   textTransform: "uppercase",
 } as const;
 
-const styles = StyleSheet.create({
+const tabletStyles = StyleSheet.create({
   // Base Styles
   baseButton,
   baseButtonText,
@@ -575,6 +582,9 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: "column",
   },
+  inputColumn: {
+    flexDirection: "column",
+  },
   sectionContainer: {
     marginBottom: 20,
     width: "auto",
@@ -586,8 +596,8 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   label: {
-    fontSize: 30,
-    fontWeight: "bold",
+    fontSize: 24,
+    fontWeight: "normal",
   },
   inputContainer: {
     justifyContent: "center",
@@ -610,7 +620,7 @@ const styles = StyleSheet.create({
   // Action Buttons
   sleekStartButton: {
     ...baseButton,
-    width: 220,
+    paddingHorizontal: 24,
     backgroundColor: "lime",
     borderColor: "lime",
     marginTop: 10,
@@ -627,7 +637,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#222",
     borderColor: "#39FF14",
     marginTop: 8,
-    width: 300,
+    paddingHorizontal: 24,
     alignSelf: "center",
   },
   saveButtonText: {
@@ -720,5 +730,89 @@ const styles = StyleSheet.create({
     color: "#222",
     fontSize: 20,
     fontWeight: "bold",
+  },
+});
+
+const mobileStyles = StyleSheet.create({
+  ...tabletStyles,
+  centeredContainer: {
+    ...tabletStyles.centeredContainer,
+    alignItems: "flex-start",
+  },
+  titleContainer: {
+    ...tabletStyles.titleContainer,
+    marginBottom: 20,
+  },
+  timerNameContainer: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 10,
+    marginBottom: 20,
+    width: "100%",
+  },
+  timerNameInput: {
+    ...tabletStyles.timerNameInput,
+    width: "100%",
+  },
+  scrollableContainer: {
+    ...tabletStyles.scrollableContainer,
+    width: "100%",
+    justifyContent: "space-between",
+    gap: 0,
+  },
+  inputRow: {
+    ...tabletStyles.inputRow,
+  },
+  sectionContainer: {
+    ...tabletStyles.sectionContainer,
+    width: "100%",
+    marginBottom: 15,
+  },
+  rowContainer: {
+    ...tabletStyles.rowContainer,
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  label: {
+    ...tabletStyles.label,
+    fontSize: 20,
+  },
+  inputContainer: {
+    ...tabletStyles.inputContainer,
+    minWidth: 70,
+    paddingLeft: 15,
+    paddingRight: 15,
+  },
+  inputText: {
+    ...tabletStyles.inputText,
+    fontSize: 20,
+  },
+  sleekStartButton: {
+    ...tabletStyles.sleekStartButton,
+    width: "100%",
+    height: 50,
+    marginBottom: 10,
+  },
+  sleekStartIcon: {
+    ...tabletStyles.sleekStartIcon,
+    fontSize: 20,
+  },
+  saveButton: {
+    ...tabletStyles.saveButton,
+    width: "100%",
+    height: 50,
+  },
+  saveButtonText: {
+    ...tabletStyles.saveButtonText,
+    fontSize: 20,
+  },
+  timerCardsContainer: {
+    ...tabletStyles.timerCardsContainer,
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  timerCard: {
+    ...tabletStyles.timerCard,
+    width: "100%",
   },
 });

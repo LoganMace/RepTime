@@ -1,18 +1,33 @@
 import { Picker } from "@react-native-picker/picker";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 
 const TimePicker = ({
   onValueChange,
-  initialMinutes = "0",
-  initialSeconds = "0",
+  initialSeconds: initialTotalSeconds = "0",
 }: {
   onValueChange: (minutes: string, seconds: string) => void;
-  initialMinutes?: string;
   initialSeconds?: string;
 }) => {
+  const parseTotalSeconds = (totalSeconds: string) => {
+    const total = parseInt(totalSeconds, 10) || 0;
+    const m = Math.floor(total / 60).toString();
+    const s = (total % 60).toString();
+    return { minutes: m, seconds: s };
+  };
+
+  const { minutes: initialMinutes, seconds: initialSecondsValue } =
+    parseTotalSeconds(initialTotalSeconds);
+
   const [minutes, setMinutes] = useState(initialMinutes);
-  const [seconds, setSeconds] = useState(initialSeconds);
+  const [seconds, setSeconds] = useState(initialSecondsValue);
+
+  useEffect(() => {
+    const { minutes: newMinutes, seconds: newSeconds } =
+      parseTotalSeconds(initialTotalSeconds);
+    setMinutes(newMinutes);
+    setSeconds(newSeconds);
+  }, [initialTotalSeconds]);
 
   const generateNumbers = (start: number, end: number) =>
     Array.from({ length: end - start + 1 }, (_, i) => start + i);
