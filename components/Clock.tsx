@@ -1,7 +1,15 @@
+import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useAudioPlayer } from "expo-audio";
 import * as Speech from "expo-speech";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import AnimatedCircleProgress from "./AnimatedCircleProgress";
 
 type ClockProps = {
@@ -32,6 +40,14 @@ const Clock = ({
   setRestTime,
   onClose,
 }: ClockProps) => {
+  const { isMobile } = useResponsiveStyles();
+  const { width } = useWindowDimensions();
+
+  const styles = isMobile ? mobileStyles : tabletStyles;
+
+  const circleSize = isMobile ? width * 0.85 : 600;
+  const circleStrokeWidth = isMobile ? 18 : 24;
+
   const lowBeep = useAudioPlayer(require("../assets/sounds/low-beep.mp3"));
   const highBeep = useAudioPlayer(require("../assets/sounds/high-beep.mp3"));
 
@@ -344,8 +360,8 @@ const Clock = ({
           <View style={styles.progressContainer}>
             <AnimatedCircleProgress
               key={animationKey}
-              size={600}
-              strokeWidth={24}
+              size={circleSize}
+              strokeWidth={circleStrokeWidth}
               duration={getTotalTimeForPhase()}
               isPaused={isPaused}
               color={getProgressColor()}
@@ -417,7 +433,7 @@ const Clock = ({
   );
 };
 
-const styles = StyleSheet.create({
+const tabletStyles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
@@ -559,6 +575,61 @@ const styles = StyleSheet.create({
   setLevelText: {
     fontSize: 30,
     color: "#999",
+  },
+});
+
+const mobileStyles = StyleSheet.create({
+  ...tabletStyles,
+  closeButton: {
+    ...tabletStyles.closeButton,
+    top: 50,
+    left: 20,
+    zIndex: 1000,
+  },
+  closeButtonText: {
+    ...tabletStyles.closeButtonText,
+    fontSize: 36,
+  },
+  progressContainer: {
+    ...tabletStyles.progressContainer,
+    marginBottom: 40,
+  },
+  phaseText: {
+    ...tabletStyles.phaseText,
+    fontSize: 44,
+    fontWeight: "600",
+  },
+  timeText: {
+    ...tabletStyles.timeText,
+    fontSize: 80,
+  },
+  roundText: {
+    ...tabletStyles.roundText,
+    fontSize: 24,
+  },
+  setLevelText: {
+    ...tabletStyles.setLevelText,
+    fontSize: 22,
+  },
+  sleekPlayButton: {
+    ...tabletStyles.sleekPlayButton,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+  },
+  sleekPlayIcon: {
+    ...tabletStyles.sleekPlayIcon,
+    fontSize: 90,
+  },
+  pauseButton: {
+    ...tabletStyles.pauseButton,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    marginTop: 24,
+  },
+  pauseButtonText: {
+    ...tabletStyles.pauseButtonText,
+    fontSize: 18,
   },
 });
 

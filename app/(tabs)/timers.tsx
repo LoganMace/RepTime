@@ -753,6 +753,10 @@ const mobileStyles = StyleSheet.create({
   timerNameInput: {
     ...tabletStyles.timerNameInput,
     width: "100%",
+    fontSize: 20,
+    padding: 8,
+    paddingLeft: 15,
+    paddingRight: 15,
   },
   scrollableContainer: {
     ...tabletStyles.scrollableContainer,
@@ -780,12 +784,14 @@ const mobileStyles = StyleSheet.create({
   inputContainer: {
     ...tabletStyles.inputContainer,
     minWidth: 70,
+    padding: 8,
     paddingLeft: 15,
     paddingRight: 15,
   },
   inputText: {
     ...tabletStyles.inputText,
     fontSize: 20,
+    paddingTop: 0,
   },
   sleekStartButton: {
     ...tabletStyles.sleekStartButton,
