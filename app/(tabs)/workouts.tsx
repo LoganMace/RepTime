@@ -7,7 +7,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -21,7 +20,6 @@ import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 export default function WorkoutsScreen() {
   const { getStyles, isMobile } = useResponsiveStyles();
   const styles = getStyles(mobileStyles, tabletStyles);
-  const { width: screenWidth } = useWindowDimensions();
 
   const [workoutName, setWorkoutName] = useState("");
   const [workouts, setWorkouts] = useState([
