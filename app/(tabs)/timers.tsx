@@ -27,7 +27,7 @@ function toTotalSeconds(minutes: string, seconds: string) {
 }
 
 export default function TimersScreen() {
-  const { getStyles, isMobile } = useResponsiveStyles();
+  const { getStyles } = useResponsiveStyles();
 
   const [timerName, setTimerName] = useState("");
   const [selectedRounds, setSelectedRounds] = useState(1);
@@ -36,6 +36,13 @@ export default function TimersScreen() {
   const [selectedSets, setSelectedSets] = useState(1);
   const [setRestTimeSeconds, setSetRestTimeSeconds] = useState(0);
   const [clockVisible, setClockVisible] = useState(false);
+  const [activeTimerData, setActiveTimerData] = useState<{
+    rounds: number;
+    workTime: number;
+    restTime: number;
+    sets: number;
+    setRestTime: number;
+  } | null>(null);
   const [savedTimers, setSavedTimers] = useState<
     {
       name: string;
@@ -133,6 +140,13 @@ export default function TimersScreen() {
   };
 
   const handleStart = () => {
+    setActiveTimerData({
+      rounds: selectedRounds,
+      workTime: workSeconds,
+      restTime: restSeconds,
+      sets: selectedSets,
+      setRestTime: setRestTimeSeconds,
+    });
     setClockVisible(true);
   };
 
@@ -198,7 +212,6 @@ export default function TimersScreen() {
         </View>
         <ScrollView contentContainerStyle={styles.scrollableContainer}>
           <View style={styles.inputRow}>
-            {/* <View style={isMobile ? styles.inputColumn : styles.inputRow}> */}
             {/* Rounds Picker */}
             <View style={styles.sectionContainer}>
               <View style={styles.rowContainer}>
@@ -252,7 +265,6 @@ export default function TimersScreen() {
           </View>
 
           <View style={styles.inputRow}>
-            {/* <View style={isMobile ? styles.inputColumn : styles.inputRow}> */}
             {/* Sets Picker */}
             <View style={styles.sectionContainer}>
               <View style={styles.rowContainer}>
@@ -370,11 +382,13 @@ export default function TimersScreen() {
                   </Text>
                   <TouchableOpacity
                     onPress={() => {
-                      setSelectedRounds(timer.rounds);
-                      setWorkSeconds(timer.workTime);
-                      setRestSeconds(timer.restTime);
-                      setSelectedSets(timer.sets);
-                      setSetRestTimeSeconds(timer.setRestTime);
+                      setActiveTimerData({
+                        rounds: timer.rounds,
+                        workTime: timer.workTime,
+                        restTime: timer.restTime,
+                        sets: timer.sets,
+                        setRestTime: timer.setRestTime,
+                      });
                       setClockVisible(true);
                     }}
                     style={styles.playButton}
@@ -389,15 +403,20 @@ export default function TimersScreen() {
       </View>
 
       {/* Clock Component */}
-      <Clock
-        visible={clockVisible}
-        onClose={() => setClockVisible(false)}
-        rounds={selectedRounds}
-        workTime={workSeconds}
-        restTime={restSeconds}
-        sets={selectedSets}
-        setRestTime={setRestTimeSeconds}
-      />
+      {activeTimerData && (
+        <Clock
+          visible={clockVisible}
+          onClose={() => {
+            setClockVisible(false);
+            setActiveTimerData(null);
+          }}
+          rounds={activeTimerData.rounds}
+          workTime={activeTimerData.workTime}
+          restTime={activeTimerData.restTime}
+          sets={activeTimerData.sets}
+          setRestTime={activeTimerData.setRestTime}
+        />
+      )}
 
       {/* Picker Modal */}
       <Modal

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useTimer } from "../hooks/useTimer";
 import AnimatedCircleProgress from "./AnimatedCircleProgress";
+import { IconSymbol } from "./ui/IconSymbol";
 
 type ClockProps = {
   visible: boolean;
@@ -180,6 +181,19 @@ const Clock = ({
           </View>
         )}
 
+        {currentPhase === "done" && (
+          <View style={styles.doneContainer}>
+            <Text style={styles.doneText}>Workout Complete!</Text>
+            <IconSymbol
+              name="party.popper"
+              size={isMobile ? 120 : 150}
+              color="gold"
+              style={styles.doneIcon}
+            />
+            <Text style={styles.doneSubText}>Great job!</Text>
+          </View>
+        )}
+
         {/* Play button for starting the timer */}
         {currentPhase === "start" && (
           <TouchableOpacity
@@ -201,6 +215,16 @@ const Clock = ({
             <Text style={styles.pauseButtonText}>
               {isPaused ? "resume" : "tap to pause"}
             </Text>
+          </TouchableOpacity>
+        )}
+
+        {currentPhase === "done" && (
+          <TouchableOpacity
+            onPress={handleClose}
+            style={styles.pauseButton}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.pauseButtonText}>Finish</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -351,6 +375,25 @@ const tabletStyles = StyleSheet.create({
     fontSize: 30,
     color: "#999",
   },
+  doneContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 20,
+  },
+  doneText: {
+    fontSize: 64,
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "center",
+  },
+  doneSubText: {
+    fontSize: 32,
+    color: "#ccc",
+    textAlign: "center",
+  },
+  doneIcon: {
+    marginVertical: 20,
+  },
 });
 
 const mobileStyles = StyleSheet.create({
@@ -405,6 +448,22 @@ const mobileStyles = StyleSheet.create({
   pauseButtonText: {
     ...tabletStyles.pauseButtonText,
     fontSize: 18,
+  },
+  doneContainer: {
+    ...tabletStyles.doneContainer,
+    gap: 15,
+  },
+  doneText: {
+    ...tabletStyles.doneText,
+    fontSize: 48,
+  },
+  doneSubText: {
+    ...tabletStyles.doneSubText,
+    fontSize: 24,
+  },
+  doneIcon: {
+    ...tabletStyles.doneIcon,
+    marginVertical: 15,
   },
 });
 
