@@ -161,7 +161,7 @@ export default function WorkoutsScreen() {
           <ThemedText style={[styles.inputLabel]}>Workout Name</ThemedText>
           <TextInput
             style={styles.workoutNameInput}
-            placeholder="name..."
+            placeholder="e.g., Morning Power Hour"
             placeholderTextColor="#999"
             value={workoutName}
             onChangeText={setWorkoutName}
@@ -662,10 +662,8 @@ const mobileStyles = StyleSheet.create({
   },
   workoutNameInput: {
     ...tabletStyles.workoutNameInput,
-    minWidth: undefined,
     width: "100%",
     fontSize: 20,
-    textAlign: "center",
   },
   formScroll: {
     width: "100%",
