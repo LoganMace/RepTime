@@ -1,8 +1,16 @@
-import { useAudioPlayer } from "expo-audio";
-import * as Speech from "expo-speech";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import React from "react";
+import {
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { useTimer } from "../hooks/useTimer";
 import AnimatedCircleProgress from "./AnimatedCircleProgress";
+import { IconSymbol } from "./ui/IconSymbol";
 
 type ClockProps = {
   visible: boolean;
@@ -14,15 +22,6 @@ type ClockProps = {
   onClose: () => void;
 };
 
-type Phase =
-  | "start"
-  | "getReady"
-  | "work"
-  | "rest"
-  | "setRest"
-  | "paused"
-  | "done";
-
 const Clock = ({
   visible,
   rounds,
@@ -32,238 +31,33 @@ const Clock = ({
   setRestTime,
   onClose,
 }: ClockProps) => {
-  const lowBeep = useAudioPlayer(require("../assets/sounds/low-beep.mp3"));
-  const highBeep = useAudioPlayer(require("../assets/sounds/high-beep.mp3"));
+  const { isMobile } = useResponsiveStyles();
+  const { width } = useWindowDimensions();
 
-  const [currentRound, setCurrentRound] = useState(1);
-  const [currentSet, setCurrentSet] = useState(1);
-  const [currentPhase, setCurrentPhase] = useState<Phase>("start");
-  const [phaseBeforePause, setPhaseBeforePause] = useState<Phase>("start");
-  const [timeLeft, setTimeLeft] = useState(0);
-  const intervalRef = useRef<number | null>(null);
+  const styles = isMobile ? mobileStyles : tabletStyles;
 
-  useEffect(() => {
-    // --- Speech Announcements ---
-    if (currentPhase === "getReady" && timeLeft === 10) {
-      Speech.speak("Get ready!");
-    } else if (currentPhase === "work" && timeLeft === workTime) {
-      Speech.speak(`Round ${currentRound}`);
-    } else if (currentPhase === "rest" && timeLeft === restTime) {
-      Speech.speak("Rest");
-    } else if (currentPhase === "setRest" && timeLeft === setRestTime) {
-      Speech.speak(`Set ${currentSet} complete. Rest.`);
-    } else if (currentPhase === "done") {
-      Speech.speak("Workout complete!");
-    }
+  const circleSize = isMobile ? width * 0.85 : 600;
+  const circleStrokeWidth = isMobile ? 18 : 24;
 
-    if (currentPhase === "work") {
-      if (timeLeft === 10 && workTime > 10) {
-        Speech.speak("Ten seconds");
-      } else if (timeLeft === Math.floor(workTime / 2) && workTime > 20) {
-        Speech.speak("Half way there");
-      } else if (workTime > 60 && timeLeft > 0 && timeLeft % 60 === 0) {
-        Speech.speak(`${timeLeft / 60} minute${timeLeft / 60 > 1 ? "s" : ""}`);
-      }
-    }
-
-    // --- Sound Effects ---
-    if (
-      (currentPhase === "work" && timeLeft === workTime && workTime > 0) ||
-      (currentPhase === "rest" && timeLeft === restTime && restTime > 0) ||
-      (currentPhase === "setRest" &&
-        timeLeft === setRestTime &&
-        setRestTime > 0)
-    ) {
-      highBeep.seekTo(0);
-      highBeep.play();
-    }
-
-    if (
-      currentPhase === "work" &&
-      timeLeft === Math.floor(workTime / 2) &&
-      workTime > 20
-    ) {
-      lowBeep.seekTo(0);
-      lowBeep.play();
-    }
-  }, [
-    currentPhase,
+  const {
     currentRound,
     currentSet,
-    timeLeft,
-    workTime,
-    restTime,
-    setRestTime,
-    highBeep,
-    lowBeep,
-  ]);
-
-  const handlePhaseEnd = useCallback(() => {
-    if (currentPhase === "getReady") {
-      if (workTime > 0) {
-        setCurrentPhase("work");
-        setTimeLeft(workTime);
-      } else if (restTime > 0) {
-        setCurrentPhase("rest");
-        setTimeLeft(restTime);
-      } else {
-        setCurrentRound((r) => r + 1);
-        setCurrentPhase("work");
-        setTimeLeft(workTime);
-      }
-    } else if (currentPhase === "work") {
-      if (currentRound < rounds) {
-        if (restTime > 0) {
-          setCurrentPhase("rest");
-          setTimeLeft(restTime);
-        } else {
-          const nextRound = currentRound + 1;
-          setCurrentRound(nextRound);
-          if (workTime > 0) {
-            setCurrentPhase("work");
-            setTimeLeft(workTime);
-          } else {
-            setCurrentPhase("done");
-          }
-        }
-      } else {
-        // End of a set
-        if (currentSet < sets) {
-          if (setRestTime > 0) {
-            setCurrentPhase("setRest");
-            setTimeLeft(setRestTime);
-          } else {
-            setCurrentSet((s) => s + 1);
-            setCurrentRound(1);
-            setCurrentPhase("work");
-            setTimeLeft(workTime);
-          }
-        } else {
-          setCurrentPhase("done");
-        }
-      }
-    } else if (currentPhase === "rest") {
-      const nextRound = currentRound + 1;
-      setCurrentRound(nextRound);
-      if (nextRound <= rounds) {
-        if (workTime > 0) {
-          setCurrentPhase("work");
-          setTimeLeft(workTime);
-        } else if (restTime > 0) {
-          setCurrentPhase("rest");
-          setTimeLeft(restTime);
-        } else {
-          setCurrentPhase("done");
-        }
-      } else {
-        // This part might be redundant if the logic in "work" phase end is correct
-        if (currentSet < sets) {
-          if (setRestTime > 0) {
-            setCurrentPhase("setRest");
-            setTimeLeft(setRestTime);
-          } else {
-            setCurrentSet((s) => s + 1);
-            setCurrentRound(1);
-            setCurrentPhase("work");
-            setTimeLeft(workTime);
-          }
-        } else {
-          setCurrentPhase("done");
-        }
-      }
-    } else if (currentPhase === "setRest") {
-      setCurrentSet((s) => s + 1);
-      setCurrentRound(1);
-      if (workTime > 0) {
-        setCurrentPhase("work");
-        setTimeLeft(workTime);
-      } else if (restTime > 0) {
-        setCurrentPhase("rest");
-        setTimeLeft(restTime);
-      } else {
-        setCurrentPhase("done");
-      }
-    }
-  }, [
     currentPhase,
-    currentRound,
+    phaseBeforePause,
+    timeLeft,
+    handleStart,
+    handlePause,
+    handleResume,
+  } = useTimer({
+    visible,
     rounds,
     workTime,
     restTime,
-    currentSet,
     sets,
     setRestTime,
-  ]);
-
-  const handleTimerTick = useCallback(
-    (prevTime: number) => {
-      if (prevTime <= 1) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        handlePhaseEnd();
-        return 0;
-      }
-
-      const newTime = prevTime - 1;
-
-      // Play countdown beep for the last 3 seconds
-      if ([1, 2, 3].includes(newTime)) {
-        lowBeep.seekTo(0);
-        lowBeep.play();
-      }
-
-      return newTime;
-    },
-    [handlePhaseEnd, lowBeep]
-  );
-
-  useEffect(() => {
-    if (!visible) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      setCurrentPhase("start");
-      setCurrentRound(1);
-      setCurrentSet(1);
-      setTimeLeft(0);
-      return;
-    }
-
-    if (["start", "paused", "done"].includes(currentPhase)) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      return;
-    }
-
-    let expected = Date.now() + 1000;
-    intervalRef.current = setInterval(() => {
-      const drift = Date.now() - expected;
-      if (drift > 1000) {
-        // If the drift is too large, we can simply reset the timer
-        // or adjust timeLeft, but for now, we'll just log it.
-        console.warn("Timer drift detected:", drift);
-      }
-      setTimeLeft(handleTimerTick);
-      expected += 1000;
-    }, 1000);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [visible, currentPhase, handleTimerTick]);
-
-  const handleStart = () => {
-    setCurrentPhase("getReady");
-    setTimeLeft(10);
-  };
-
-  const handlePause = () => {
-    setPhaseBeforePause(currentPhase);
-    setCurrentPhase("paused");
-  };
-
-  const handleResume = () => {
-    setCurrentPhase(phaseBeforePause);
-  };
+  });
 
   const handleClose = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
     onClose();
   };
 
@@ -344,8 +138,8 @@ const Clock = ({
           <View style={styles.progressContainer}>
             <AnimatedCircleProgress
               key={animationKey}
-              size={600}
-              strokeWidth={24}
+              size={circleSize}
+              strokeWidth={circleStrokeWidth}
               duration={getTotalTimeForPhase()}
               isPaused={isPaused}
               color={getProgressColor()}
@@ -360,15 +154,13 @@ const Clock = ({
                     : currentPhase === "rest"
                     ? styles.rest
                     : currentPhase === "setRest"
-                    ? styles.rest // Or a new style for set rest
+                    ? styles.rest
                     : currentPhase === "paused"
                     ? styles.paused
                     : styles.getReady,
                 ]}
               >
                 {phaseLabel}
-                {/* {currentPhase === "done" && "Complete!"}
-                {currentPhase === "start" && "Ready"} */}
               </Text>
 
               <Text style={styles.timeText}>
@@ -386,6 +178,19 @@ const Clock = ({
                 Set {currentSet} of {sets}
               </Text>
             </View>
+          </View>
+        )}
+
+        {currentPhase === "done" && (
+          <View style={styles.doneContainer}>
+            <Text style={styles.doneText}>Workout Complete!</Text>
+            <IconSymbol
+              name="party.popper"
+              size={isMobile ? 120 : 150}
+              color="gold"
+              style={styles.doneIcon}
+            />
+            <Text style={styles.doneSubText}>Great job!</Text>
           </View>
         )}
 
@@ -412,12 +217,22 @@ const Clock = ({
             </Text>
           </TouchableOpacity>
         )}
+
+        {currentPhase === "done" && (
+          <TouchableOpacity
+            onPress={handleClose}
+            style={styles.pauseButton}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.pauseButtonText}>Finish</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </Modal>
   );
 };
 
-const styles = StyleSheet.create({
+const tabletStyles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
@@ -559,6 +374,96 @@ const styles = StyleSheet.create({
   setLevelText: {
     fontSize: 30,
     color: "#999",
+  },
+  doneContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 20,
+  },
+  doneText: {
+    fontSize: 64,
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "center",
+  },
+  doneSubText: {
+    fontSize: 32,
+    color: "#ccc",
+    textAlign: "center",
+  },
+  doneIcon: {
+    marginVertical: 20,
+  },
+});
+
+const mobileStyles = StyleSheet.create({
+  ...tabletStyles,
+  closeButton: {
+    ...tabletStyles.closeButton,
+    top: 50,
+    left: 20,
+    zIndex: 1000,
+  },
+  closeButtonText: {
+    ...tabletStyles.closeButtonText,
+    fontSize: 36,
+  },
+  progressContainer: {
+    ...tabletStyles.progressContainer,
+    marginBottom: 40,
+  },
+  phaseText: {
+    ...tabletStyles.phaseText,
+    fontSize: 44,
+    fontWeight: "600",
+  },
+  timeText: {
+    ...tabletStyles.timeText,
+    fontSize: 80,
+  },
+  roundText: {
+    ...tabletStyles.roundText,
+    fontSize: 24,
+  },
+  setLevelText: {
+    ...tabletStyles.setLevelText,
+    fontSize: 22,
+  },
+  sleekPlayButton: {
+    ...tabletStyles.sleekPlayButton,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+  },
+  sleekPlayIcon: {
+    ...tabletStyles.sleekPlayIcon,
+    fontSize: 90,
+  },
+  pauseButton: {
+    ...tabletStyles.pauseButton,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    marginTop: 24,
+  },
+  pauseButtonText: {
+    ...tabletStyles.pauseButtonText,
+    fontSize: 18,
+  },
+  doneContainer: {
+    ...tabletStyles.doneContainer,
+    gap: 15,
+  },
+  doneText: {
+    ...tabletStyles.doneText,
+    fontSize: 48,
+  },
+  doneSubText: {
+    ...tabletStyles.doneSubText,
+    fontSize: 24,
+  },
+  doneIcon: {
+    ...tabletStyles.doneIcon,
+    marginVertical: 15,
   },
 });
 

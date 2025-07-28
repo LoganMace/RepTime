@@ -1,3 +1,4 @@
+import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import {
@@ -26,6 +27,8 @@ function toTotalSeconds(minutes: string, seconds: string) {
 }
 
 export default function TimersScreen() {
+  const { getStyles } = useResponsiveStyles();
+
   const [timerName, setTimerName] = useState("");
   const [selectedRounds, setSelectedRounds] = useState(1);
   const [workSeconds, setWorkSeconds] = useState(0);
@@ -33,6 +36,13 @@ export default function TimersScreen() {
   const [selectedSets, setSelectedSets] = useState(1);
   const [setRestTimeSeconds, setSetRestTimeSeconds] = useState(0);
   const [clockVisible, setClockVisible] = useState(false);
+  const [activeTimerData, setActiveTimerData] = useState<{
+    rounds: number;
+    workTime: number;
+    restTime: number;
+    sets: number;
+    setRestTime: number;
+  } | null>(null);
   const [savedTimers, setSavedTimers] = useState<
     {
       name: string;
@@ -60,6 +70,8 @@ export default function TimersScreen() {
   const isSaveDisabled =
     !timerName.trim() || (workSeconds === 0 && restSeconds === 0);
   const isStartDisabled = workSeconds === 0 && restSeconds === 0;
+
+  const styles = getStyles(mobileStyles, tabletStyles);
 
   const loadTimers = async () => {
     try {
@@ -128,6 +140,13 @@ export default function TimersScreen() {
   };
 
   const handleStart = () => {
+    setActiveTimerData({
+      rounds: selectedRounds,
+      workTime: workSeconds,
+      restTime: restSeconds,
+      sets: selectedSets,
+      setRestTime: setRestTimeSeconds,
+    });
     setClockVisible(true);
   };
 
@@ -186,6 +205,7 @@ export default function TimersScreen() {
           <TextInput
             style={styles.timerNameInput}
             placeholder="Timer Name"
+            placeholderTextColor="#999"
             value={timerName}
             onChangeText={setTimerName}
           />
@@ -362,11 +382,13 @@ export default function TimersScreen() {
                   </Text>
                   <TouchableOpacity
                     onPress={() => {
-                      setSelectedRounds(timer.rounds);
-                      setWorkSeconds(timer.workTime);
-                      setRestSeconds(timer.restTime);
-                      setSelectedSets(timer.sets);
-                      setSetRestTimeSeconds(timer.setRestTime);
+                      setActiveTimerData({
+                        rounds: timer.rounds,
+                        workTime: timer.workTime,
+                        restTime: timer.restTime,
+                        sets: timer.sets,
+                        setRestTime: timer.setRestTime,
+                      });
                       setClockVisible(true);
                     }}
                     style={styles.playButton}
@@ -381,15 +403,20 @@ export default function TimersScreen() {
       </View>
 
       {/* Clock Component */}
-      <Clock
-        visible={clockVisible}
-        onClose={() => setClockVisible(false)}
-        rounds={selectedRounds}
-        workTime={workSeconds}
-        restTime={restSeconds}
-        sets={selectedSets}
-        setRestTime={setRestTimeSeconds}
-      />
+      {activeTimerData && (
+        <Clock
+          visible={clockVisible}
+          onClose={() => {
+            setClockVisible(false);
+            setActiveTimerData(null);
+          }}
+          rounds={activeTimerData.rounds}
+          workTime={activeTimerData.workTime}
+          restTime={activeTimerData.restTime}
+          sets={activeTimerData.sets}
+          setRestTime={activeTimerData.setRestTime}
+        />
+      )}
 
       {/* Picker Modal */}
       <Modal
@@ -413,6 +440,7 @@ export default function TimersScreen() {
                     setTempRounds(parseInt(itemValue))
                   }
                   style={styles.picker}
+                  itemStyle={{ color: "white" }}
                 >
                   {roundOptions.map((round) => (
                     <Picker.Item
@@ -437,6 +465,7 @@ export default function TimersScreen() {
                     setTempSets(parseInt(itemValue))
                   }
                   style={styles.picker}
+                  itemStyle={{ color: "white" }}
                 >
                   {setOptions.map((set) => (
                     <Picker.Item
@@ -515,7 +544,7 @@ const baseButtonText = {
   textTransform: "uppercase",
 } as const;
 
-const styles = StyleSheet.create({
+const tabletStyles = StyleSheet.create({
   // Base Styles
   baseButton,
   baseButtonText,
@@ -555,11 +584,12 @@ const styles = StyleSheet.create({
   },
   timerNameInput: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#555",
     borderRadius: 8,
     padding: 10,
     fontSize: 24,
-    backgroundColor: "#fff",
+    backgroundColor: "#333",
+    color: "#fff",
     minWidth: 200,
   },
   scrollableContainer: {
@@ -569,6 +599,9 @@ const styles = StyleSheet.create({
     gap: 40,
   },
   inputRow: {
+    flexDirection: "column",
+  },
+  inputColumn: {
     flexDirection: "column",
   },
   sectionContainer: {
@@ -582,8 +615,8 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   label: {
-    fontSize: 30,
-    fontWeight: "bold",
+    fontSize: 24,
+    fontWeight: "normal",
   },
   inputContainer: {
     justifyContent: "center",
@@ -592,21 +625,21 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingRight: 20,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#555",
     borderRadius: 10,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#333",
     minWidth: 120,
   },
   inputText: {
     paddingTop: 3,
     fontSize: 24,
-    color: "#333",
+    color: "#fff",
   },
 
   // Action Buttons
   sleekStartButton: {
     ...baseButton,
-    width: 220,
+    paddingHorizontal: 24,
     backgroundColor: "lime",
     borderColor: "lime",
     marginTop: 10,
@@ -623,7 +656,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#222",
     borderColor: "#39FF14",
     marginTop: 8,
-    width: 300,
+    paddingHorizontal: 24,
     alignSelf: "center",
   },
   saveButtonText: {
@@ -703,6 +736,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     flex: 1,
+    color: "white",
   },
   confirmButton: {
     marginTop: 24,
@@ -715,5 +749,95 @@ const styles = StyleSheet.create({
     color: "#222",
     fontSize: 20,
     fontWeight: "bold",
+  },
+});
+
+const mobileStyles = StyleSheet.create({
+  ...tabletStyles,
+  centeredContainer: {
+    ...tabletStyles.centeredContainer,
+    alignItems: "flex-start",
+  },
+  titleContainer: {
+    ...tabletStyles.titleContainer,
+    marginBottom: 20,
+  },
+  timerNameContainer: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 10,
+    marginBottom: 20,
+    width: "100%",
+  },
+  timerNameInput: {
+    ...tabletStyles.timerNameInput,
+    width: "100%",
+    fontSize: 20,
+    padding: 8,
+    paddingLeft: 15,
+    paddingRight: 15,
+  },
+  scrollableContainer: {
+    ...tabletStyles.scrollableContainer,
+    width: "100%",
+    justifyContent: "space-between",
+    gap: 0,
+  },
+  inputRow: {
+    ...tabletStyles.inputRow,
+  },
+  sectionContainer: {
+    ...tabletStyles.sectionContainer,
+    width: "100%",
+    marginBottom: 15,
+  },
+  rowContainer: {
+    ...tabletStyles.rowContainer,
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  label: {
+    ...tabletStyles.label,
+    fontSize: 20,
+  },
+  inputContainer: {
+    ...tabletStyles.inputContainer,
+    minWidth: 70,
+    padding: 8,
+    paddingLeft: 15,
+    paddingRight: 15,
+  },
+  inputText: {
+    ...tabletStyles.inputText,
+    fontSize: 20,
+    paddingTop: 0,
+  },
+  sleekStartButton: {
+    ...tabletStyles.sleekStartButton,
+    width: "100%",
+    height: 50,
+    marginBottom: 10,
+  },
+  sleekStartIcon: {
+    ...tabletStyles.sleekStartIcon,
+    fontSize: 20,
+  },
+  saveButton: {
+    ...tabletStyles.saveButton,
+    width: "100%",
+    height: 50,
+  },
+  saveButtonText: {
+    ...tabletStyles.saveButtonText,
+    fontSize: 20,
+  },
+  timerCardsContainer: {
+    ...tabletStyles.timerCardsContainer,
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  timerCard: {
+    ...tabletStyles.timerCard,
+    width: "100%",
   },
 });

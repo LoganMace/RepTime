@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import { Platform } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
@@ -7,22 +7,17 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const { isMobile } = useResponsiveStyles();
+
+  const iconSize = isMobile ? 28 : 32;
+  const labelSize = isMobile ? 12 : 20;
 
   return (
     <>
-      {/* <SideNav isOpen={isDrawerOpen} onClose={() => setDrawerOpen(false)} /> */}
-      {/* <View style={{ position: "absolute", top: 30, left: 20, zIndex: 1 }}>
-        <Icon
-          name="menu"
-          size={40}
-          color={Colors[colorScheme ?? "light"].text}
-          onPress={() => setDrawerOpen(!isDrawerOpen)}
-        />
-      </View> */}
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
@@ -37,7 +32,7 @@ export default function TabLayout() {
             default: {},
           }),
           tabBarLabelStyle: {
-            fontSize: 20,
+            fontSize: labelSize,
           },
         }}
       >
@@ -46,7 +41,7 @@ export default function TabLayout() {
           options={{
             title: "Home",
             tabBarIcon: ({ color }) => (
-              <IconSymbol size={32} name="house.fill" color={color} />
+              <IconSymbol size={iconSize} name="house.fill" color={color} />
             ),
           }}
         />
@@ -55,7 +50,7 @@ export default function TabLayout() {
           options={{
             title: "Timers",
             tabBarIcon: ({ color }) => (
-              <IconSymbol size={32} name="timer" color={color} />
+              <IconSymbol size={iconSize} name="timer" color={color} />
             ),
           }}
         />
@@ -64,7 +59,7 @@ export default function TabLayout() {
           options={{
             title: "Workouts",
             tabBarIcon: ({ color }) => (
-              <IconSymbol size={32} name="dumbbell" color={color} />
+              <IconSymbol size={iconSize} name="dumbbell" color={color} />
             ),
           }}
         />
