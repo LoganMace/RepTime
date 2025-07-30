@@ -16,6 +16,9 @@ export function CustomDrawerContent(props: any) {
   const { isMobile } = useResponsiveStyles();
 
   const [timersOpen, setTimersOpen] = useState(pathname.startsWith("/timers"));
+  const [workoutsOpen, setWorkoutsOpen] = useState(
+    pathname.startsWith("/workouts")
+  );
 
   const colors = Colors[colorScheme ?? "light"];
 
@@ -33,7 +36,9 @@ export function CustomDrawerContent(props: any) {
 
   const getItemStyle = (path: string) => {
     const isActive =
-      pathname === path || (path === "/timers" && pathname.startsWith(path));
+      pathname === path ||
+      (path === "/timers" && pathname.startsWith(path)) ||
+      (path === "/workouts" && pathname.startsWith(path));
     return {
       backgroundColor: isActive ? "rgba(255, 215, 0, 0.15)" : "transparent",
       borderRadius: 10,
@@ -53,6 +58,7 @@ export function CustomDrawerContent(props: any) {
   };
 
   const isTimersPath = pathname.startsWith("/timers");
+  const isWorkoutsPath = pathname.startsWith("/workouts");
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -73,6 +79,7 @@ export function CustomDrawerContent(props: any) {
           onPress={() => {
             router.push("/");
             setTimersOpen(false);
+            setWorkoutsOpen(false);
           }}
         />
 
@@ -104,7 +111,10 @@ export function CustomDrawerContent(props: any) {
               color={isTimersPath ? colors.tint : colors.text}
             />
           )}
-          onPress={() => setTimersOpen(!timersOpen)}
+          onPress={() => {
+            setTimersOpen(!timersOpen);
+            setWorkoutsOpen(false);
+          }}
         />
 
         {timersOpen && (
@@ -125,14 +135,14 @@ export function CustomDrawerContent(props: any) {
               }}
             />
             <DrawerItem
-              style={getSubItemStyle("/timers/quickTimers")}
+              style={getSubItemStyle("/timers/savedTimers")}
               label={() => (
-                <Text style={getLabelStyle("/timers/quickTimers")}>
-                  Quick Timers
+                <Text style={getLabelStyle("/timers/savedTimers")}>
+                  Saved Timers
                 </Text>
               )}
               onPress={() => {
-                router.push("/timers/quickTimers");
+                router.push("/timers/savedTimers");
                 props.navigation.closeDrawer();
               }}
             />
@@ -141,19 +151,69 @@ export function CustomDrawerContent(props: any) {
 
         <DrawerItem
           style={getItemStyle("/workouts")}
-          label={() => <Text style={getLabelStyle("/workouts")}>Workouts</Text>}
+          label={() => (
+            <View style={styles.collapsibleLabelContainer}>
+              <Text
+                style={{
+                  color: isWorkoutsPath ? colors.tint : colors.text,
+                  fontSize: labelSize,
+                  fontWeight: isWorkoutsPath ? "bold" : "normal",
+                }}
+              >
+                Workouts
+              </Text>
+              <Feather
+                name={workoutsOpen ? "chevron-down" : "chevron-right"}
+                size={iconSize}
+                color={isWorkoutsPath ? colors.tint : colors.text}
+                style={styles.chevron}
+              />
+            </View>
+          )}
           icon={() => (
             <IconSymbol
               name="dumbbell"
               size={iconSize}
-              color={pathname === "/workouts" ? colors.tint : colors.text}
+              color={isWorkoutsPath ? colors.tint : colors.text}
             />
           )}
           onPress={() => {
-            router.push("/workouts");
+            setWorkoutsOpen(!workoutsOpen);
             setTimersOpen(false);
           }}
         />
+
+        {workoutsOpen && (
+          <View
+            style={[
+              styles.collapsibleContent,
+              { paddingLeft: isMobile ? 30 : 45 },
+            ]}
+          >
+            <DrawerItem
+              style={getSubItemStyle("/workouts")}
+              label={() => (
+                <Text style={getLabelStyle("/workouts")}>Create Workout</Text>
+              )}
+              onPress={() => {
+                router.push("/workouts");
+                props.navigation.closeDrawer();
+              }}
+            />
+            <DrawerItem
+              style={getSubItemStyle("/workouts/savedWorkouts")}
+              label={() => (
+                <Text style={getLabelStyle("/workouts/savedWorkouts")}>
+                  Saved Workouts
+                </Text>
+              )}
+              onPress={() => {
+                router.push("/workouts/savedWorkouts");
+                props.navigation.closeDrawer();
+              }}
+            />
+          </View>
+        )}
       </DrawerContentScrollView>
     </View>
   );

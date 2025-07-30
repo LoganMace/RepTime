@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -13,12 +14,13 @@ import {
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import WorkoutViewModal from "@/components/WorkoutViewModal";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 
 export default function WorkoutsScreen() {
   const { getStyles, isMobile } = useResponsiveStyles();
   const styles = getStyles(mobileStyles, tabletStyles);
+  const params = useLocalSearchParams();
+  const router = useRouter();
 
   const [workoutName, setWorkoutName] = useState("");
   const [workouts, setWorkouts] = useState([
@@ -31,23 +33,17 @@ export default function WorkoutsScreen() {
       restTime: "",
     },
   ]);
-  const [savedWorkouts, setSavedWorkouts] = useState<any[]>([]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [viewModalVisible, setViewModalVisible] = useState(false);
-  const [viewWorkout, setViewWorkout] = useState<any | null>(null);
-
-  const loadWorkouts = async () => {
-    try {
-      const data = await AsyncStorage.getItem("workoutPlans");
-      setSavedWorkouts(data ? JSON.parse(data) : []);
-    } catch {
-      setSavedWorkouts([]);
-    }
-  };
 
   useEffect(() => {
-    loadWorkouts();
-  }, []);
+    if (params.workout && typeof params.editIndex === "string") {
+      const workoutToEdit = JSON.parse(params.workout as string);
+      const index = parseInt(params.editIndex, 10);
+      setWorkoutName(workoutToEdit.name);
+      setWorkouts(workoutToEdit.exercises);
+      setEditIndex(index);
+    }
+  }, [params]);
 
   const handleChange = (index: number, field: string, value: string) => {
     setWorkouts((prev) => {
@@ -76,23 +72,6 @@ export default function WorkoutsScreen() {
     setWorkouts((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleDelete = async (idx: number) => {
-    const updated = savedWorkouts.filter((_, i) => i !== idx);
-    setSavedWorkouts(updated);
-    await AsyncStorage.setItem("workoutPlans", JSON.stringify(updated));
-  };
-
-  const handleEdit = (plan: any, idx: number) => {
-    setWorkoutName(plan.name);
-    setWorkouts(plan.exercises);
-    setEditIndex(idx);
-  };
-
-  const handleView = (plan: any) => {
-    setViewWorkout(plan);
-    setViewModalVisible(true);
-  };
-
   const savePlan = async () => {
     if (!workoutName.trim()) {
       alert("Please enter a workout name.");
@@ -112,14 +91,14 @@ export default function WorkoutsScreen() {
       savedAt: new Date().toISOString(),
     };
     try {
-      let plans = savedWorkouts.slice();
+      const existingPlans = await AsyncStorage.getItem("workoutPlans");
+      let plans = existingPlans ? JSON.parse(existingPlans) : [];
       if (editIndex !== null) {
         plans[editIndex] = plan;
       } else {
         plans.push(plan);
       }
       await AsyncStorage.setItem("workoutPlans", JSON.stringify(plans));
-      setSavedWorkouts(plans);
       alert("Workout plan saved!");
       setWorkoutName("");
       setWorkouts([
@@ -133,6 +112,7 @@ export default function WorkoutsScreen() {
         },
       ]);
       setEditIndex(null);
+      router.push("/workouts/savedWorkouts");
     } catch {
       alert("Failed to save workout plan.");
     }
@@ -376,94 +356,12 @@ export default function WorkoutsScreen() {
             onPress={savePlan}
             activeOpacity={0.85}
           >
-            <Text style={styles.saveButtonText}>Save Workout Plan</Text>
+            <Text style={styles.saveButtonText}>
+              {editIndex !== null ? "Update Workout Plan" : "Save Workout Plan"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* Saved Workouts Section */}
-      <View style={{ marginTop: 40, width: "100%", alignItems: "center" }}>
-        <ThemedText type="title" style={{ marginBottom: 12 }}>
-          Saved Workouts
-        </ThemedText>
-        <View style={styles.timerCardsContainer}>
-          {savedWorkouts.length === 0 ? (
-            <ThemedText>No saved workouts yet.</ThemedText>
-          ) : (
-            savedWorkouts.map((plan, idx) => (
-              <View key={idx} style={styles.timerCard}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "flex-end",
-                    gap: 16,
-                  }}
-                >
-                  <TouchableOpacity
-                    onPress={() => handleEdit(plan, idx)}
-                    style={{ padding: 4 }}
-                  >
-                    <Feather name="edit-2" size={26} color="#007AFF" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleDelete(idx)}
-                    style={{ padding: 4 }}
-                  >
-                    <Feather name="trash-2" size={26} color="#d9534f" />
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.timerCardTitle}>{plan.name}</Text>
-                <Text style={styles.timerCardText}>
-                  {plan.exercises.length} exercise
-                  {plan.exercises.length !== 1 ? "s" : ""}
-                </Text>
-                <ScrollView style={{ maxHeight: 120 }}>
-                  {plan.exercises.map((ex: any, i: number) => {
-                    const details = [];
-                    if (ex.sets) details.push(`Sets: ${ex.sets}`);
-                    if (ex.reps) details.push(`Reps: ${ex.reps}`);
-                    if (ex.weight) details.push(`Weight: ${ex.weight}`);
-                    if (ex.workTime) details.push(`Work: ${ex.workTime}s`);
-                    if (ex.restTime) details.push(`Rest: ${ex.restTime}s`);
-                    return (
-                      <Text key={i} style={styles.timerCardText}>
-                        {ex.workout}
-                        {details.length > 0 ? " | " + details.join(" | ") : ""}
-                      </Text>
-                    );
-                  })}
-                </ScrollView>
-                <Text
-                  style={[styles.timerCardText, { fontSize: 12, marginTop: 8 }]}
-                >
-                  Saved: {new Date(plan.savedAt).toLocaleString()}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => handleView(plan)}
-                  style={{
-                    position: "absolute",
-                    bottom: 12,
-                    right: 12,
-                    backgroundColor: "#007AFF",
-                    borderRadius: 24,
-                    padding: 10,
-                    zIndex: 10,
-                  }}
-                >
-                  <Feather name="eye" size={24} color="#fff" />
-                </TouchableOpacity>
-              </View>
-            ))
-          )}
-        </View>
-      </View>
-
-      {/* Workout View Modal */}
-      <WorkoutViewModal
-        visible={viewModalVisible}
-        workout={viewWorkout}
-        onClose={() => setViewModalVisible(false)}
-      />
     </ParallaxScrollView>
   );
 }
@@ -599,33 +497,7 @@ const tabletStyles = StyleSheet.create({
     ...baseButtonText,
     color: "gold",
   },
-  timerCardsContainer: {
-    width: "100%",
-    paddingHorizontal: 16,
-  },
-  timerCard: {
-    backgroundColor: "#444",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    width: "100%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  timerCardTitle: {
-    color: "gold",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  timerCardText: {
-    color: "white",
-    fontSize: 16,
-    marginBottom: 4,
-  },
+  // Removed timerCardsContainer and related styles
   // Properties for mobile styles that don't exist in tablet
   mobileFormContainer: {},
   tableHeader: {},

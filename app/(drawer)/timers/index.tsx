@@ -10,7 +10,6 @@ import {
   View,
 } from "react-native";
 
-import { Feather } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { ScrollView } from "react-native-gesture-handler";
 
@@ -19,6 +18,7 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import TimePicker from "@/components/TimePicker";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 // Utility function to convert minutes and seconds to total seconds
 function toTotalSeconds(minutes: string, seconds: string) {
@@ -27,6 +27,8 @@ function toTotalSeconds(minutes: string, seconds: string) {
 
 export default function TimersScreen() {
   const { getStyles, isMobile } = useResponsiveStyles();
+  const router = useRouter();
+  const params = useLocalSearchParams();
 
   const [timerName, setTimerName] = useState("");
   const [selectedRounds, setSelectedRounds] = useState(1);
@@ -42,17 +44,6 @@ export default function TimersScreen() {
     sets: number;
     setRestTime: number;
   } | null>(null);
-  const [savedTimers, setSavedTimers] = useState<
-    {
-      name: string;
-      rounds: number;
-      workTime: number;
-      restTime: number;
-      sets: number;
-      setRestTime: number;
-      savedAt: string;
-    }[]
-  >([]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
   // Modal state
@@ -72,45 +63,19 @@ export default function TimersScreen() {
 
   const styles = getStyles(mobileStyles, tabletStyles);
 
-  const loadTimers = async () => {
-    try {
-      const timers = await AsyncStorage.getItem("timers");
-      setSavedTimers(timers ? JSON.parse(timers) : []);
-    } catch {
-      setSavedTimers([]);
-    }
-  };
-
   useEffect(() => {
-    loadTimers();
-  }, []);
-
-  const handleDelete = async (idx: number) => {
-    const updated = savedTimers.filter((_, i) => i !== idx);
-    setSavedTimers(updated);
-    await AsyncStorage.setItem("timers", JSON.stringify(updated));
-  };
-
-  const handleEdit = (
-    timer: {
-      name: string;
-      rounds: number;
-      workTime: number;
-      restTime: number;
-      sets: number;
-      setRestTime: number;
-      savedAt: string;
-    },
-    idx: number
-  ) => {
-    setTimerName(timer.name);
-    setSelectedRounds(timer.rounds);
-    setWorkSeconds(timer.workTime);
-    setRestSeconds(timer.restTime);
-    setSelectedSets(timer.sets);
-    setSetRestTimeSeconds(timer.setRestTime);
-    setEditIndex(idx);
-  };
+    if (params.timer) {
+      const timerToEdit = JSON.parse(params.timer as string);
+      const editIndex = parseInt(params.editIndex as string);
+      setTimerName(timerToEdit.name);
+      setSelectedRounds(timerToEdit.rounds);
+      setWorkSeconds(timerToEdit.workTime);
+      setRestSeconds(timerToEdit.restTime);
+      setSelectedSets(timerToEdit.sets);
+      setSetRestTimeSeconds(timerToEdit.setRestTime);
+      setEditIndex(editIndex);
+    }
+  }, [params]);
 
   const generateRounds = () => {
     const rounds = [];
@@ -163,14 +128,14 @@ export default function TimersScreen() {
       setRestTime: setRestTimeSeconds,
       savedAt: new Date().toISOString(),
     };
-    let timers = savedTimers.slice();
+    const savedTimers = await AsyncStorage.getItem("timers");
+    let timers = savedTimers ? JSON.parse(savedTimers) : [];
     if (editIndex !== null) {
       timers[editIndex] = timer;
     } else {
       timers.push(timer);
     }
     await AsyncStorage.setItem("timers", JSON.stringify(timers));
-    setSavedTimers(timers);
     alert("Timer saved!");
     setTimerName("");
     setSelectedRounds(1);
@@ -179,6 +144,7 @@ export default function TimersScreen() {
     setSelectedSets(1);
     setSetRestTimeSeconds(0);
     setEditIndex(null);
+    router.push("/(drawer)/timers/savedTimers");
   };
 
   return (
@@ -327,75 +293,9 @@ export default function TimersScreen() {
               isSaveDisabled && styles.disabledButtonText,
             ]}
           >
-            Save Timer
+            {editIndex !== null ? "Update Timer" : "Save Timer"}
           </Text>
         </TouchableOpacity>
-
-        {/* Saved Timers Section */}
-        <View style={{ marginTop: 40, width: "100%", alignItems: "center" }}>
-          <ThemedText type="title" style={{ marginBottom: 12 }}>
-            Saved Timers
-          </ThemedText>
-          <View style={styles.timerCardsContainer}>
-            {savedTimers.length === 0 ? (
-              <ThemedText>No saved timers yet.</ThemedText>
-            ) : (
-              savedTimers.map((timer, idx) => (
-                <View key={idx} style={styles.timerCard}>
-                  <View style={styles.timerCardActions}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        console.log("Edit pressed", idx);
-                        handleEdit(timer, idx);
-                      }}
-                      style={styles.iconButton}
-                    >
-                      <Feather name="edit-2" size={26} color="#007AFF" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        console.log("Delete pressed", idx);
-                        handleDelete(idx);
-                      }}
-                      style={styles.iconButton}
-                    >
-                      <Feather name="trash-2" size={26} color="#d9534f" />
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={styles.timerCardTitle}>{timer.name}</Text>
-                  <Text style={styles.timerCardText}>
-                    Rounds: {timer.rounds}
-                  </Text>
-                  <Text style={styles.timerCardText}>
-                    Work: {timer.workTime}s
-                  </Text>
-                  <Text style={styles.timerCardText}>
-                    Rest: {timer.restTime}s
-                  </Text>
-                  <Text style={styles.timerCardText}>Sets: {timer.sets}</Text>
-                  <Text style={styles.timerCardText}>
-                    Set Rest: {timer.setRestTime}s
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setActiveTimerData({
-                        rounds: timer.rounds,
-                        workTime: timer.workTime,
-                        restTime: timer.restTime,
-                        sets: timer.sets,
-                        setRestTime: timer.setRestTime,
-                      });
-                      setClockVisible(true);
-                    }}
-                    style={styles.playButton}
-                  >
-                    <Feather name="play-circle" size={60} color="#39FF14" />
-                  </TouchableOpacity>
-                </View>
-              ))
-            )}
-          </View>
-        </View>
       </View>
 
       {/* Clock Component */}
@@ -657,62 +557,6 @@ const tabletStyles = StyleSheet.create({
     color: "#39FF14",
   },
 
-  // Saved Timers Section
-  timerCardsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: 16,
-    width: "100%",
-  },
-  timerCard: {
-    backgroundColor: "#333",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    width: 320,
-    minHeight: 120,
-    position: "relative",
-    marginHorizontal: 8,
-    marginTop: 8,
-  },
-  timerCardActions: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    flexDirection: "row",
-    gap: 16,
-    minHeight: 44,
-    minWidth: 100,
-    zIndex: 10,
-  },
-  timerCardTitle: {
-    color: "#39FF14",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  timerCardText: {
-    color: "#fff",
-    fontSize: 18,
-  },
-  iconButton: {
-    width: 44,
-    height: 44,
-    padding: 0,
-    borderRadius: 22,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  playButton: {
-    position: "absolute",
-    bottom: 12,
-    right: 12,
-    width: 60,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
   // Modal & Picker
   modalOverlay: {
     flex: 1,
@@ -824,14 +668,5 @@ const mobileStyles = StyleSheet.create({
   saveButtonText: {
     ...tabletStyles.saveButtonText,
     fontSize: 20,
-  },
-  timerCardsContainer: {
-    ...tabletStyles.timerCardsContainer,
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  timerCard: {
-    ...tabletStyles.timerCard,
-    width: "100%",
   },
 });
