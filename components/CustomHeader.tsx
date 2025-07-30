@@ -18,9 +18,10 @@ export function CustomHeader() {
 
   const getTitle = () => {
     if (pathname === "/") return "Home";
-    if (pathname === "/workouts") return "Workouts";
+    if (pathname === "/workouts") return "Create Workout";
+    if (pathname === "/workouts/savedWorkouts") return "Saved Workouts";
     if (pathname === "/timers") return "Create Timer";
-    if (pathname === "/timers/quickTimers") return "Quick Timers";
+    if (pathname === "/timers/savedTimers") return "Saved Timers";
     return "RepTime";
   };
 
