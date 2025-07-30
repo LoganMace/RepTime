@@ -12,7 +12,6 @@ import {
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import WorkoutViewModal from "@/components/WorkoutViewModal";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
@@ -144,7 +143,7 @@ export default function WorkoutsScreen() {
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
       headerImage={
         <IconSymbol
-          size={310}
+          size={isMobile ? 180 : 310}
           color="gold"
           name="figure.strengthtraining.traditional"
           style={styles.headerImage}
@@ -152,9 +151,6 @@ export default function WorkoutsScreen() {
       }
     >
       <View style={styles.centeredContainer}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Create a Workout</ThemedText>
-        </ThemedView>
         <View style={styles.workoutNameContainer}>
           <ThemedText style={[styles.inputLabel]}>Workout Name</ThemedText>
           <TextInput
@@ -516,9 +512,6 @@ const tabletStyles = StyleSheet.create({
     justifyContent: "center",
     width: "100%",
   },
-  titleContainer: {
-    marginBottom: 40,
-  },
   workoutNameContainer: {
     marginBottom: 20,
     alignItems: "center",
@@ -645,13 +638,14 @@ const tabletStyles = StyleSheet.create({
 
 const mobileStyles = StyleSheet.create({
   ...tabletStyles,
+  headerImage: {
+    bottom: -30,
+    left: -20,
+    position: "absolute",
+  },
   centeredContainer: {
     ...tabletStyles.centeredContainer,
-    paddingHorizontal: 10,
     justifyContent: "flex-start",
-  },
-  titleContainer: {
-    marginBottom: 15,
   },
   workoutNameContainer: {
     width: "100%",

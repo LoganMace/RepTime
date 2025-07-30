@@ -17,7 +17,6 @@ import { ScrollView } from "react-native-gesture-handler";
 import Clock from "@/components/Clock";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import TimePicker from "@/components/TimePicker";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 
@@ -27,7 +26,7 @@ function toTotalSeconds(minutes: string, seconds: string) {
 }
 
 export default function TimersScreen() {
-  const { getStyles } = useResponsiveStyles();
+  const { getStyles, isMobile } = useResponsiveStyles();
 
   const [timerName, setTimerName] = useState("");
   const [selectedRounds, setSelectedRounds] = useState(1);
@@ -187,7 +186,7 @@ export default function TimersScreen() {
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
       headerImage={
         <IconSymbol
-          size={310}
+          size={isMobile ? 180 : 310}
           color="lime"
           name="timer.circle"
           style={styles.headerImage}
@@ -195,9 +194,6 @@ export default function TimersScreen() {
       }
     >
       <View style={styles.centeredContainer}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Create a Timer</ThemedText>
-        </ThemedView>
         <View style={styles.timerNameContainer}>
           <ThemedText type="subtitle" style={styles.label}>
             Timer Name
@@ -571,9 +567,6 @@ const tabletStyles = StyleSheet.create({
     alignItems: "center",
     position: "relative",
   },
-  titleContainer: {
-    marginBottom: 40,
-  },
 
   // Timer Creation Form
   timerNameContainer: {
@@ -754,13 +747,14 @@ const tabletStyles = StyleSheet.create({
 
 const mobileStyles = StyleSheet.create({
   ...tabletStyles,
+  headerImage: {
+    bottom: -30,
+    left: -20,
+    position: "absolute",
+  },
   centeredContainer: {
     ...tabletStyles.centeredContainer,
     alignItems: "flex-start",
-  },
-  titleContainer: {
-    ...tabletStyles.titleContainer,
-    marginBottom: 20,
   },
   timerNameContainer: {
     flexDirection: "column",
