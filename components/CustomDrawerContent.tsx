@@ -146,6 +146,18 @@ export function CustomDrawerContent(props: any) {
                 props.navigation.closeDrawer();
               }}
             />
+            <DrawerItem
+              style={getSubItemStyle("/timers/quickTimers")}
+              label={() => (
+                <Text style={getLabelStyle("/timers/quickTimers")}>
+                  Quick Timers
+                </Text>
+              )}
+              onPress={() => {
+                router.push("/timers/quickTimers");
+                props.navigation.closeDrawer();
+              }}
+            />
           </View>
         )}
 
