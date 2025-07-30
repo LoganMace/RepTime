@@ -521,7 +521,7 @@ const mobileStyles = StyleSheet.create({
   },
   workoutNameContainer: {
     width: "100%",
-    marginBottom: 15,
+    marginBottom: 12,
     alignItems: "stretch",
   },
   workoutNameInput: {
@@ -546,7 +546,7 @@ const mobileStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   cardTitle: {
     color: "gold",
@@ -559,7 +559,7 @@ const mobileStyles = StyleSheet.create({
   row: {
     flexDirection: "row",
     gap: 12,
-    marginBottom: 12,
+    marginTop: 12,
   },
   inputGroup: {
     flex: 1,
@@ -579,13 +579,6 @@ const mobileStyles = StyleSheet.create({
     minWidth: 0,
     textAlign: "left",
   },
-  // Deprecated mobile table styles
-  tableHeader: {},
-  workoutRow: {},
-  exerciseColumn: {},
-  smallColumn: {},
-  removeColumn: {},
-  removeButtonContainer: {},
   buttonContainer: {
     ...tabletStyles.buttonContainer,
     flexDirection: "column",

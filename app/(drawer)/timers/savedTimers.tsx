@@ -13,12 +13,10 @@ import { Feather } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 
 import Clock from "@/components/Clock";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export default function SavedTimersScreen() {
-  const { getStyles, isMobile } = useResponsiveStyles();
+  const { getStyles } = useResponsiveStyles();
   const router = useRouter();
 
   const [clockVisible, setClockVisible] = useState(false);
@@ -83,17 +81,7 @@ export default function SavedTimersScreen() {
   };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      headerImage={
-        <IconSymbol
-          size={isMobile ? 180 : 310}
-          color="lime"
-          name="timer.circle"
-          style={styles.headerImage}
-        />
-      }
-    >
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.centeredContainer}>
         <View style={{ width: "100%", alignItems: "center" }}>
           <ScrollView style={{ width: "100%" }}>
@@ -152,27 +140,30 @@ export default function SavedTimersScreen() {
             </View>
           </ScrollView>
         </View>
+        {activeTimerData && (
+          <Clock
+            visible={clockVisible}
+            onClose={() => {
+              setClockVisible(false);
+              setActiveTimerData(null);
+            }}
+            rounds={activeTimerData.rounds}
+            workTime={activeTimerData.workTime}
+            restTime={activeTimerData.restTime}
+            sets={activeTimerData.sets}
+            setRestTime={activeTimerData.setRestTime}
+          />
+        )}
       </View>
-
-      {activeTimerData && (
-        <Clock
-          visible={clockVisible}
-          onClose={() => {
-            setClockVisible(false);
-            setActiveTimerData(null);
-          }}
-          rounds={activeTimerData.rounds}
-          workTime={activeTimerData.workTime}
-          restTime={activeTimerData.restTime}
-          sets={activeTimerData.sets}
-          setRestTime={activeTimerData.setRestTime}
-        />
-      )}
-    </ParallaxScrollView>
+    </ScrollView>
   );
 }
 
 const tabletStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
   headerImage: {
     color: "#808080",
     bottom: -90,
