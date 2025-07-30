@@ -4,8 +4,12 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 
 export default function HomeScreen() {
+  const { getStyles, isMobile } = useResponsiveStyles();
+  const styles = getStyles(mobileStyles, tabletStyles);
+
   return (
     <View style={{ flex: 1 }}>
       <ParallaxScrollView
@@ -13,7 +17,7 @@ export default function HomeScreen() {
         headerImage={
           <IconSymbol
             name="figure.walk"
-            size={310}
+            size={isMobile ? 180 : 310}
             color="cyan"
             style={styles.headerIcon}
           />
@@ -51,7 +55,7 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const tabletStyles = StyleSheet.create({
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -64,6 +68,15 @@ const styles = StyleSheet.create({
   headerIcon: {
     bottom: -90,
     left: -35,
+    position: "absolute",
+  },
+});
+
+const mobileStyles = StyleSheet.create({
+  ...tabletStyles,
+  headerIcon: {
+    bottom: -30,
+    left: -20,
     position: "absolute",
   },
 });
