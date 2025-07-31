@@ -47,6 +47,12 @@ function DrawerNavigator() {
           title: "Workouts",
         }}
       />
+      <Drawer.Screen
+        name="trackers"
+        options={{
+          title: "Trackers",
+        }}
+      />
     </Drawer>
   );
 }
