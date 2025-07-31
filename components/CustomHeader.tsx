@@ -22,6 +22,7 @@ export function CustomHeader() {
     if (pathname === "/workouts/savedWorkouts") return "Saved Workouts";
     if (pathname === "/timers") return "Create Timer";
     if (pathname === "/timers/savedTimers") return "Saved Timers";
+    if (pathname === "/timers/quickTimers") return "Quick Timers";
     return "RepTime";
   };
 

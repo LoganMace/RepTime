@@ -1,5 +1,5 @@
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   StyleSheet,
@@ -20,6 +20,8 @@ type ClockProps = {
   sets: number;
   setRestTime: number;
   onClose: () => void;
+  skipGetReady?: boolean;
+  quickTimer?: boolean;
 };
 
 const Clock = ({
@@ -30,6 +32,8 @@ const Clock = ({
   sets,
   setRestTime,
   onClose,
+  skipGetReady = false,
+  quickTimer = false,
 }: ClockProps) => {
   const { isMobile } = useResponsiveStyles();
   const { width } = useWindowDimensions();
@@ -55,11 +59,36 @@ const Clock = ({
     restTime,
     sets,
     setRestTime,
+    skipGetReady,
+    quickTimer,
   });
 
   const handleClose = () => {
     onClose();
   };
+
+  const [hasRun, setHasRun] = useState(false);
+
+  // Track when the timer has actually run (moved past start phase)
+  useEffect(() => {
+    if (currentPhase !== "start") {
+      setHasRun(true);
+    }
+    if (!visible) {
+      setHasRun(false);
+    }
+  }, [currentPhase, visible]);
+
+  // Auto-close for quick timers when done
+  useEffect(() => {
+    if (quickTimer && currentPhase === "start" && visible && hasRun) {
+      // Small delay to ensure beep plays
+      const timer = setTimeout(() => {
+        onClose();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [quickTimer, currentPhase, onClose, visible, hasRun]);
 
   // Helper function to get total time for current phase
   const getTotalTimeForPhase = () => {
@@ -146,22 +175,24 @@ const Clock = ({
               backgroundColor="#2c2c2c"
             />
             <View style={styles.timerContent}>
-              <Text
-                style={[
-                  styles.phaseText,
-                  currentPhase === "work"
-                    ? styles.work
-                    : currentPhase === "rest"
-                    ? styles.rest
-                    : currentPhase === "setRest"
-                    ? styles.rest
-                    : currentPhase === "paused"
-                    ? styles.paused
-                    : styles.getReady,
-                ]}
-              >
-                {phaseLabel}
-              </Text>
+              {!quickTimer && (
+                <Text
+                  style={[
+                    styles.phaseText,
+                    currentPhase === "work"
+                      ? styles.work
+                      : currentPhase === "rest"
+                      ? styles.rest
+                      : currentPhase === "setRest"
+                      ? styles.rest
+                      : currentPhase === "paused"
+                      ? styles.paused
+                      : styles.getReady,
+                  ]}
+                >
+                  {phaseLabel}
+                </Text>
+              )}
 
               <Text style={styles.timeText}>
                 {Math.floor(timeLeft / 60)
@@ -169,19 +200,22 @@ const Clock = ({
                   .padStart(2, "0")}
                 :{(timeLeft % 60).toString().padStart(2, "0")}
               </Text>
+              {!quickTimer && (
+                <>
+                  <Text style={styles.roundText}>
+                    Round {currentRound} of {rounds}
+                  </Text>
 
-              <Text style={styles.roundText}>
-                Round {currentRound} of {rounds}
-              </Text>
-
-              <Text style={styles.setLevelText}>
-                Set {currentSet} of {sets}
-              </Text>
+                  <Text style={styles.setLevelText}>
+                    Set {currentSet} of {sets}
+                  </Text>
+                </>
+              )}
             </View>
           </View>
         )}
 
-        {currentPhase === "done" && (
+        {currentPhase === "done" && !quickTimer && (
           <View style={styles.doneContainer}>
             <Text style={styles.doneText}>Workout Complete!</Text>
             <IconSymbol
@@ -195,7 +229,7 @@ const Clock = ({
         )}
 
         {/* Play button for starting the timer */}
-        {currentPhase === "start" && (
+        {currentPhase === "start" && !quickTimer && (
           <TouchableOpacity
             onPress={handleStart}
             style={styles.sleekPlayButton}
@@ -218,7 +252,7 @@ const Clock = ({
           </TouchableOpacity>
         )}
 
-        {currentPhase === "done" && (
+        {currentPhase === "done" && !quickTimer && (
           <TouchableOpacity
             onPress={handleClose}
             style={styles.pauseButton}
