@@ -125,13 +125,6 @@ const tabletStyles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    marginBottom: 8,
-    letterSpacing: -0.5,
-  },
   subtitle: {
     marginTop: 0,
     marginBottom: 20,
@@ -204,10 +197,6 @@ const mobileStyles = StyleSheet.create({
   },
   headerContainer: {
     ...tabletStyles.headerContainer,
-  },
-  title: {
-    ...tabletStyles.title,
-    fontSize: 28,
   },
   subtitle: {
     ...tabletStyles.subtitle,
