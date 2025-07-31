@@ -12,16 +12,16 @@ import { ThemedText } from "@/components/ThemedText";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 
 const PRESET_TIMERS = [
-  { name: "15s", duration: 15, color: "#ef4444" }, // Red
-  { name: "20s", duration: 20, color: "#f97316" }, // Orange
-  { name: "30s", duration: 30, color: "#6366f1" }, // Indigo
-  { name: "45s", duration: 45, color: "#ec4899" }, // Pink
-  { name: "1m", duration: 60, color: "#06b6d4" }, // Cyan
-  { name: "90s", duration: 90, color: "#10b981" }, // Emerald
-  { name: "2m", duration: 120, color: "#f59e0b" }, // Amber
-  { name: "3m", duration: 180, color: "#84cc16" }, // Lime
-  { name: "4m", duration: 240, color: "#8b5cf6" }, // Violet
-  { name: "5m", duration: 300, color: "#a855f7" }, // Purple
+  { name: "15s", duration: 15, color: "#dc2626", brightColor: "#ef4444" }, // Red - Fastest/Hottest
+  { name: "20s", duration: 20, color: "#ea580c", brightColor: "#f97316" }, // Red-Orange
+  { name: "30s", duration: 30, color: "#d97706", brightColor: "#f59e0b" }, // Orange
+  { name: "45s", duration: 45, color: "#ca8a04", brightColor: "#eab308" }, // Yellow-Orange
+  { name: "1m", duration: 60, color: "#65a30d", brightColor: "#84cc16" }, // Yellow-Green
+  { name: "90s", duration: 90, color: "#16a34a", brightColor: "#22c55e" }, // Green
+  { name: "2m", duration: 120, color: "#10b981", brightColor: "#10b981" }, // Green-Teal
+  { name: "3m", duration: 180, color: "#06b6d4", brightColor: "#06b6d4" }, // Cyan/Teal
+  { name: "4m", duration: 240, color: "#3b82f6", brightColor: "#3b82f6" }, // Blue
+  { name: "5m", duration: 300, color: "#6366f1", brightColor: "#6366f1" }, // Blue-Purple - Coolest/Slowest
 ];
 
 export default function QuickTimersScreen() {
@@ -42,12 +42,20 @@ export default function QuickTimersScreen() {
   const renderTimer = ({
     item,
   }: {
-    item: { name: string; duration: number; color: string };
+    item: {
+      name: string;
+      duration: number;
+      color: string;
+      brightColor: string;
+    };
   }) => (
     <TouchableOpacity
       style={[
         styles.timerButton,
-        { backgroundColor: item.color },
+        {
+          borderColor: item.brightColor,
+          borderWidth: 4,
+        },
         pressedTimer === item.name && styles.timerButtonPressed,
       ]}
       onPress={() => handleStartTimer(item.duration)}
@@ -55,7 +63,9 @@ export default function QuickTimersScreen() {
       onPressOut={() => setPressedTimer(null)}
       activeOpacity={0.9}
     >
-      <Text style={styles.timerButtonText}>{item.name}</Text>
+      <Text style={[styles.timerButtonText, { color: item.brightColor }]}>
+        {item.name}
+      </Text>
     </TouchableOpacity>
   );
 
@@ -134,18 +144,20 @@ const tabletStyles = StyleSheet.create({
   grid: {
     width: "100%",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
     alignItems: "center",
   },
   timerButton: {
     borderRadius: 16,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
-    margin: 8,
+    paddingVertical: 32,
+    paddingHorizontal: 16,
+    margin: 12,
     justifyContent: "center",
     alignItems: "center",
-    minHeight: 110,
-    minWidth: 260,
+    minHeight: 140,
+    flex: 1,
+    maxWidth: 380,
+    backgroundColor: "#1a1a1a",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
@@ -159,11 +171,13 @@ const tabletStyles = StyleSheet.create({
     elevation: 3,
   },
   timerButtonText: {
-    color: "#FFFFFF",
-    fontSize: 28,
-    fontWeight: "700",
+    fontSize: 36,
+    fontWeight: "900",
     marginBottom: 4,
     letterSpacing: -0.3,
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   timerDurationText: {
     color: "rgba(255, 255, 255, 0.85)",
@@ -172,7 +186,8 @@ const tabletStyles = StyleSheet.create({
     opacity: 0.9,
   },
   row: {
-    justifyContent: "center",
+    justifyContent: "space-evenly",
+    paddingHorizontal: 8,
   },
 });
 
