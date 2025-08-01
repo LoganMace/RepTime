@@ -23,6 +23,8 @@ export function CustomHeader() {
     if (pathname === "/timers") return "Create Timer";
     if (pathname === "/timers/savedTimers") return "Saved Timers";
     if (pathname === "/timers/quickTimers") return "Quick Timers";
+    if (pathname === "/trackers") return "Trackers";
+    if (pathname === "/trackers/weight") return "Weight Tracker";
     return "RepTime";
   };
 

@@ -236,7 +236,25 @@ export function CustomDrawerContent(props: any) {
 
         <DrawerItem
           style={getItemStyle("/trackers")}
-          label={() => <Text style={getLabelStyle("/trackers")}>Trackers</Text>}
+          label={() => (
+            <View style={styles.collapsibleLabelContainer}>
+              <Text
+                style={{
+                  color: isTrackersPath ? colors.tint : colors.text,
+                  fontSize: labelSize,
+                  fontWeight: isTrackersPath ? "bold" : "normal",
+                }}
+              >
+                Trackers
+              </Text>
+              <Feather
+                name={trackersOpen ? "chevron-down" : "chevron-right"}
+                size={iconSize}
+                color={isTrackersPath ? colors.tint : colors.text}
+                style={styles.chevron}
+              />
+            </View>
+          )}
           icon={() => (
             <IconSymbol
               name="chart.line.uptrend.xyaxis"
@@ -245,13 +263,41 @@ export function CustomDrawerContent(props: any) {
             />
           )}
           onPress={() => {
-            router.push("/trackers");
+            setTrackersOpen(!trackersOpen);
             setTimersOpen(false);
             setWorkoutsOpen(false);
-            setTrackersOpen(false);
-            props.navigation.closeDrawer();
           }}
         />
+
+        {trackersOpen && (
+          <View
+            style={[
+              styles.collapsibleContent,
+              { paddingLeft: isMobile ? 30 : 45 },
+            ]}
+          >
+            <DrawerItem
+              style={getSubItemStyle("/trackers")}
+              label={() => (
+                <Text style={getLabelStyle("/trackers")}>Overview</Text>
+              )}
+              onPress={() => {
+                router.push("/trackers");
+                props.navigation.closeDrawer();
+              }}
+            />
+            <DrawerItem
+              style={getSubItemStyle("/trackers/weight")}
+              label={() => (
+                <Text style={getLabelStyle("/trackers/weight")}>Weight</Text>
+              )}
+              onPress={() => {
+                router.push("/trackers/weight");
+                props.navigation.closeDrawer();
+              }}
+            />
+          </View>
+        )}
       </DrawerContentScrollView>
     </View>
   );
