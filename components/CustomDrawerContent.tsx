@@ -19,6 +19,9 @@ export function CustomDrawerContent(props: any) {
   const [workoutsOpen, setWorkoutsOpen] = useState(
     pathname.startsWith("/workouts")
   );
+  const [trackersOpen, setTrackersOpen] = useState(
+    pathname.startsWith("/trackers")
+  );
 
   const colors = Colors[colorScheme ?? "light"];
 
@@ -59,6 +62,7 @@ export function CustomDrawerContent(props: any) {
 
   const isTimersPath = pathname.startsWith("/timers");
   const isWorkoutsPath = pathname.startsWith("/workouts");
+  const isTrackersPath = pathname.startsWith("/trackers");
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -80,6 +84,7 @@ export function CustomDrawerContent(props: any) {
             router.push("/");
             setTimersOpen(false);
             setWorkoutsOpen(false);
+            setTrackersOpen(false);
           }}
         />
 
@@ -114,6 +119,7 @@ export function CustomDrawerContent(props: any) {
           onPress={() => {
             setTimersOpen(!timersOpen);
             setWorkoutsOpen(false);
+            setTrackersOpen(false);
           }}
         />
 
@@ -192,6 +198,7 @@ export function CustomDrawerContent(props: any) {
           onPress={() => {
             setWorkoutsOpen(!workoutsOpen);
             setTimersOpen(false);
+            setTrackersOpen(false);
           }}
         />
 
@@ -226,6 +233,25 @@ export function CustomDrawerContent(props: any) {
             />
           </View>
         )}
+
+        <DrawerItem
+          style={getItemStyle("/trackers")}
+          label={() => <Text style={getLabelStyle("/trackers")}>Trackers</Text>}
+          icon={() => (
+            <IconSymbol
+              name="chart.line.uptrend.xyaxis"
+              size={iconSize}
+              color={isTrackersPath ? colors.tint : colors.text}
+            />
+          )}
+          onPress={() => {
+            router.push("/trackers");
+            setTimersOpen(false);
+            setWorkoutsOpen(false);
+            setTrackersOpen(false);
+            props.navigation.closeDrawer();
+          }}
+        />
       </DrawerContentScrollView>
     </View>
   );
