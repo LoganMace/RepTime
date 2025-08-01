@@ -91,6 +91,7 @@ export default function WeightTrackingScreen() {
 
   const [newWeight, setNewWeight] = useState("");
   const [goalWeight] = useState(165); // Mock goal weight
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   const currentWeight = weightEntries[0]?.weight || 0;
   const previousWeight = weightEntries[1]?.weight || currentWeight;
@@ -201,44 +202,59 @@ export default function WeightTrackingScreen() {
         {/* Weight History */}
         <View style={styles.historyCard}>
           <ThemedText style={styles.cardTitle}>Weight History</ThemedText>
-          {weightEntries.map((entry, index) => {
-            const previousEntry = weightEntries[index + 1];
-            const change = previousEntry
-              ? entry.weight - previousEntry.weight
-              : 0;
+          {(showAllHistory ? weightEntries : weightEntries.slice(0, 5)).map(
+            (entry, index) => {
+              const previousEntry = weightEntries[index + 1];
+              const change = previousEntry
+                ? entry.weight - previousEntry.weight
+                : 0;
 
-            return (
-              <View key={entry.id} style={styles.historyEntry}>
-                <View style={styles.historyLeft}>
-                  <ThemedText style={styles.historyIcon}>
-                    {getTrendIcon(
-                      entry.weight,
-                      previousEntry?.weight || entry.weight
-                    )}
-                  </ThemedText>
-                  <View>
-                    <ThemedText style={styles.historyWeight}>
-                      {entry.weight} lbs
+              return (
+                <View key={entry.id} style={styles.historyEntry}>
+                  <View style={styles.historyLeft}>
+                    <ThemedText style={styles.historyIcon}>
+                      {getTrendIcon(
+                        entry.weight,
+                        previousEntry?.weight || entry.weight
+                      )}
                     </ThemedText>
-                    <ThemedText style={styles.historyDate}>
-                      {entry.date}
-                    </ThemedText>
+                    <View>
+                      <ThemedText style={styles.historyWeight}>
+                        {entry.weight} lbs
+                      </ThemedText>
+                      <ThemedText style={styles.historyDate}>
+                        {entry.date}
+                      </ThemedText>
+                    </View>
                   </View>
+                  {previousEntry && (
+                    <ThemedText
+                      style={[
+                        styles.historyChange,
+                        { color: getChangeColor(change) },
+                      ]}
+                    >
+                      {getChangeIcon(change)}
+                      {Math.abs(change).toFixed(1)}
+                    </ThemedText>
+                  )}
                 </View>
-                {previousEntry && (
-                  <ThemedText
-                    style={[
-                      styles.historyChange,
-                      { color: getChangeColor(change) },
-                    ]}
-                  >
-                    {getChangeIcon(change)}
-                    {Math.abs(change).toFixed(1)}
-                  </ThemedText>
-                )}
-              </View>
-            );
-          })}
+              );
+            }
+          )}
+
+          {weightEntries.length > 5 && (
+            <TouchableOpacity
+              style={styles.showMoreButton}
+              onPress={() => setShowAllHistory(!showAllHistory)}
+            >
+              <ThemedText style={styles.showMoreText}>
+                {showAllHistory
+                  ? "Show Less"
+                  : `Show More (${weightEntries.length - 5} more entries)`}
+              </ThemedText>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Features Coming Soon */}
@@ -342,7 +358,7 @@ const tabletStyles = StyleSheet.create({
     marginBottom: 16,
   },
   chartDescription: {
-    marginTop: 24,
+    marginTop: 32,
     paddingHorizontal: 10,
   },
   chartDescriptionText: {
@@ -384,6 +400,19 @@ const tabletStyles = StyleSheet.create({
   historyChange: {
     fontSize: 14,
     fontWeight: "600",
+  },
+  showMoreButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "#2a2a2a",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  showMoreText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#22c55e",
   },
   comingSoonCard: {
     backgroundColor: "#1a1a1a",
@@ -433,11 +462,15 @@ const mobileStyles = StyleSheet.create({
   },
   chartDescription: {
     ...tabletStyles.chartDescription,
-    marginTop: 66,
+    marginTop: 30,
     paddingHorizontal: 10,
   },
   chartDescriptionText: {
     ...tabletStyles.chartDescriptionText,
     fontSize: 12,
+  },
+  showMoreText: {
+    ...tabletStyles.showMoreText,
+    fontSize: 13,
   },
 });

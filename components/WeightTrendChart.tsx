@@ -9,6 +9,7 @@ import Svg, {
   Stop,
   Text as SvgText,
 } from "react-native-svg";
+import { useResponsiveStyles } from "../hooks/useResponsiveStyles";
 import { ThemedText } from "./ThemedText";
 
 interface WeightEntry {
@@ -30,9 +31,12 @@ export function WeightTrendChart({
   data,
   goalWeight,
   width = Dimensions.get("window").width - 80,
-  height = 200,
+  height = 240, // Increased to accommodate date labels
   showSmoothing = true,
 }: WeightTrendChartProps) {
+  const { getStyles, isMobile } = useResponsiveStyles();
+  const styles = getStyles(mobileStyles, tabletStyles);
+
   if (data.length === 0) {
     return (
       <View style={[styles.container, { width, height }]}>
@@ -48,8 +52,9 @@ export function WeightTrendChart({
 
   // Calculate chart dimensions
   const padding = 40;
+  const bottomPadding = 60; // Extra space for date labels
   const chartWidth = width - padding * 2;
-  const chartHeight = height - padding * 2;
+  const chartHeight = height - padding - bottomPadding;
 
   // Calculate weight range
   const weights = sortedData.map((entry) => entry.weight);
@@ -124,6 +129,50 @@ export function WeightTrendChart({
     yAxisLabels.push({ weight: weight.toFixed(1), y });
   }
 
+  // Generate X-axis date labels
+  const formatDate = (timestamp: number, isMobile: boolean = false) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (isMobile) {
+      // More compact labels for mobile
+      if (diffDays === 1) return "Today";
+      if (diffDays === 2) return "Yest";
+      if (diffDays <= 7) return `${diffDays - 1}d`;
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
+    // Full labels for tablet
+    if (diffDays === 1) return "Today";
+    if (diffDays === 2) return "Yesterday";
+    if (diffDays <= 7) return `${diffDays - 1}d ago`;
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+  };
+
+  // Select dates to show on x-axis with better mobile spacing
+  const maxLabels = isMobile ? 4 : 6; // Fewer labels on mobile
+  const labelStep = Math.max(1, Math.floor(sortedData.length / maxLabels));
+
+  const xAxisLabels = sortedData
+    .filter((_, index) => {
+      // Always show first and last
+      if (index === 0 || index === sortedData.length - 1) return true;
+      // Show every nth entry based on step calculation
+      return index % labelStep === 0;
+    })
+    .map((entry, _, filteredArray) => {
+      const originalIndex = sortedData.findIndex(
+        (item) => item.id === entry.id
+      );
+      return {
+        x: getX(originalIndex),
+        label: formatDate(entry.timestamp, isMobile),
+        isRecent: entry.timestamp > Date.now() - 7 * 24 * 60 * 60 * 1000,
+      };
+    });
+
   return (
     <View style={[styles.container, { width, height }]}>
       <Svg width={width} height={height}>
@@ -153,6 +202,16 @@ export function WeightTrendChart({
             strokeDasharray="2,2"
           />
         ))}
+
+        {/* X-axis line */}
+        <Line
+          x1={padding}
+          y1={padding + chartHeight}
+          x2={width - padding}
+          y2={padding + chartHeight}
+          stroke="#444"
+          strokeWidth="1"
+        />
 
         {/* Goal weight line */}
         {goalY && (
@@ -200,11 +259,25 @@ export function WeightTrendChart({
             key={index}
             x={padding - 10}
             y={label.y + 3}
-            fontSize="10"
+            fontSize={isMobile ? "10" : "12"}
             fill="#9CA3AF"
             textAnchor="end"
           >
             {label.weight}
+          </SvgText>
+        ))}
+
+        {/* X-axis date labels */}
+        {xAxisLabels.map((label, index) => (
+          <SvgText
+            key={index}
+            x={label.x}
+            y={padding + chartHeight + 25}
+            fontSize={isMobile ? "8" : "11"}
+            fill="#9CA3AF"
+            textAnchor="middle"
+          >
+            {label.label}
           </SvgText>
         ))}
 
@@ -213,7 +286,7 @@ export function WeightTrendChart({
           <SvgText
             x={width - padding + 5}
             y={goalY + 3}
-            fontSize="10"
+            fontSize={isMobile ? "10" : "12"}
             fill="#fbbf24"
             textAnchor="start"
           >
@@ -250,7 +323,7 @@ export function WeightTrendChart({
   );
 }
 
-const styles = StyleSheet.create({
+const tabletStyles = StyleSheet.create({
   container: {
     backgroundColor: "transparent",
     marginVertical: 10,
@@ -281,5 +354,28 @@ const styles = StyleSheet.create({
   legendText: {
     fontSize: 12,
     opacity: 0.8,
+  },
+});
+
+const mobileStyles = StyleSheet.create({
+  ...tabletStyles,
+  legend: {
+    ...tabletStyles.legend,
+    gap: 8,
+    marginTop: 8,
+  },
+  legendItem: {
+    ...tabletStyles.legendItem,
+    gap: 3,
+    marginBottom: 4,
+  },
+  legendLine: {
+    ...tabletStyles.legendLine,
+    width: 16,
+    height: 2,
+  },
+  legendText: {
+    ...tabletStyles.legendText,
+    fontSize: 10,
   },
 });
