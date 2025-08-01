@@ -1,14 +1,9 @@
 import { useState } from "react";
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import Clock from "@/components/Clock";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 
 const PRESET_TIMERS = [
@@ -39,55 +34,58 @@ export default function QuickTimersScreen() {
     setClockVisible(true);
   };
 
-  const renderTimer = ({
-    item,
-  }: {
-    item: {
-      name: string;
-      duration: number;
-      color: string;
-      brightColor: string;
-    };
+  const renderTimerButton = (timer: {
+    name: string;
+    duration: number;
+    color: string;
+    brightColor: string;
   }) => (
     <TouchableOpacity
+      key={timer.name}
       style={[
         styles.timerButton,
         {
-          borderColor: item.brightColor,
+          borderColor: timer.brightColor,
           borderWidth: 4,
         },
-        pressedTimer === item.name && styles.timerButtonPressed,
+        pressedTimer === timer.name && styles.timerButtonPressed,
       ]}
-      onPress={() => handleStartTimer(item.duration)}
-      onPressIn={() => setPressedTimer(item.name)}
+      onPress={() => handleStartTimer(timer.duration)}
+      onPressIn={() => setPressedTimer(timer.name)}
       onPressOut={() => setPressedTimer(null)}
       activeOpacity={0.9}
     >
-      <Text style={[styles.timerButtonText, { color: item.brightColor }]}>
-        {item.name}
+      <Text style={[styles.timerButtonText, { color: timer.brightColor }]}>
+        {timer.name}
       </Text>
     </TouchableOpacity>
   );
 
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <ThemedText style={styles.subtitle}>
-        Tap a preset time to start instantly
-      </ThemedText>
-    </View>
-  );
+  // Create rows for the grid
+  const createRows = () => {
+    const rows = [];
+    const itemsPerRow = isMobile ? 2 : 3; // 3 per row on tablet for better spacing
+
+    for (let i = 0; i < PRESET_TIMERS.length; i += itemsPerRow) {
+      const rowItems = PRESET_TIMERS.slice(i, i + itemsPerRow);
+      rows.push(
+        <View key={i} style={styles.row}>
+          {rowItems.map(renderTimerButton)}
+        </View>
+      );
+    }
+    return rows;
+  };
 
   return (
-    <>
-      <FlatList
-        data={PRESET_TIMERS}
-        renderItem={renderTimer}
-        keyExtractor={(item) => item.name}
-        numColumns={isMobile ? 2 : 3}
-        contentContainerStyle={styles.grid}
-        ListHeaderComponent={renderHeader}
-        columnWrapperStyle={styles.row}
-      />
+    <ThemedView style={styles.container}>
+      <View style={styles.headerContainer}>
+        <ThemedText style={styles.subtitle}>
+          Tap a preset time to start instantly
+        </ThemedText>
+      </View>
+
+      <View style={styles.grid}>{createRows()}</View>
 
       {activeTimerData && (
         <Clock
@@ -105,18 +103,14 @@ export default function QuickTimersScreen() {
           quickTimer={true}
         />
       )}
-    </>
+    </ThemedView>
   );
 }
 
 const tabletStyles = StyleSheet.create({
-  headerImage: {
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
   container: {
     flex: 1,
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: 20,
   },
@@ -124,10 +118,9 @@ const tabletStyles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 20,
+    marginBottom: 40,
   },
   subtitle: {
-    marginTop: 0,
-    marginBottom: 20,
     fontSize: 16,
     textAlign: "center",
     color: "#A0A0A0",
@@ -136,20 +129,19 @@ const tabletStyles = StyleSheet.create({
   },
   grid: {
     width: "100%",
+    maxWidth: 800,
     justifyContent: "center",
-    paddingHorizontal: 24,
     alignItems: "center",
   },
   timerButton: {
     borderRadius: 16,
     paddingVertical: 32,
     paddingHorizontal: 16,
-    margin: 12,
+    margin: 8,
     justifyContent: "center",
     alignItems: "center",
     minHeight: 140,
-    flex: 1,
-    maxWidth: 380,
+    width: "30%",
     backgroundColor: "#1a1a1a",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -172,31 +164,26 @@ const tabletStyles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  timerDurationText: {
-    color: "rgba(255, 255, 255, 0.85)",
-    fontSize: 14,
-    fontWeight: "500",
-    opacity: 0.9,
-  },
   row: {
+    flexDirection: "row",
     justifyContent: "space-evenly",
+    alignItems: "center",
     paddingHorizontal: 8,
+    marginBottom: 16,
+    width: "100%",
+    gap: 16,
   },
 });
 
 const mobileStyles = StyleSheet.create({
   ...tabletStyles,
-  headerImage: {
-    bottom: -30,
-    left: -20,
-    position: "absolute",
-  },
   container: {
     ...tabletStyles.container,
     padding: 15,
   },
   headerContainer: {
     ...tabletStyles.headerContainer,
+    marginBottom: 30,
   },
   subtitle: {
     ...tabletStyles.subtitle,
@@ -211,19 +198,17 @@ const mobileStyles = StyleSheet.create({
     paddingVertical: 20,
     margin: 6,
     minHeight: 95,
-    minWidth: "45%",
+    width: "45%",
     borderRadius: 14,
   },
   timerButtonText: {
     ...tabletStyles.timerButtonText,
     fontSize: 24,
   },
-  timerDurationText: {
-    ...tabletStyles.timerDurationText,
-    fontSize: 12,
-  },
   row: {
     ...tabletStyles.row,
-    justifyContent: "center",
+    justifyContent: "space-around",
+    marginBottom: 12,
+    gap: 12,
   },
 });
