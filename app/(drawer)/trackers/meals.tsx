@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useMocksContext } from "@/contexts/MocksContext";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import {
@@ -110,10 +111,10 @@ const DAILY_GOALS: DailyGoals = {
 };
 
 const CATEGORIES = [
-  { key: "breakfast" as const, name: "Breakfast", icon: "🥐" },
-  { key: "lunch" as const, name: "Lunch", icon: "🥗" },
-  { key: "dinner" as const, name: "Dinner", icon: "🍽️" },
-  { key: "snacks" as const, name: "Snacks", icon: "🍎" },
+  { key: "breakfast" as const, name: "Breakfast", icon: "sun.max.fill" },
+  { key: "lunch" as const, name: "Lunch", icon: "sun.max" },
+  { key: "dinner" as const, name: "Dinner", icon: "moon.fill" },
+  { key: "snacks" as const, name: "Snacks", icon: "circle.fill" },
 ];
 
 export default function MealsScreen() {
@@ -411,15 +412,22 @@ export default function MealsScreen() {
           onPress={() => toggleFavorite(meal.id)}
           style={styles.favoriteButton}
         >
-          <Text style={styles.favoriteButtonText}>
-            {meal.isFavorite ? "❤️" : "🤍"}
-          </Text>
+          <IconSymbol
+            name={meal.isFavorite ? "star.fill" : "star"}
+            size={16}
+            color={meal.isFavorite ? "#fbbf24" : "#666"}
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => deleteMeal(meal.id)}
           style={styles.favoriteButton}
         >
-          <Text style={styles.deleteButtonText}>🗑️</Text>
+          <IconSymbol
+            name="trash"
+            size={16}
+            color="#ef4444"
+            style={{ opacity: 0.7 }}
+          />
         </TouchableOpacity>
       </View>
     </View>
@@ -433,9 +441,15 @@ export default function MealsScreen() {
     return (
       <View key={category.key} style={styles.categorySection}>
         <View style={styles.categoryHeader}>
-          <Text style={styles.categoryTitle}>
-            {category.icon} {category.name}
-          </Text>
+          <View style={styles.categoryTitleContainer}>
+            <IconSymbol
+              name={category.icon as any}
+              size={18}
+              color="#fff"
+              style={styles.categoryIcon}
+            />
+            <Text style={styles.categoryTitle}>{category.name}</Text>
+          </View>
           <Text style={styles.categoryCount}>
             {categoryMeals.length} item{categoryMeals.length !== 1 ? "s" : ""}
           </Text>
@@ -456,9 +470,12 @@ export default function MealsScreen() {
               style={[styles.addFoodButton, styles.addFoodButtonSecondary]}
               onPress={() => openFavoritesModal(category.key)}
             >
-              <Text style={styles.addFavoritesButtonText}>
-                ⭐ From Favorites
-              </Text>
+              <View style={styles.favoritesButtonContent}>
+                <IconSymbol name="star.fill" size={14} color="#A0A0A0" />
+                <Text style={styles.addFavoritesButtonText}>
+                  From Favorites
+                </Text>
+              </View>
             </TouchableOpacity>
           )}
         </View>
@@ -530,11 +547,23 @@ export default function MealsScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              Add to{" "}
-              {selectedCategory &&
-                CATEGORIES.find((c) => c.key === selectedCategory)?.name}
-            </Text>
+            <View style={styles.modalTitleContainer}>
+              <Text style={styles.modalTitle}>
+                Add to{" "}
+                {selectedCategory &&
+                  CATEGORIES.find((c) => c.key === selectedCategory)?.name}
+              </Text>
+              {selectedCategory && (
+                <IconSymbol
+                  name={
+                    CATEGORIES.find((c) => c.key === selectedCategory)
+                      ?.icon as any
+                  }
+                  size={20}
+                  color="#fff"
+                />
+              )}
+            </View>
 
             <TextInput
               style={styles.input}
@@ -592,11 +621,23 @@ export default function MealsScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              Add from Favorites to{" "}
-              {selectedCategory &&
-                CATEGORIES.find((c) => c.key === selectedCategory)?.name}
-            </Text>
+            <View style={styles.modalTitleContainer}>
+              <Text style={styles.modalTitle}>
+                Add from Favorites to{" "}
+                {selectedCategory &&
+                  CATEGORIES.find((c) => c.key === selectedCategory)?.name}
+              </Text>
+              {selectedCategory && (
+                <IconSymbol
+                  name={
+                    CATEGORIES.find((c) => c.key === selectedCategory)
+                      ?.icon as any
+                  }
+                  size={20}
+                  color="#fff"
+                />
+              )}
+            </View>
 
             <ScrollView
               style={styles.favoritesScrollView}
@@ -738,6 +779,14 @@ const tabletStyles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
+  categoryTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  categoryIcon: {
+    marginRight: 4,
+  },
   categoryTitle: {
     fontSize: 18,
     fontWeight: "600",
@@ -813,6 +862,11 @@ const tabletStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
   },
+  favoritesButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -831,6 +885,12 @@ const tabletStyles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
     textAlign: "center",
+  },
+  modalTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
     marginBottom: 20,
   },
   input: {
@@ -942,6 +1002,9 @@ const mobileStyles = StyleSheet.create({
   categoryTitle: {
     ...tabletStyles.categoryTitle,
     fontSize: 16,
+  },
+  categoryIcon: {
+    ...tabletStyles.categoryIcon,
   },
   mealName: {
     ...tabletStyles.mealName,
