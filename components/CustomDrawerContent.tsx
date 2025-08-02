@@ -296,6 +296,16 @@ export function CustomDrawerContent(props: any) {
                 props.navigation.closeDrawer();
               }}
             />
+            <DrawerItem
+              style={getSubItemStyle("/trackers/meals")}
+              label={() => (
+                <Text style={getLabelStyle("/trackers/meals")}>Meals</Text>
+              )}
+              onPress={() => {
+                router.push("/trackers/meals");
+                props.navigation.closeDrawer();
+              }}
+            />
           </View>
         )}
       </DrawerContentScrollView>
