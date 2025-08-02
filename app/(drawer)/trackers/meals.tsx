@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { useMocksContext } from "@/contexts/MocksContext";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import React, { useState } from "react";
 import {
@@ -104,8 +105,9 @@ const CATEGORIES = [
 export default function MealsScreen() {
   const { getStyles } = useResponsiveStyles();
   const styles = getStyles(mobileStyles, tabletStyles);
+  const { useMocks } = useMocksContext();
 
-  const [meals, setMeals] = useState<MealEntry[]>(MOCK_MEALS);
+  const [meals, setMeals] = useState<MealEntry[]>(useMocks ? MOCK_MEALS : []);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<
     MealEntry["category"] | null

@@ -11,6 +11,7 @@ import {
 import { ThemedText } from "../../../components/ThemedText";
 import { ThemedView } from "../../../components/ThemedView";
 import { WeightTrendChart } from "../../../components/WeightTrendChart";
+import { useMocksContext } from "../../../contexts/MocksContext";
 import { useResponsiveStyles } from "../../../hooks/useResponsiveStyles";
 
 interface WeightEntry {
@@ -18,76 +19,80 @@ interface WeightEntry {
   weight: number;
   date: string;
   timestamp: number;
-  note?: string;
 }
+
+const MOCK_WEIGHT_ENTRIES: WeightEntry[] = [
+  {
+    id: "10",
+    weight: 175.6,
+    date: "Today",
+    timestamp: Date.now(),
+  },
+  {
+    id: "9",
+    weight: 176.2,
+    date: "Yesterday",
+    timestamp: Date.now() - 86400000,
+  },
+  {
+    id: "8",
+    weight: 175.8,
+    date: "2 days ago",
+    timestamp: Date.now() - 172800000,
+  },
+  {
+    id: "7",
+    weight: 178.0,
+    date: "3 days ago",
+    timestamp: Date.now() - 259200000,
+  },
+  {
+    id: "6",
+    weight: 177.4,
+    date: "4 days ago",
+    timestamp: Date.now() - 345600000,
+  },
+  {
+    id: "5",
+    weight: 179.1,
+    date: "5 days ago",
+    timestamp: Date.now() - 432000000,
+  },
+  {
+    id: "4",
+    weight: 178.8,
+    date: "6 days ago",
+    timestamp: Date.now() - 518400000,
+  },
+  {
+    id: "3",
+    weight: 180.2,
+    date: "1 week ago",
+    timestamp: Date.now() - 604800000,
+  },
+  {
+    id: "2",
+    weight: 179.6,
+    date: "8 days ago",
+    timestamp: Date.now() - 691200000,
+  },
+  {
+    id: "1",
+    weight: 181.3,
+    date: "9 days ago",
+    timestamp: Date.now() - 777600000,
+  },
+];
 
 export default function WeightTrackingScreen() {
   const { getStyles } = useResponsiveStyles();
   const styles = getStyles(mobileStyles, tabletStyles);
+  const { useMocks } = useMocksContext();
 
   // Mock data for demonstration with daily fluctuations
-  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([
-    {
-      id: "10",
-      weight: 175.6,
-      date: "Today",
-      timestamp: Date.now(),
-    },
-    {
-      id: "9",
-      weight: 176.2,
-      date: "Yesterday",
-      timestamp: Date.now() - 86400000,
-    },
-    {
-      id: "8",
-      weight: 175.8,
-      date: "2 days ago",
-      timestamp: Date.now() - 172800000,
-    },
-    {
-      id: "7",
-      weight: 178.0,
-      date: "3 days ago",
-      timestamp: Date.now() - 259200000,
-    },
-    {
-      id: "6",
-      weight: 177.4,
-      date: "4 days ago",
-      timestamp: Date.now() - 345600000,
-    },
-    {
-      id: "5",
-      weight: 179.1,
-      date: "5 days ago",
-      timestamp: Date.now() - 432000000,
-    },
-    {
-      id: "4",
-      weight: 178.8,
-      date: "6 days ago",
-      timestamp: Date.now() - 518400000,
-    },
-    {
-      id: "3",
-      weight: 180.2,
-      date: "1 week ago",
-      timestamp: Date.now() - 604800000,
-    },
-    {
-      id: "2",
-      weight: 179.6,
-      date: "8 days ago",
-      timestamp: Date.now() - 691200000,
-    },
-    {
-      id: "1",
-      weight: 181.3,
-      date: "9 days ago",
-      timestamp: Date.now() - 777600000,
-    },
-  ]);
+  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>(
+    useMocks ? MOCK_WEIGHT_ENTRIES : []
+  );
 
   const [newWeight, setNewWeight] = useState("");
   const [goalWeight] = useState(165); // Mock goal weight
