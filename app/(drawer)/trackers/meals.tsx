@@ -111,10 +111,10 @@ const DAILY_GOALS: DailyGoals = {
 };
 
 const CATEGORIES = [
-  { key: "breakfast" as const, name: "Breakfast", icon: "sun.max.fill" },
+  { key: "breakfast" as const, name: "Breakfast", icon: "sunrise" },
   { key: "lunch" as const, name: "Lunch", icon: "sun.max" },
-  { key: "dinner" as const, name: "Dinner", icon: "moon.fill" },
-  { key: "snacks" as const, name: "Snacks", icon: "circle.fill" },
+  { key: "dinner" as const, name: "Dinner", icon: "sunset" },
+  { key: "snacks" as const, name: "Snacks", icon: "sparkles" },
 ];
 
 export default function MealsScreen() {

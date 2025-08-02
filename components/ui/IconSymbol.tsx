@@ -31,6 +31,9 @@ const MAPPING = {
   star: "star-border",
   trash: "delete",
   plus: "add",
+  sunrise: "wb-twilight",
+  sunset: "wb-twilight",
+  sparkles: "auto-awesome",
 } as IconMapping;
 
 /**
