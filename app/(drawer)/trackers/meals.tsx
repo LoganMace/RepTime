@@ -111,10 +111,34 @@ const DAILY_GOALS: DailyGoals = {
 };
 
 const CATEGORIES = [
-  { key: "breakfast" as const, name: "Breakfast", icon: "sunrise" },
-  { key: "lunch" as const, name: "Lunch", icon: "sun.max" },
-  { key: "dinner" as const, name: "Dinner", icon: "sunset" },
-  { key: "snacks" as const, name: "Snacks", icon: "sparkles" },
+  {
+    key: "breakfast" as const,
+    name: "Breakfast",
+    icon: "sunrise.fill",
+    color: "#ff6b6b",
+    lightColor: "#ffe0e0",
+  },
+  {
+    key: "lunch" as const,
+    name: "Lunch",
+    icon: "sun.max.fill",
+    color: "#4ecdc4",
+    lightColor: "#e0f7f6",
+  },
+  {
+    key: "dinner" as const,
+    name: "Dinner",
+    icon: "sunset.fill",
+    color: "#45b7d1",
+    lightColor: "#e0f1f8",
+  },
+  {
+    key: "snacks" as const,
+    name: "Snacks",
+    icon: "sparkles",
+    color: "#96ceb4",
+    lightColor: "#f0f9f5",
+  },
 ];
 
 export default function MealsScreen() {
@@ -384,15 +408,29 @@ export default function MealsScreen() {
     );
   };
 
-  const renderProgressBar = (current: number, goal: number, color: string) => {
+  const renderProgressBar = (
+    current: number,
+    goal: number,
+    color: string,
+    category: string
+  ) => {
     const percentage = Math.min((current / goal) * 100, 100);
+    const isOverGoal = current > goal;
 
     return (
       <View style={styles.progressBarContainer}>
         <View
           style={[
             styles.progressBar,
-            { backgroundColor: color, width: `${percentage}%` },
+            {
+              backgroundColor:
+                isOverGoal && category === "calories"
+                  ? "#ef4444"
+                  : isOverGoal && category === "protein"
+                  ? "#f59e0b"
+                  : color,
+              width: `${Math.min(percentage, 100)}%`,
+            },
           ]}
         />
       </View>
@@ -408,20 +446,14 @@ export default function MealsScreen() {
         </Text>
       </View>
       <View style={styles.mealActions}>
-        <TouchableOpacity
-          onPress={() => toggleFavorite(meal.id)}
-          style={styles.favoriteButton}
-        >
+        <TouchableOpacity onPress={() => toggleFavorite(meal.id)}>
           <IconSymbol
             name={meal.isFavorite ? "star.fill" : "star"}
             size={16}
             color={meal.isFavorite ? "#fbbf24" : "#666"}
           />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => deleteMeal(meal.id)}
-          style={styles.favoriteButton}
-        >
+        <TouchableOpacity onPress={() => deleteMeal(meal.id)}>
           <IconSymbol
             name="trash"
             size={16}
@@ -439,30 +471,59 @@ export default function MealsScreen() {
     );
 
     return (
-      <View key={category.key} style={styles.categorySection}>
+      <View
+        key={category.key}
+        style={[
+          styles.categorySection,
+          { borderLeftWidth: 4, borderLeftColor: category.color },
+        ]}
+      >
         <View style={styles.categoryHeader}>
           <View style={styles.categoryTitleContainer}>
-            <IconSymbol
-              name={category.icon as any}
-              size={18}
-              color="#fff"
-              style={styles.categoryIcon}
-            />
+            <View
+              style={[
+                styles.categoryIconContainer,
+                { backgroundColor: category.color },
+              ]}
+            >
+              <IconSymbol
+                name={category.icon as any}
+                size={22}
+                color="#fff"
+                style={styles.categoryIcon}
+              />
+            </View>
             <Text style={styles.categoryTitle}>{category.name}</Text>
           </View>
-          <Text style={styles.categoryCount}>
-            {categoryMeals.length} item{categoryMeals.length !== 1 ? "s" : ""}
-          </Text>
+          <View
+            style={[
+              styles.categoryCountBadge,
+              { backgroundColor: category.color },
+            ]}
+          >
+            <Text style={styles.categoryCount}>{categoryMeals.length}</Text>
+          </View>
         </View>
 
         {categoryMeals.map(renderMealItem)}
 
         <View style={styles.addButtonContainer}>
           <TouchableOpacity
-            style={[styles.addFoodButton, styles.addFoodButtonPrimary]}
+            style={[
+              styles.addFoodButton,
+              styles.addFoodButtonPrimary,
+              { borderColor: category.color },
+            ]}
             onPress={() => openAddModal(category.key)}
           >
-            <Text style={styles.addFoodButtonText}>+ Add Food</Text>
+            <View style={styles.addButtonContent}>
+              <IconSymbol name="plus" size={16} color={category.color} />
+              <Text
+                style={[styles.addFoodButtonText, { color: category.color }]}
+              >
+                Add Food
+              </Text>
+            </View>
           </TouchableOpacity>
 
           {favoriteMeals.length > 0 && (
@@ -515,7 +576,8 @@ export default function MealsScreen() {
               {renderProgressBar(
                 dailyTotals.calories,
                 DAILY_GOALS.calories,
-                "#3b82f6"
+                "#6366f1",
+                "calories"
               )}
             </View>
 
@@ -528,7 +590,8 @@ export default function MealsScreen() {
               {renderProgressBar(
                 dailyTotals.protein,
                 DAILY_GOALS.protein,
-                "#10b981"
+                "#10b981",
+                "protein"
               )}
             </View>
           </View>
@@ -620,7 +683,17 @@ export default function MealsScreen() {
         onRequestClose={() => setShowFavoritesModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View
+            style={[
+              styles.modalContent,
+              selectedCategory && {
+                borderWidth: 2,
+                borderColor:
+                  CATEGORIES.find((c) => c.key === selectedCategory)?.color ||
+                  "#666",
+              },
+            ]}
+          >
             <View style={styles.modalTitleContainer}>
               <Text style={styles.modalTitle}>
                 Add from Favorites to{" "}
@@ -628,14 +701,25 @@ export default function MealsScreen() {
                   CATEGORIES.find((c) => c.key === selectedCategory)?.name}
               </Text>
               {selectedCategory && (
-                <IconSymbol
-                  name={
-                    CATEGORIES.find((c) => c.key === selectedCategory)
-                      ?.icon as any
-                  }
-                  size={20}
-                  color="#fff"
-                />
+                <View
+                  style={[
+                    styles.categoryIconContainer,
+                    {
+                      backgroundColor:
+                        CATEGORIES.find((c) => c.key === selectedCategory)
+                          ?.color || "#666",
+                    },
+                  ]}
+                >
+                  <IconSymbol
+                    name={
+                      CATEGORIES.find((c) => c.key === selectedCategory)
+                        ?.icon as any
+                    }
+                    size={18}
+                    color="#fff"
+                  />
+                </View>
               )}
             </View>
 
@@ -644,15 +728,33 @@ export default function MealsScreen() {
               showsVerticalScrollIndicator={false}
             >
               {favoriteMeals.length === 0 ? (
-                <Text style={styles.noFavoritesText}>
-                  No favorite meals yet. Add some meals to favorites by tapping
-                  the heart icon!
-                </Text>
+                <View style={styles.noFavoritesContainer}>
+                  <IconSymbol name="star" size={48} color="#666" />
+                  <Text style={styles.noFavoritesText}>
+                    No favorite meals yet. Add some meals to favorites by
+                    tapping the heart icon!
+                  </Text>
+                </View>
               ) : (
                 favoriteMeals.map((favorite) => (
                   <TouchableOpacity
                     key={favorite.id}
-                    style={styles.favoriteItem}
+                    style={[
+                      styles.favoriteItem,
+                      selectedCategory && {
+                        backgroundColor: `${
+                          CATEGORIES.find((c) => c.key === selectedCategory)
+                            ?.lightColor || "#333"
+                        }15`,
+                        borderLeftWidth: 3,
+                        borderLeftColor:
+                          CATEGORIES.find((c) => c.key === selectedCategory)
+                            ?.color || "#666",
+                        borderRadius: 8,
+                        marginVertical: 2,
+                        paddingHorizontal: 12,
+                      },
+                    ]}
                     onPress={() => addFromFavorites(favorite)}
                   >
                     <View style={styles.favoriteItemInfo}>
@@ -662,6 +764,18 @@ export default function MealsScreen() {
                       <Text style={styles.favoriteItemNutrition}>
                         {favorite.calories} cal • {favorite.protein}g protein
                       </Text>
+                    </View>
+                    <View style={styles.favoriteItemAction}>
+                      <IconSymbol
+                        name="plus.circle.fill"
+                        size={20}
+                        color={
+                          selectedCategory
+                            ? CATEGORIES.find((c) => c.key === selectedCategory)
+                                ?.color || "#3b82f6"
+                            : "#3b82f6"
+                        }
+                      />
                     </View>
                   </TouchableOpacity>
                 ))
@@ -762,10 +876,19 @@ const tabletStyles = StyleSheet.create({
     backgroundColor: "#333",
     borderRadius: 4,
     overflow: "hidden",
+    position: "relative",
   },
   progressBar: {
     height: "100%",
     borderRadius: 4,
+  },
+  progressOverlay: {
+    position: "absolute",
+    right: 4,
+    top: -2,
+  },
+  progressOverlayText: {
+    fontSize: 12,
   },
   categorySection: {
     backgroundColor: "#1a1a1a",
@@ -784,24 +907,39 @@ const tabletStyles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
+  categoryIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   categoryIcon: {
-    marginRight: 4,
+    marginRight: 0,
   },
   categoryTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "#fff",
   },
+  categoryCountBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    minWidth: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   categoryCount: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#fff",
   },
   mealItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 12,
-    paddingHorizontal: 4,
     borderBottomWidth: 1,
     borderBottomColor: "#333",
   },
@@ -823,9 +961,6 @@ const tabletStyles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  favoriteButton: {
-    padding: 8,
-  },
   favoriteButtonText: {
     fontSize: 16,
   },
@@ -843,8 +978,12 @@ const tabletStyles = StyleSheet.create({
     borderWidth: 2,
     alignItems: "center",
   },
+  addButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
   addFoodButtonPrimary: {
-    borderColor: "#3b82f6",
     borderStyle: "dashed",
   },
   addFoodButtonSecondary: {
@@ -932,11 +1071,15 @@ const tabletStyles = StyleSheet.create({
     maxHeight: 300,
     marginBottom: 16,
   },
+  noFavoritesContainer: {
+    alignItems: "center",
+    padding: 32,
+    gap: 16,
+  },
   noFavoritesText: {
     color: "#A0A0A0",
     fontSize: 14,
     textAlign: "center",
-    padding: 20,
     lineHeight: 20,
   },
   favoriteItem: {
@@ -944,9 +1087,14 @@ const tabletStyles = StyleSheet.create({
     paddingHorizontal: 4,
     borderBottomWidth: 1,
     borderBottomColor: "#333",
+    flexDirection: "row",
+    alignItems: "center",
   },
   favoriteItemInfo: {
     flex: 1,
+  },
+  favoriteItemAction: {
+    paddingLeft: 8,
   },
   favoriteItemName: {
     fontSize: 16,
