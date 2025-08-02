@@ -4,6 +4,7 @@ import { Stack } from "expo-router";
 import { SafeAreaView, StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
+import { MocksProvider } from "../contexts/MocksContext";
 import { OrientationProvider } from "../hooks/useOrientation";
 
 export default function RootLayout() {
@@ -18,21 +19,26 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <OrientationProvider>
-        <ThemeProvider value={DarkTheme}>
-          <StatusBar
-            backgroundColor="black" // for Android
-            barStyle="light-content" // for iOS
-            translucent={false}
-          />
-          <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-            <Stack>
-              <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-          </SafeAreaView>
-        </ThemeProvider>
-      </OrientationProvider>
+      <MocksProvider defaultUseMocks={true}>
+        <OrientationProvider>
+          <ThemeProvider value={DarkTheme}>
+            <StatusBar
+              backgroundColor="black" // for Android
+              barStyle="light-content" // for iOS
+              translucent={false}
+            />
+            <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+              <Stack>
+                <Stack.Screen
+                  name="(drawer)"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </SafeAreaView>
+          </ThemeProvider>
+        </OrientationProvider>
+      </MocksProvider>
     </GestureHandlerRootView>
   );
 }
