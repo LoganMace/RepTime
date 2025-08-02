@@ -1,3 +1,4 @@
+import MealHistoryModal from "@/components/MealHistoryModal";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -150,6 +151,7 @@ export default function MealsScreen() {
   const [favoriteMeals, setFavoriteMeals] = useState<FavoriteMeal[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<
     MealEntry["category"] | null
   >(null);
@@ -402,10 +404,7 @@ export default function MealsScreen() {
   };
 
   const viewHistory = () => {
-    Alert.alert(
-      "View History",
-      "This feature would show meal history over time"
-    );
+    setShowHistoryModal(true);
   };
 
   const renderProgressBar = (
@@ -793,6 +792,12 @@ export default function MealsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* History Modal */}
+      <MealHistoryModal
+        visible={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+      />
     </ThemedView>
   );
 }
@@ -959,7 +964,7 @@ const tabletStyles = StyleSheet.create({
   mealActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 12,
   },
   favoriteButtonText: {
     fontSize: 16,
