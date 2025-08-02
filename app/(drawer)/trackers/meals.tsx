@@ -2,7 +2,20 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useMocksContext } from "@/contexts/MocksContext";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
-import React, { useState } from "react";
+import {
+  addMealEntry,
+  addToFavorites,
+  formatDateForStorage,
+  getFavoriteId,
+  getMealsForDate,
+  loadFavoriteMeals,
+  removeFromFavorites,
+  removeMealEntry,
+  type FavoriteMeal,
+  type MealType,
+  type MealEntry as StoredMealEntry,
+} from "@/utils/mealStorage";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Modal,
@@ -21,6 +34,7 @@ interface MealEntry {
   protein: number;
   category: "breakfast" | "lunch" | "dinner" | "snacks";
   isFavorite?: boolean;
+  storageIndex?: number; // Index in storage for deletion
 }
 
 interface DailyGoals {
@@ -107,8 +121,10 @@ export default function MealsScreen() {
   const styles = getStyles(mobileStyles, tabletStyles);
   const { useMocks } = useMocksContext();
 
-  const [meals, setMeals] = useState<MealEntry[]>(useMocks ? MOCK_MEALS : []);
+  const [meals, setMeals] = useState<MealEntry[]>([]);
+  const [favoriteMeals, setFavoriteMeals] = useState<FavoriteMeal[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showFavoritesModal, setShowFavoritesModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<
     MealEntry["category"] | null
   >(null);
@@ -117,6 +133,55 @@ export default function MealsScreen() {
     calories: "",
     protein: "",
   });
+  const [currentDate] = useState(formatDateForStorage());
+
+  const loadMealsFromStorage = useCallback(async () => {
+    try {
+      // Load favorite meals
+      const favorites = await loadFavoriteMeals();
+      setFavoriteMeals(favorites);
+
+      if (useMocks) {
+        // Use mock data when mocks are enabled
+        const mockMealsWithIds = MOCK_MEALS.map((meal, index) => ({
+          ...meal,
+          id: `mock-${index}`,
+        }));
+        setMeals(mockMealsWithIds);
+      } else {
+        // Load from AsyncStorage
+        const dayMeals = await getMealsForDate(currentDate);
+        const allMeals: MealEntry[] = [];
+
+        // Convert storage format to component format
+        for (const [category, categoryMeals] of Object.entries(dayMeals)) {
+          for (let index = 0; index < categoryMeals.length; index++) {
+            const meal = categoryMeals[index];
+            const favoriteId = await getFavoriteId(meal);
+            allMeals.push({
+              id: `${category}-${index}-${Date.now()}`,
+              name: meal.name,
+              calories: meal.calories,
+              protein: meal.protein,
+              category: category as MealEntry["category"],
+              isFavorite: favoriteId !== null,
+              storageIndex: index,
+            });
+          }
+        }
+
+        setMeals(allMeals);
+      }
+    } catch (error) {
+      console.error("Error loading meals:", error);
+      Alert.alert("Error", "Failed to load meals");
+    }
+  }, [currentDate, useMocks]);
+
+  // Load meals from storage on component mount
+  useEffect(() => {
+    loadMealsFromStorage();
+  }, [loadMealsFromStorage]);
 
   // Calculate daily totals
   const dailyTotals = meals.reduce(
@@ -127,7 +192,7 @@ export default function MealsScreen() {
     { calories: 0, protein: 0 }
   );
 
-  const handleAddMeal = () => {
+  const handleAddMeal = async () => {
     if (
       !newMeal.name ||
       !newMeal.calories ||
@@ -138,18 +203,42 @@ export default function MealsScreen() {
       return;
     }
 
-    const meal: MealEntry = {
-      id: Date.now().toString(),
-      name: newMeal.name,
-      calories: parseInt(newMeal.calories),
-      protein: parseFloat(newMeal.protein),
-      category: selectedCategory,
-    };
+    try {
+      if (useMocks) {
+        // For mock mode, just add to local state
+        const meal: MealEntry = {
+          id: Date.now().toString(),
+          name: newMeal.name,
+          calories: parseInt(newMeal.calories),
+          protein: parseFloat(newMeal.protein),
+          category: selectedCategory,
+        };
+        setMeals([...meals, meal]);
+      } else {
+        // Save to AsyncStorage
+        const mealForStorage: StoredMealEntry = {
+          name: newMeal.name,
+          calories: parseInt(newMeal.calories),
+          protein: parseFloat(newMeal.protein),
+        };
 
-    setMeals([...meals, meal]);
-    setNewMeal({ name: "", calories: "", protein: "" });
-    setShowAddModal(false);
-    setSelectedCategory(null);
+        await addMealEntry(
+          currentDate,
+          selectedCategory as MealType,
+          mealForStorage
+        );
+
+        // Reload meals to reflect the change
+        await loadMealsFromStorage();
+      }
+
+      setNewMeal({ name: "", calories: "", protein: "" });
+      setShowAddModal(false);
+      setSelectedCategory(null);
+    } catch (error) {
+      console.error("Error adding meal:", error);
+      Alert.alert("Error", "Failed to add meal");
+    }
   };
 
   const openAddModal = (category: MealEntry["category"]) => {
@@ -157,12 +246,134 @@ export default function MealsScreen() {
     setShowAddModal(true);
   };
 
-  const toggleFavorite = (mealId: string) => {
-    setMeals(
-      meals.map((meal) =>
-        meal.id === mealId ? { ...meal, isFavorite: !meal.isFavorite } : meal
-      )
-    );
+  const openFavoritesModal = (category: MealEntry["category"]) => {
+    setSelectedCategory(category);
+    setShowFavoritesModal(true);
+  };
+
+  const addFromFavorites = async (favorite: FavoriteMeal) => {
+    try {
+      if (!selectedCategory) return;
+
+      if (useMocks) {
+        // For mock mode, just add to local state
+        const meal: MealEntry = {
+          id: Date.now().toString(),
+          name: favorite.name,
+          calories: favorite.calories,
+          protein: favorite.protein,
+          category: selectedCategory,
+          isFavorite: true,
+        };
+        setMeals([...meals, meal]);
+      } else {
+        // Save to AsyncStorage
+        const mealForStorage: StoredMealEntry = {
+          name: favorite.name,
+          calories: favorite.calories,
+          protein: favorite.protein,
+        };
+
+        await addMealEntry(
+          currentDate,
+          selectedCategory as MealType,
+          mealForStorage
+        );
+
+        // Reload meals to reflect the change
+        await loadMealsFromStorage();
+      }
+
+      setShowFavoritesModal(false);
+      setSelectedCategory(null);
+    } catch (error) {
+      console.error("Error adding meal from favorites:", error);
+      Alert.alert("Error", "Failed to add meal from favorites");
+    }
+  };
+
+  const toggleFavorite = async (mealId: string) => {
+    try {
+      const meal = meals.find((m) => m.id === mealId);
+      if (!meal) return;
+
+      const mealEntry: StoredMealEntry = {
+        name: meal.name,
+        calories: meal.calories,
+        protein: meal.protein,
+      };
+
+      if (meal.isFavorite) {
+        // Remove from favorites
+        await removeFromFavorites(mealId);
+      } else {
+        // Add to favorites
+        await addToFavorites(mealEntry);
+      }
+
+      // Update local state
+      setMeals(
+        meals.map((m) =>
+          m.id === mealId ? { ...m, isFavorite: !m.isFavorite } : m
+        )
+      );
+
+      // Reload favorites
+      const updatedFavorites = await loadFavoriteMeals();
+      setFavoriteMeals(updatedFavorites);
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      Alert.alert("Error", "Failed to update favorite");
+    }
+  };
+
+  const deleteMeal = async (mealId: string) => {
+    try {
+      const meal = meals.find((m) => m.id === mealId);
+      if (!meal) return;
+
+      // Show confirmation dialog
+      Alert.alert(
+        "Delete Meal",
+        `Are you sure you want to delete "${meal.name}"?`,
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                if (useMocks) {
+                  // For mock mode, just remove from local state
+                  setMeals(meals.filter((m) => m.id !== mealId));
+                } else {
+                  // Remove from AsyncStorage
+                  if (meal.storageIndex !== undefined) {
+                    await removeMealEntry(
+                      currentDate,
+                      meal.category as MealType,
+                      meal.storageIndex
+                    );
+
+                    // Reload meals to reflect the change
+                    await loadMealsFromStorage();
+                  }
+                }
+              } catch (error) {
+                console.error("Error deleting meal:", error);
+                Alert.alert("Error", "Failed to delete meal");
+              }
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error("Error deleting meal:", error);
+      Alert.alert("Error", "Failed to delete meal");
+    }
   };
 
   const viewHistory = () => {
@@ -195,14 +406,22 @@ export default function MealsScreen() {
           {meal.calories} cal • {meal.protein}g protein
         </Text>
       </View>
-      <TouchableOpacity
-        onPress={() => toggleFavorite(meal.id)}
-        style={styles.favoriteButton}
-      >
-        <Text style={styles.favoriteButtonText}>
-          {meal.isFavorite ? "❤️" : "🤍"}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.mealActions}>
+        <TouchableOpacity
+          onPress={() => toggleFavorite(meal.id)}
+          style={styles.favoriteButton}
+        >
+          <Text style={styles.favoriteButtonText}>
+            {meal.isFavorite ? "❤️" : "🤍"}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => deleteMeal(meal.id)}
+          style={styles.favoriteButton}
+        >
+          <Text style={styles.deleteButtonText}>🗑️</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -224,12 +443,25 @@ export default function MealsScreen() {
 
         {categoryMeals.map(renderMealItem)}
 
-        <TouchableOpacity
-          style={styles.addFoodButton}
-          onPress={() => openAddModal(category.key)}
-        >
-          <Text style={styles.addFoodButtonText}>+ Add Food</Text>
-        </TouchableOpacity>
+        <View style={styles.addButtonContainer}>
+          <TouchableOpacity
+            style={[styles.addFoodButton, styles.addFoodButtonPrimary]}
+            onPress={() => openAddModal(category.key)}
+          >
+            <Text style={styles.addFoodButtonText}>+ Add Food</Text>
+          </TouchableOpacity>
+
+          {favoriteMeals.length > 0 && (
+            <TouchableOpacity
+              style={[styles.addFoodButton, styles.addFoodButtonSecondary]}
+              onPress={() => openFavoritesModal(category.key)}
+            >
+              <Text style={styles.addFavoritesButtonText}>
+                ⭐ From Favorites
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     );
   };
@@ -345,6 +577,62 @@ export default function MealsScreen() {
                 onPress={handleAddMeal}
               >
                 <Text style={styles.addButtonText}>Add Food</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Favorites Modal */}
+      <Modal
+        visible={showFavoritesModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowFavoritesModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              Add from Favorites to{" "}
+              {selectedCategory &&
+                CATEGORIES.find((c) => c.key === selectedCategory)?.name}
+            </Text>
+
+            <ScrollView
+              style={styles.favoritesScrollView}
+              showsVerticalScrollIndicator={false}
+            >
+              {favoriteMeals.length === 0 ? (
+                <Text style={styles.noFavoritesText}>
+                  No favorite meals yet. Add some meals to favorites by tapping
+                  the heart icon!
+                </Text>
+              ) : (
+                favoriteMeals.map((favorite) => (
+                  <TouchableOpacity
+                    key={favorite.id}
+                    style={styles.favoriteItem}
+                    onPress={() => addFromFavorites(favorite)}
+                  >
+                    <View style={styles.favoriteItemInfo}>
+                      <Text style={styles.favoriteItemName}>
+                        {favorite.name}
+                      </Text>
+                      <Text style={styles.favoriteItemNutrition}>
+                        {favorite.calories} cal • {favorite.protein}g protein
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowFavoritesModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -481,23 +769,47 @@ const tabletStyles = StyleSheet.create({
     fontSize: 14,
     color: "#A0A0A0",
   },
+  mealActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   favoriteButton: {
     padding: 8,
   },
   favoriteButtonText: {
     fontSize: 16,
   },
-  addFoodButton: {
+  deleteButtonText: {
+    fontSize: 16,
+    opacity: 0.7,
+  },
+  addButtonContainer: {
     marginTop: 12,
+    gap: 8,
+  },
+  addFoodButton: {
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 2,
+    alignItems: "center",
+  },
+  addFoodButtonPrimary: {
     borderColor: "#3b82f6",
     borderStyle: "dashed",
-    alignItems: "center",
+  },
+  addFoodButtonSecondary: {
+    borderColor: "#666",
+    borderStyle: "dashed",
+    backgroundColor: "rgba(102, 102, 102, 0.05)",
   },
   addFoodButtonText: {
     color: "#3b82f6",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  addFavoritesButtonText: {
+    color: "#A0A0A0",
     fontSize: 16,
     fontWeight: "500",
   },
@@ -544,7 +856,7 @@ const tabletStyles = StyleSheet.create({
     backgroundColor: "#333",
   },
   cancelButtonText: {
-    color: "#A0A0A0",
+    color: "#CCCCCC",
     fontSize: 16,
     fontWeight: "500",
   },
@@ -555,6 +867,36 @@ const tabletStyles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  favoritesScrollView: {
+    maxHeight: 300,
+    marginBottom: 16,
+  },
+  noFavoritesText: {
+    color: "#A0A0A0",
+    fontSize: 14,
+    textAlign: "center",
+    padding: 20,
+    lineHeight: 20,
+  },
+  favoriteItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#333",
+  },
+  favoriteItemInfo: {
+    flex: 1,
+  },
+  favoriteItemName: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  favoriteItemNutrition: {
+    fontSize: 14,
+    color: "#A0A0A0",
   },
 });
 
@@ -617,5 +959,31 @@ const mobileStyles = StyleSheet.create({
   modalTitle: {
     ...tabletStyles.modalTitle,
     fontSize: 18,
+  },
+  favoriteItemName: {
+    ...tabletStyles.favoriteItemName,
+    fontSize: 15,
+  },
+  favoriteItemNutrition: {
+    ...tabletStyles.favoriteItemNutrition,
+    fontSize: 13,
+  },
+  addFavoritesButtonText: {
+    ...tabletStyles.addFavoritesButtonText,
+    fontSize: 14,
+    color: "#A0A0A0",
+  },
+  cancelButtonText: {
+    ...tabletStyles.cancelButtonText,
+    color: "#CCCCCC",
+    fontSize: 14,
+  },
+  modalButton: {
+    ...tabletStyles.modalButton,
+    paddingVertical: 12,
+  },
+  deleteButtonText: {
+    ...tabletStyles.deleteButtonText,
+    fontSize: 14,
   },
 });
