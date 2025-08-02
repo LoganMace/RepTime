@@ -165,17 +165,10 @@ export default function MealsScreen() {
     );
   };
 
-  const copyFromYesterday = () => {
+  const viewHistory = () => {
     Alert.alert(
-      "Copy from Yesterday",
-      "This feature would copy meals from the previous day"
-    );
-  };
-
-  const viewTrends = () => {
-    Alert.alert(
-      "View Trends",
-      "This feature would show nutrition trends over time"
+      "View History",
+      "This feature would show meal history over time"
     );
   };
 
@@ -197,9 +190,7 @@ export default function MealsScreen() {
   const renderMealItem = (meal: MealEntry) => (
     <View key={meal.id} style={styles.mealItem}>
       <View style={styles.mealInfo}>
-        <Text style={styles.mealName}>
-          {meal.name} {meal.isFavorite && "⭐"}
-        </Text>
+        <Text style={styles.mealName}>{meal.name}</Text>
         <Text style={styles.mealNutrition}>
           {meal.calories} cal • {meal.protein}g protein
         </Text>
@@ -255,14 +246,8 @@ export default function MealsScreen() {
             Today, {new Date().toLocaleDateString()}
           </Text>
           <View style={styles.dateActions}>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={copyFromYesterday}
-            >
-              <Text style={styles.actionButtonText}>Copy Yesterday</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton} onPress={viewTrends}>
-              <Text style={styles.actionButtonText}>View Trends</Text>
+            <TouchableOpacity style={styles.actionButton} onPress={viewHistory}>
+              <Text style={styles.actionButtonText}>View History</Text>
             </TouchableOpacity>
           </View>
         </View>
