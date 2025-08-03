@@ -1,7 +1,15 @@
 import MealHistoryModal from "@/components/MealHistoryModal";
-import { ThemedText } from "@/components/ThemedText";
+import AddMealModal from "@/components/meals/AddMealModal";
+import DailySummary from "@/components/meals/DailySummary";
+import FavoritesModal from "@/components/meals/FavoritesModal";
+import MealCategory from "@/components/meals/MealCategory";
+import {
+  CATEGORIES,
+  DAILY_GOALS,
+  MOCK_MEALS,
+  type MealEntry,
+} from "@/components/meals/MealConstants";
 import { ThemedView } from "@/components/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useMocksContext } from "@/contexts/MocksContext";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import {
@@ -20,127 +28,12 @@ import {
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
-  Modal,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-
-interface MealEntry {
-  id: string;
-  name: string;
-  calories: number;
-  protein: number;
-  category: "breakfast" | "lunch" | "dinner" | "snacks";
-  isFavorite?: boolean;
-  storageIndex?: number; // Index in storage for deletion
-}
-
-interface DailyGoals {
-  calories: number;
-  protein: number;
-}
-
-const MOCK_MEALS: MealEntry[] = [
-  {
-    id: "1",
-    name: "Greek Yogurt with Berries",
-    calories: 180,
-    protein: 15,
-    category: "breakfast",
-    isFavorite: true,
-  },
-  {
-    id: "2",
-    name: "2 Scrambled Eggs",
-    calories: 140,
-    protein: 12,
-    category: "breakfast",
-  },
-  {
-    id: "3",
-    name: "Grilled Chicken Salad",
-    calories: 350,
-    protein: 35,
-    category: "lunch",
-    isFavorite: true,
-  },
-  {
-    id: "4",
-    name: "Brown Rice (1 cup)",
-    calories: 220,
-    protein: 5,
-    category: "lunch",
-  },
-  {
-    id: "5",
-    name: "Salmon with Vegetables",
-    calories: 420,
-    protein: 38,
-    category: "dinner",
-  },
-  {
-    id: "6",
-    name: "Sweet Potato",
-    calories: 180,
-    protein: 4,
-    category: "dinner",
-  },
-  {
-    id: "7",
-    name: "Protein Shake",
-    calories: 160,
-    protein: 25,
-    category: "snacks",
-    isFavorite: true,
-  },
-  {
-    id: "8",
-    name: "Mixed Nuts (1 oz)",
-    calories: 170,
-    protein: 6,
-    category: "snacks",
-  },
-];
-
-const DAILY_GOALS: DailyGoals = {
-  calories: 2200,
-  protein: 150,
-};
-
-const CATEGORIES = [
-  {
-    key: "breakfast" as const,
-    name: "Breakfast",
-    icon: "sunrise.fill",
-    color: "#ff6b6b",
-    lightColor: "#ffe0e0",
-  },
-  {
-    key: "lunch" as const,
-    name: "Lunch",
-    icon: "sun.max.fill",
-    color: "#4ecdc4",
-    lightColor: "#e0f7f6",
-  },
-  {
-    key: "dinner" as const,
-    name: "Dinner",
-    icon: "sunset.fill",
-    color: "#45b7d1",
-    lightColor: "#e0f1f8",
-  },
-  {
-    key: "snacks" as const,
-    name: "Snacks",
-    icon: "sparkles",
-    color: "#96ceb4",
-    lightColor: "#f0f9f5",
-  },
-];
 
 export default function MealsScreen() {
   const { getStyles } = useResponsiveStyles();
@@ -266,6 +159,10 @@ export default function MealsScreen() {
       console.error("Error adding meal:", error);
       Alert.alert("Error", "Failed to add meal");
     }
+  };
+
+  const handleMealChange = (field: string, value: string) => {
+    setNewMeal({ ...newMeal, [field]: value });
   };
 
   const openAddModal = (category: MealEntry["category"]) => {
@@ -407,142 +304,6 @@ export default function MealsScreen() {
     setShowHistoryModal(true);
   };
 
-  const renderProgressBar = (
-    current: number,
-    goal: number,
-    color: string,
-    category: string
-  ) => {
-    const percentage = Math.min((current / goal) * 100, 100);
-    const isOverGoal = current > goal;
-
-    return (
-      <View style={styles.progressBarContainer}>
-        <View
-          style={[
-            styles.progressBar,
-            {
-              backgroundColor:
-                isOverGoal && category === "calories"
-                  ? "#ef4444"
-                  : isOverGoal && category === "protein"
-                  ? "#f59e0b"
-                  : color,
-              width: `${Math.min(percentage, 100)}%`,
-            },
-          ]}
-        />
-      </View>
-    );
-  };
-
-  const renderMealItem = (meal: MealEntry) => (
-    <View key={meal.id} style={styles.mealItem}>
-      <View style={styles.mealInfo}>
-        <Text style={styles.mealName}>{meal.name}</Text>
-        <Text style={styles.mealNutrition}>
-          {meal.calories} cal • {meal.protein}g protein
-        </Text>
-      </View>
-      <View style={styles.mealActions}>
-        <TouchableOpacity onPress={() => toggleFavorite(meal.id)}>
-          <IconSymbol
-            name={meal.isFavorite ? "star.fill" : "star"}
-            size={16}
-            color={meal.isFavorite ? "#fbbf24" : "#666"}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => deleteMeal(meal.id)}>
-          <IconSymbol
-            name="trash"
-            size={16}
-            color="#ef4444"
-            style={{ opacity: 0.7 }}
-          />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  const renderCategory = (category: (typeof CATEGORIES)[0]) => {
-    const categoryMeals = meals.filter(
-      (meal) => meal.category === category.key
-    );
-
-    return (
-      <View
-        key={category.key}
-        style={[
-          styles.categorySection,
-          { borderLeftWidth: 4, borderLeftColor: category.color },
-        ]}
-      >
-        <View style={styles.categoryHeader}>
-          <View style={styles.categoryTitleContainer}>
-            <View
-              style={[
-                styles.categoryIconContainer,
-                { backgroundColor: category.color },
-              ]}
-            >
-              <IconSymbol
-                name={category.icon as any}
-                size={22}
-                color="#fff"
-                style={styles.categoryIcon}
-              />
-            </View>
-            <Text style={styles.categoryTitle}>{category.name}</Text>
-          </View>
-          <View
-            style={[
-              styles.categoryCountBadge,
-              { backgroundColor: category.color },
-            ]}
-          >
-            <Text style={styles.categoryCount}>{categoryMeals.length}</Text>
-          </View>
-        </View>
-
-        {categoryMeals.map(renderMealItem)}
-
-        <View style={styles.addButtonContainer}>
-          <TouchableOpacity
-            style={[
-              styles.addFoodButton,
-              styles.addFoodButtonPrimary,
-              { borderColor: category.color },
-            ]}
-            onPress={() => openAddModal(category.key)}
-          >
-            <View style={styles.addButtonContent}>
-              <IconSymbol name="plus" size={16} color={category.color} />
-              <Text
-                style={[styles.addFoodButtonText, { color: category.color }]}
-              >
-                Add Food
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          {favoriteMeals.length > 0 && (
-            <TouchableOpacity
-              style={[styles.addFoodButton, styles.addFoodButtonSecondary]}
-              onPress={() => openFavoritesModal(category.key)}
-            >
-              <View style={styles.favoritesButtonContent}>
-                <IconSymbol name="star.fill" size={14} color="#A0A0A0" />
-                <Text style={styles.addFavoritesButtonText}>
-                  From Favorites
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-    );
-  };
-
   return (
     <ThemedView style={styles.container}>
       <ScrollView
@@ -562,236 +323,41 @@ export default function MealsScreen() {
         </View>
 
         {/* Daily Summary */}
-        <View style={styles.summarySection}>
-          <ThemedText style={styles.summaryTitle}>Daily Summary</ThemedText>
-
-          <View style={styles.summaryRow}>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryValue}>{dailyTotals.calories}</Text>
-              <Text style={styles.summaryLabel}>Calories</Text>
-              <Text style={styles.summaryGoal}>
-                Goal: {DAILY_GOALS.calories}
-              </Text>
-              {renderProgressBar(
-                dailyTotals.calories,
-                DAILY_GOALS.calories,
-                "#6366f1",
-                "calories"
-              )}
-            </View>
-
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryValue}>{dailyTotals.protein}g</Text>
-              <Text style={styles.summaryLabel}>Protein</Text>
-              <Text style={styles.summaryGoal}>
-                Goal: {DAILY_GOALS.protein}g
-              </Text>
-              {renderProgressBar(
-                dailyTotals.protein,
-                DAILY_GOALS.protein,
-                "#10b981",
-                "protein"
-              )}
-            </View>
-          </View>
-        </View>
+        <DailySummary dailyTotals={dailyTotals} dailyGoals={DAILY_GOALS} />
 
         {/* Meal Categories */}
-        {CATEGORIES.map(renderCategory)}
+        {CATEGORIES.map((category) => (
+          <MealCategory
+            key={category.key}
+            category={category}
+            meals={meals}
+            favoriteMeals={favoriteMeals}
+            onAddMeal={openAddModal}
+            onAddFromFavorites={openFavoritesModal}
+            onToggleFavorite={toggleFavorite}
+            onDeleteMeal={deleteMeal}
+          />
+        ))}
       </ScrollView>
 
       {/* Add Meal Modal */}
-      <Modal
+      <AddMealModal
         visible={showAddModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowAddModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalTitleContainer}>
-              <Text style={styles.modalTitle}>
-                Add to{" "}
-                {selectedCategory &&
-                  CATEGORIES.find((c) => c.key === selectedCategory)?.name}
-              </Text>
-              {selectedCategory && (
-                <IconSymbol
-                  name={
-                    CATEGORIES.find((c) => c.key === selectedCategory)
-                      ?.icon as any
-                  }
-                  size={20}
-                  color="#fff"
-                />
-              )}
-            </View>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Food name"
-              value={newMeal.name}
-              onChangeText={(text) => setNewMeal({ ...newMeal, name: text })}
-              placeholderTextColor="#999"
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Calories"
-              value={newMeal.calories}
-              onChangeText={(text) =>
-                setNewMeal({ ...newMeal, calories: text })
-              }
-              keyboardType="numeric"
-              placeholderTextColor="#999"
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Protein (g)"
-              value={newMeal.protein}
-              onChangeText={(text) => setNewMeal({ ...newMeal, protein: text })}
-              keyboardType="numeric"
-              placeholderTextColor="#999"
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setShowAddModal(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalButton, styles.addButton]}
-                onPress={handleAddMeal}
-              >
-                <Text style={styles.addButtonText}>Add Food</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        selectedCategory={selectedCategory}
+        newMeal={newMeal}
+        onClose={() => setShowAddModal(false)}
+        onAddMeal={handleAddMeal}
+        onMealChange={handleMealChange}
+      />
 
       {/* Favorites Modal */}
-      <Modal
+      <FavoritesModal
         visible={showFavoritesModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowFavoritesModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View
-            style={[
-              styles.modalContent,
-              selectedCategory && {
-                borderWidth: 2,
-                borderColor:
-                  CATEGORIES.find((c) => c.key === selectedCategory)?.color ||
-                  "#666",
-              },
-            ]}
-          >
-            <View style={styles.modalTitleContainer}>
-              <Text style={styles.modalTitle}>
-                Add from Favorites to{" "}
-                {selectedCategory &&
-                  CATEGORIES.find((c) => c.key === selectedCategory)?.name}
-              </Text>
-              {selectedCategory && (
-                <View
-                  style={[
-                    styles.categoryIconContainer,
-                    {
-                      backgroundColor:
-                        CATEGORIES.find((c) => c.key === selectedCategory)
-                          ?.color || "#666",
-                    },
-                  ]}
-                >
-                  <IconSymbol
-                    name={
-                      CATEGORIES.find((c) => c.key === selectedCategory)
-                        ?.icon as any
-                    }
-                    size={18}
-                    color="#fff"
-                  />
-                </View>
-              )}
-            </View>
-
-            <ScrollView
-              style={styles.favoritesScrollView}
-              showsVerticalScrollIndicator={false}
-            >
-              {favoriteMeals.length === 0 ? (
-                <View style={styles.noFavoritesContainer}>
-                  <IconSymbol name="star" size={48} color="#666" />
-                  <Text style={styles.noFavoritesText}>
-                    No favorite meals yet. Add some meals to favorites by
-                    tapping the heart icon!
-                  </Text>
-                </View>
-              ) : (
-                favoriteMeals.map((favorite) => (
-                  <TouchableOpacity
-                    key={favorite.id}
-                    style={[
-                      styles.favoriteItem,
-                      selectedCategory && {
-                        backgroundColor: `${
-                          CATEGORIES.find((c) => c.key === selectedCategory)
-                            ?.lightColor || "#333"
-                        }15`,
-                        borderLeftWidth: 3,
-                        borderLeftColor:
-                          CATEGORIES.find((c) => c.key === selectedCategory)
-                            ?.color || "#666",
-                        borderRadius: 8,
-                        marginVertical: 2,
-                        paddingHorizontal: 12,
-                      },
-                    ]}
-                    onPress={() => addFromFavorites(favorite)}
-                  >
-                    <View style={styles.favoriteItemInfo}>
-                      <Text style={styles.favoriteItemName}>
-                        {favorite.name}
-                      </Text>
-                      <Text style={styles.favoriteItemNutrition}>
-                        {favorite.calories} cal • {favorite.protein}g protein
-                      </Text>
-                    </View>
-                    <View style={styles.favoriteItemAction}>
-                      <IconSymbol
-                        name="plus.circle.fill"
-                        size={20}
-                        color={
-                          selectedCategory
-                            ? CATEGORIES.find((c) => c.key === selectedCategory)
-                                ?.color || "#3b82f6"
-                            : "#3b82f6"
-                        }
-                      />
-                    </View>
-                  </TouchableOpacity>
-                ))
-              )}
-            </ScrollView>
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setShowFavoritesModal(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        selectedCategory={selectedCategory}
+        favoriteMeals={favoriteMeals}
+        onClose={() => setShowFavoritesModal(false)}
+        onAddFromFavorites={addFromFavorites}
+      />
 
       {/* History Modal */}
       <MealHistoryModal
@@ -839,278 +405,6 @@ const tabletStyles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
   },
-  summarySection: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-  },
-  summaryTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  summaryRow: {
-    flexDirection: "row",
-    gap: 20,
-  },
-  summaryItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  summaryValue: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  summaryLabel: {
-    fontSize: 14,
-    color: "#A0A0A0",
-    marginBottom: 4,
-  },
-  summaryGoal: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 8,
-  },
-  progressBarContainer: {
-    width: "100%",
-    height: 8,
-    backgroundColor: "#333",
-    borderRadius: 4,
-    overflow: "hidden",
-    position: "relative",
-  },
-  progressBar: {
-    height: "100%",
-    borderRadius: 4,
-  },
-  progressOverlay: {
-    position: "absolute",
-    right: 4,
-    top: -2,
-  },
-  progressOverlayText: {
-    fontSize: 12,
-  },
-  categorySection: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-  },
-  categoryHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  categoryTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  categoryIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  categoryIcon: {
-    marginRight: 0,
-  },
-  categoryTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  categoryCountBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    minWidth: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  categoryCount: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  mealItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-  },
-  mealInfo: {
-    flex: 1,
-  },
-  mealName: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  mealNutrition: {
-    fontSize: 14,
-    color: "#A0A0A0",
-  },
-  mealActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  favoriteButtonText: {
-    fontSize: 16,
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    opacity: 0.7,
-  },
-  addButtonContainer: {
-    marginTop: 12,
-    gap: 8,
-  },
-  addFoodButton: {
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 2,
-    alignItems: "center",
-  },
-  addButtonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  addFoodButtonPrimary: {
-    borderStyle: "dashed",
-  },
-  addFoodButtonSecondary: {
-    borderColor: "#666",
-    borderStyle: "dashed",
-    backgroundColor: "rgba(102, 102, 102, 0.05)",
-  },
-  addFoodButtonText: {
-    color: "#3b82f6",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  addFavoritesButtonText: {
-    color: "#A0A0A0",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  favoritesButtonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 16,
-    padding: 24,
-    width: "90%",
-    maxWidth: 400,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#fff",
-    textAlign: "center",
-  },
-  modalTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    marginBottom: 20,
-  },
-  input: {
-    backgroundColor: "#333",
-    borderRadius: 8,
-    padding: 16,
-    fontSize: 16,
-    color: "#fff",
-    marginBottom: 16,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
-  },
-  modalButton: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  cancelButton: {
-    backgroundColor: "#333",
-  },
-  cancelButtonText: {
-    color: "#CCCCCC",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  addButton: {
-    backgroundColor: "#3b82f6",
-  },
-  addButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  favoritesScrollView: {
-    maxHeight: 300,
-    marginBottom: 16,
-  },
-  noFavoritesContainer: {
-    alignItems: "center",
-    padding: 32,
-    gap: 16,
-  },
-  noFavoritesText: {
-    color: "#A0A0A0",
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  favoriteItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  favoriteItemInfo: {
-    flex: 1,
-  },
-  favoriteItemAction: {
-    paddingLeft: 8,
-  },
-  favoriteItemName: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  favoriteItemNutrition: {
-    fontSize: 14,
-    color: "#A0A0A0",
-  },
 });
 
 const mobileStyles = StyleSheet.create({
@@ -1135,71 +429,5 @@ const mobileStyles = StyleSheet.create({
     ...tabletStyles.actionButton,
     flex: 1,
     alignItems: "center",
-  },
-  summarySection: {
-    ...tabletStyles.summarySection,
-    padding: 16,
-  },
-  summaryRow: {
-    ...tabletStyles.summaryRow,
-    gap: 16,
-  },
-  summaryValue: {
-    ...tabletStyles.summaryValue,
-    fontSize: 24,
-  },
-  categorySection: {
-    ...tabletStyles.categorySection,
-    padding: 12,
-  },
-  categoryTitle: {
-    ...tabletStyles.categoryTitle,
-    fontSize: 16,
-  },
-  categoryIcon: {
-    ...tabletStyles.categoryIcon,
-  },
-  mealName: {
-    ...tabletStyles.mealName,
-    fontSize: 15,
-  },
-  mealNutrition: {
-    ...tabletStyles.mealNutrition,
-    fontSize: 13,
-  },
-  modalContent: {
-    ...tabletStyles.modalContent,
-    width: "95%",
-    margin: 16,
-  },
-  modalTitle: {
-    ...tabletStyles.modalTitle,
-    fontSize: 18,
-  },
-  favoriteItemName: {
-    ...tabletStyles.favoriteItemName,
-    fontSize: 15,
-  },
-  favoriteItemNutrition: {
-    ...tabletStyles.favoriteItemNutrition,
-    fontSize: 13,
-  },
-  addFavoritesButtonText: {
-    ...tabletStyles.addFavoritesButtonText,
-    fontSize: 14,
-    color: "#A0A0A0",
-  },
-  cancelButtonText: {
-    ...tabletStyles.cancelButtonText,
-    color: "#CCCCCC",
-    fontSize: 14,
-  },
-  modalButton: {
-    ...tabletStyles.modalButton,
-    paddingVertical: 12,
-  },
-  deleteButtonText: {
-    ...tabletStyles.deleteButtonText,
-    fontSize: 14,
   },
 });
