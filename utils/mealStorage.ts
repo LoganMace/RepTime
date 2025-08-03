@@ -30,12 +30,82 @@ export interface MealsData {
   [date: string]: DayMeals;
 }
 
+// Mock data for testing
+const MOCK_MEALS_DATA: MealsData = {
+  "2025-08-02": {
+    breakfast: [
+      { name: "Greek Yogurt with Berries", calories: 180, protein: 15 },
+      { name: "2 Scrambled Eggs", calories: 140, protein: 12 },
+    ],
+    lunch: [
+      { name: "Grilled Chicken Salad", calories: 350, protein: 35 },
+      { name: "Brown Rice (1 cup)", calories: 220, protein: 5 },
+    ],
+    dinner: [
+      { name: "Salmon with Vegetables", calories: 420, protein: 38 },
+      { name: "Sweet Potato", calories: 180, protein: 4 },
+    ],
+    snacks: [
+      { name: "Protein Shake", calories: 160, protein: 25 },
+      { name: "Mixed Nuts (1 oz)", calories: 170, protein: 6 },
+    ],
+  },
+  "2025-08-01": {
+    breakfast: [
+      { name: "Oatmeal with Banana", calories: 250, protein: 8 },
+      { name: "Coffee with Milk", calories: 50, protein: 3 },
+    ],
+    lunch: [
+      { name: "Turkey Sandwich", calories: 400, protein: 25 },
+      { name: "Apple", calories: 95, protein: 0 },
+    ],
+    dinner: [
+      { name: "Beef Stir Fry", calories: 380, protein: 30 },
+      { name: "Quinoa (1 cup)", calories: 220, protein: 8 },
+    ],
+    snacks: [{ name: "Greek Yogurt", calories: 120, protein: 20 }],
+  },
+  "2025-07-31": {
+    breakfast: [{ name: "Avocado Toast", calories: 300, protein: 12 }],
+    lunch: [
+      { name: "Tuna Salad", calories: 320, protein: 28 },
+      { name: "Whole Grain Crackers", calories: 120, protein: 3 },
+    ],
+    dinner: [
+      { name: "Grilled Chicken Breast", calories: 250, protein: 45 },
+      { name: "Steamed Broccoli", calories: 55, protein: 6 },
+    ],
+    snacks: [{ name: "Protein Bar", calories: 200, protein: 20 }],
+  },
+};
+
+/**
+ * Initialize mock data for testing (call this once to populate storage)
+ */
+export const initializeMockData = async (): Promise<void> => {
+  try {
+    const existingData = await AsyncStorage.getItem(MEALS_STORAGE_KEY);
+    if (!existingData) {
+      await AsyncStorage.setItem(
+        MEALS_STORAGE_KEY,
+        JSON.stringify(MOCK_MEALS_DATA)
+      );
+      console.log("Mock meal data initialized");
+    }
+  } catch (error) {
+    console.error("Error initializing mock data:", error);
+  }
+};
+
 /**
  * Load all meals data from AsyncStorage
  * @returns Promise<MealsData> - Returns full meals object or empty object if no data
  */
 export const loadMeals = async (): Promise<MealsData> => {
   try {
+    // Initialize mock data if no data exists
+    await initializeMockData();
+
     const mealsJson = await AsyncStorage.getItem(MEALS_STORAGE_KEY);
     if (mealsJson) {
       return JSON.parse(mealsJson);
@@ -186,6 +256,23 @@ export const clearAllMeals = async (): Promise<void> => {
     await AsyncStorage.removeItem(MEALS_STORAGE_KEY);
   } catch (error) {
     console.error("Error clearing meals data:", error);
+    throw error;
+  }
+};
+
+/**
+ * Reset and reload mock data (useful for testing)
+ */
+export const resetToMockData = async (): Promise<void> => {
+  try {
+    await clearAllMeals();
+    await AsyncStorage.setItem(
+      MEALS_STORAGE_KEY,
+      JSON.stringify(MOCK_MEALS_DATA)
+    );
+    console.log("Data reset to mock data");
+  } catch (error) {
+    console.error("Error resetting to mock data:", error);
     throw error;
   }
 };
