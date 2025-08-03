@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
+  Modal,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -13,110 +14,109 @@ import { ThemedView } from "../../../components/ThemedView";
 import { WeightTrendChart } from "../../../components/WeightTrendChart";
 import { useMocksContext } from "../../../contexts/MocksContext";
 import { useResponsiveStyles } from "../../../hooks/useResponsiveStyles";
-
-interface WeightEntry {
-  id: string;
-  weight: number;
-  date: string;
-  timestamp: number;
-}
-
-const MOCK_WEIGHT_ENTRIES: WeightEntry[] = [
-  {
-    id: "10",
-    weight: 175.6,
-    date: "Today",
-    timestamp: Date.now(),
-  },
-  {
-    id: "9",
-    weight: 176.2,
-    date: "Yesterday",
-    timestamp: Date.now() - 86400000,
-  },
-  {
-    id: "8",
-    weight: 175.8,
-    date: "2 days ago",
-    timestamp: Date.now() - 172800000,
-  },
-  {
-    id: "7",
-    weight: 178.0,
-    date: "3 days ago",
-    timestamp: Date.now() - 259200000,
-  },
-  {
-    id: "6",
-    weight: 177.4,
-    date: "4 days ago",
-    timestamp: Date.now() - 345600000,
-  },
-  {
-    id: "5",
-    weight: 179.1,
-    date: "5 days ago",
-    timestamp: Date.now() - 432000000,
-  },
-  {
-    id: "4",
-    weight: 178.8,
-    date: "6 days ago",
-    timestamp: Date.now() - 518400000,
-  },
-  {
-    id: "3",
-    weight: 180.2,
-    date: "1 week ago",
-    timestamp: Date.now() - 604800000,
-  },
-  {
-    id: "2",
-    weight: 179.6,
-    date: "8 days ago",
-    timestamp: Date.now() - 691200000,
-  },
-  {
-    id: "1",
-    weight: 181.3,
-    date: "9 days ago",
-    timestamp: Date.now() - 777600000,
-  },
-];
+import {
+  formatDateForDisplay,
+  getWeightGoal,
+  initializeMockWeightData,
+  loadWeightEntries,
+  addWeightEntry as saveWeightEntry,
+  setWeightGoal,
+  type WeightEntry,
+} from "../../../utils/weightStorage";
 
 export default function WeightTrackingScreen() {
   const { getStyles } = useResponsiveStyles();
   const styles = getStyles(mobileStyles, tabletStyles);
   const { useMocks } = useMocksContext();
 
-  // Mock data for demonstration with daily fluctuations
-  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>(
-    useMocks ? MOCK_WEIGHT_ENTRIES : []
-  );
-
+  const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
   const [newWeight, setNewWeight] = useState("");
-  const [goalWeight] = useState(165); // Mock goal weight
+  const [goalWeight, setGoalWeightState] = useState<number>(165); // Default goal weight
+  const [newGoalWeight, setNewGoalWeight] = useState("");
+  const [showGoalModal, setShowGoalModal] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Load weight data from storage
+  const loadWeightData = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      // Initialize mock data if using mocks and no data exists
+      if (useMocks) {
+        await initializeMockWeightData();
+      }
+
+      // Load weight entries
+      const entries = await loadWeightEntries();
+      // Update date format for display
+      const entriesWithDisplayDates = entries.map((entry) => ({
+        ...entry,
+        date: formatDateForDisplay(entry.date),
+      }));
+      setWeightEntries(entriesWithDisplayDates);
+
+      // Load goal weight
+      const goal = await getWeightGoal();
+      if (goal) {
+        setGoalWeightState(goal);
+      }
+    } catch (error) {
+      console.error("Error loading weight data:", error);
+      Alert.alert("Error", "Failed to load weight data");
+    } finally {
+      setLoading(false);
+    }
+  }, [useMocks]);
+
+  // Load data on component mount
+  useEffect(() => {
+    loadWeightData();
+  }, [loadWeightData]);
 
   const currentWeight = weightEntries[0]?.weight || 0;
   const previousWeight = weightEntries[1]?.weight || currentWeight;
   const weightChange = currentWeight - previousWeight;
 
-  const addWeightEntry = () => {
+  const addWeightEntry = async () => {
     if (!newWeight || isNaN(parseFloat(newWeight))) {
       Alert.alert("Error", "Please enter a valid weight");
       return;
     }
 
-    const entry: WeightEntry = {
-      id: Date.now().toString(),
-      weight: parseFloat(newWeight),
-      date: "Today",
-      timestamp: Date.now(),
-    };
+    try {
+      await saveWeightEntry(parseFloat(newWeight));
+      setNewWeight("");
+      // Reload data to reflect changes
+      await loadWeightData();
+    } catch (error) {
+      console.error("Error adding weight entry:", error);
+      Alert.alert("Error", "Failed to save weight entry");
+    }
+  };
 
-    setWeightEntries([entry, ...weightEntries]);
-    setNewWeight("");
+  const updateGoalWeight = async () => {
+    if (!newGoalWeight || isNaN(parseFloat(newGoalWeight))) {
+      Alert.alert("Error", "Please enter a valid goal weight");
+      return;
+    }
+
+    try {
+      const goal = parseFloat(newGoalWeight);
+      await setWeightGoal(goal);
+      setGoalWeightState(goal);
+      setNewGoalWeight("");
+      setShowGoalModal(false);
+      Alert.alert("Success", "Goal weight updated successfully!");
+    } catch (error) {
+      console.error("Error setting goal weight:", error);
+      Alert.alert("Error", "Failed to save goal weight");
+    }
+  };
+
+  const openGoalModal = () => {
+    setNewGoalWeight(goalWeight.toString());
+    setShowGoalModal(true);
   };
 
   const getChangeColor = (change: number) => {
@@ -147,134 +147,203 @@ export default function WeightTrackingScreen() {
           </ThemedText>
         </View>
 
-        {/* Current Weight Summary */}
-        <View style={styles.summaryCard}>
-          <ThemedText style={styles.currentWeight}>
-            {currentWeight} lbs
-          </ThemedText>
-          <ThemedText
-            style={[
-              styles.weightChange,
-              { color: getChangeColor(weightChange) },
-            ]}
-          >
-            {getChangeIcon(weightChange)} {Math.abs(weightChange).toFixed(1)}{" "}
-            lbs since last entry
-          </ThemedText>
-          {goalWeight > 0 && (
-            <ThemedText style={styles.goalProgress}>
-              Goal: {goalWeight} lbs •{" "}
-              {Math.abs(currentWeight - goalWeight).toFixed(1)} lbs to go
-            </ThemedText>
-          )}
-        </View>
-
-        {/* Quick Add Weight */}
-        <View style={styles.addWeightCard}>
-          <ThemedText style={styles.cardTitle}>Quick Add Weight</ThemedText>
-          <View style={styles.addWeightForm}>
-            <TextInput
-              style={styles.weightInput}
-              placeholder="Enter weight (lbs)"
-              placeholderTextColor="#9CA3AF"
-              value={newWeight}
-              onChangeText={setNewWeight}
-              keyboardType="decimal-pad"
-            />
-            <TouchableOpacity style={styles.addButton} onPress={addWeightEntry}>
-              <ThemedText style={styles.addButtonText}>Add</ThemedText>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Weight Trend Graph */}
-        <View style={styles.chartCard}>
-          <ThemedText style={styles.cardTitle}>Weight Trend</ThemedText>
-          <WeightTrendChart
-            data={weightEntries}
-            goalWeight={goalWeight}
-            showSmoothing={true}
-          />
-          <View style={styles.chartDescription}>
-            <ThemedText style={styles.chartDescriptionText}>
-              The dotted line shows your actual daily weights, while the solid
-              green line represents a 3-day moving average to smooth out natural
-              fluctuations and reveal your true weight trend.
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ThemedText style={styles.loadingText}>
+              Loading weight data...
             </ThemedText>
           </View>
-        </View>
-
-        {/* Weight History */}
-        <View style={styles.historyCard}>
-          <ThemedText style={styles.cardTitle}>Weight History</ThemedText>
-          {(showAllHistory ? weightEntries : weightEntries.slice(0, 5)).map(
-            (entry, index) => {
-              const previousEntry = weightEntries[index + 1];
-              const change = previousEntry
-                ? entry.weight - previousEntry.weight
-                : 0;
-
-              return (
-                <View key={entry.id} style={styles.historyEntry}>
-                  <View style={styles.historyLeft}>
-                    <ThemedText style={styles.historyIcon}>
-                      {getTrendIcon(
-                        entry.weight,
-                        previousEntry?.weight || entry.weight
-                      )}
-                    </ThemedText>
-                    <View>
-                      <ThemedText style={styles.historyWeight}>
-                        {entry.weight} lbs
-                      </ThemedText>
-                      <ThemedText style={styles.historyDate}>
-                        {entry.date}
-                      </ThemedText>
-                    </View>
-                  </View>
-                  {previousEntry && (
-                    <ThemedText
-                      style={[
-                        styles.historyChange,
-                        { color: getChangeColor(change) },
-                      ]}
-                    >
-                      {getChangeIcon(change)}
-                      {Math.abs(change).toFixed(1)}
-                    </ThemedText>
-                  )}
-                </View>
-              );
-            }
-          )}
-
-          {weightEntries.length > 5 && (
-            <TouchableOpacity
-              style={styles.showMoreButton}
-              onPress={() => setShowAllHistory(!showAllHistory)}
-            >
-              <ThemedText style={styles.showMoreText}>
-                {showAllHistory
-                  ? "Show Less"
-                  : `Show More (${weightEntries.length - 5} more entries)`}
+        ) : (
+          <>
+            {/* Current Weight Summary */}
+            <View style={styles.summaryCard}>
+              <ThemedText style={styles.currentWeight}>
+                {currentWeight} lbs
               </ThemedText>
-            </TouchableOpacity>
-          )}
-        </View>
+              <ThemedText
+                style={[
+                  styles.weightChange,
+                  { color: getChangeColor(weightChange) },
+                ]}
+              >
+                {getChangeIcon(weightChange)}{" "}
+                {Math.abs(weightChange).toFixed(1)} lbs since last entry
+              </ThemedText>
+              {goalWeight > 0 && (
+                <ThemedText style={styles.goalProgress}>
+                  Goal: {goalWeight} lbs •{" "}
+                  {Math.abs(currentWeight - goalWeight).toFixed(1)} lbs to go
+                </ThemedText>
+              )}
+              <TouchableOpacity
+                style={styles.editGoalButton}
+                onPress={openGoalModal}
+              >
+                <ThemedText style={styles.editGoalText}>
+                  {goalWeight > 0 ? "Edit Goal" : "Set Goal"}
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
 
-        {/* Features Coming Soon */}
-        <View style={styles.comingSoonCard}>
-          <ThemedText style={styles.cardTitle}>Coming Soon</ThemedText>
-          <ThemedText style={styles.featureList}>
-            🎯 Goal Weight Progress Tracking{"\n"}
-            📊 Advanced Trend Analysis{"\n"}
-            📝 Weight Entry Notes & Annotations{"\n"}
-            🏆 Milestone Badges & Achievements{"\n"}
-            📸 Progress Photo Comparison{"\n"}
-            📱 Data Export & Backup
-          </ThemedText>
-        </View>
+            {/* Quick Add Weight */}
+            <View style={styles.addWeightCard}>
+              <ThemedText style={styles.cardTitle}>Quick Add Weight</ThemedText>
+              <View style={styles.addWeightForm}>
+                <TextInput
+                  style={styles.weightInput}
+                  placeholder="Enter weight (lbs)"
+                  placeholderTextColor="#9CA3AF"
+                  value={newWeight}
+                  onChangeText={setNewWeight}
+                  keyboardType="decimal-pad"
+                />
+                <TouchableOpacity
+                  style={styles.addButton}
+                  onPress={addWeightEntry}
+                >
+                  <ThemedText style={styles.addButtonText}>Add</ThemedText>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Weight Trend Graph */}
+            <View style={styles.chartCard}>
+              <ThemedText style={styles.cardTitle}>Weight Trend</ThemedText>
+              <WeightTrendChart
+                data={weightEntries}
+                goalWeight={goalWeight}
+                showSmoothing={true}
+              />
+              <View style={styles.chartDescription}>
+                <ThemedText style={styles.chartDescriptionText}>
+                  The dotted line shows your actual daily weights, while the
+                  solid green line represents a 3-day moving average to smooth
+                  out natural fluctuations and reveal your true weight trend.
+                </ThemedText>
+              </View>
+            </View>
+
+            {/* Weight History */}
+            <View style={styles.historyCard}>
+              <ThemedText style={styles.cardTitle}>Weight History</ThemedText>
+              {weightEntries.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <ThemedText style={styles.emptyText}>
+                    No weight entries yet. Add your first weight above to start
+                    tracking!
+                  </ThemedText>
+                </View>
+              ) : (
+                <>
+                  {(showAllHistory
+                    ? weightEntries
+                    : weightEntries.slice(0, 5)
+                  ).map((entry, index) => {
+                    const previousEntry = weightEntries[index + 1];
+                    const change = previousEntry
+                      ? entry.weight - previousEntry.weight
+                      : 0;
+
+                    return (
+                      <View key={entry.id} style={styles.historyEntry}>
+                        <View style={styles.historyLeft}>
+                          <ThemedText style={styles.historyIcon}>
+                            {getTrendIcon(
+                              entry.weight,
+                              previousEntry?.weight || entry.weight
+                            )}
+                          </ThemedText>
+                          <View>
+                            <ThemedText style={styles.historyWeight}>
+                              {entry.weight} lbs
+                            </ThemedText>
+                            <ThemedText style={styles.historyDate}>
+                              {entry.date}
+                            </ThemedText>
+                          </View>
+                        </View>
+                        {previousEntry && (
+                          <ThemedText
+                            style={[
+                              styles.historyChange,
+                              { color: getChangeColor(change) },
+                            ]}
+                          >
+                            {getChangeIcon(change)}
+                            {Math.abs(change).toFixed(1)}
+                          </ThemedText>
+                        )}
+                      </View>
+                    );
+                  })}
+
+                  {weightEntries.length > 5 && (
+                    <TouchableOpacity
+                      style={styles.showMoreButton}
+                      onPress={() => setShowAllHistory(!showAllHistory)}
+                    >
+                      <ThemedText style={styles.showMoreText}>
+                        {showAllHistory
+                          ? "Show Less"
+                          : `Show More (${
+                              weightEntries.length - 5
+                            } more entries)`}
+                      </ThemedText>
+                    </TouchableOpacity>
+                  )}
+                </>
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
+
+      {/* Goal Weight Modal */}
+      <Modal
+        visible={showGoalModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowGoalModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <ThemedText style={styles.modalTitle}>Set Goal Weight</ThemedText>
+            <ThemedText style={styles.modalSubtitle}>
+              Current goal: {goalWeight > 0 ? `${goalWeight} lbs` : "Not set"}
+            </ThemedText>
+
+            <View style={styles.modalForm}>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Enter goal weight (lbs)"
+                placeholderTextColor="#9CA3AF"
+                value={newGoalWeight}
+                onChangeText={setNewGoalWeight}
+                keyboardType="decimal-pad"
+                autoFocus={true}
+              />
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.modalCancelButton}
+                  onPress={() => setShowGoalModal(false)}
+                >
+                  <ThemedText style={styles.modalCancelText}>Cancel</ThemedText>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.modalSaveButton}
+                  onPress={updateGoalWeight}
+                >
+                  <ThemedText style={styles.modalSaveText}>
+                    Save Goal
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -286,7 +355,6 @@ const tabletStyles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     padding: 24,
-    paddingTop: 48,
   },
   headerContainer: {
     alignItems: "center",
@@ -320,6 +388,19 @@ const tabletStyles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.8,
   },
+  editGoalButton: {
+    marginTop: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "#3b82f630",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  editGoalText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#3b82f6",
+  },
   addWeightCard: {
     backgroundColor: "#1a1a1a",
     borderRadius: 16,
@@ -352,6 +433,33 @@ const tabletStyles = StyleSheet.create({
     justifyContent: "center",
   },
   addButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  goalWeightCard: {
+    backgroundColor: "#1a1a1a",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+  },
+  goalDescription: {
+    fontSize: 14,
+    opacity: 0.8,
+    marginBottom: 16,
+  },
+  goalWeightForm: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  goalButton: {
+    backgroundColor: "#3b82f6",
+    borderRadius: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    justifyContent: "center",
+  },
+  goalButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
@@ -419,16 +527,90 @@ const tabletStyles = StyleSheet.create({
     fontWeight: "600",
     color: "#22c55e",
   },
-  comingSoonCard: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 200,
   },
-  featureList: {
+  loadingText: {
+    color: "#A0A0A0",
+    fontSize: 16,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    padding: 32,
+    gap: 16,
+  },
+  emptyText: {
+    color: "#A0A0A0",
     fontSize: 14,
-    lineHeight: 22,
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#1a1a1a",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 24,
+    paddingBottom: 40,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  modalSubtitle: {
+    fontSize: 14,
     opacity: 0.8,
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  modalForm: {
+    gap: 20,
+  },
+  modalInput: {
+    backgroundColor: "#2a2a2a",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: "#FFFFFF",
+    textAlign: "center",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  modalCancelButton: {
+    flex: 1,
+    backgroundColor: "#2a2a2a",
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+  modalCancelText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  modalSaveButton: {
+    flex: 1,
+    backgroundColor: "#3b82f6",
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+  modalSaveText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 
@@ -437,7 +619,7 @@ const mobileStyles = StyleSheet.create({
   scrollContainer: {
     ...tabletStyles.scrollContainer,
     padding: 16,
-    paddingTop: 32,
+    paddingTop: 24,
   },
   subtitle: {
     ...tabletStyles.subtitle,
@@ -453,8 +635,17 @@ const mobileStyles = StyleSheet.create({
     flexDirection: "column",
     gap: 12,
   },
+  goalWeightForm: {
+    ...tabletStyles.goalWeightForm,
+    flexDirection: "column",
+    gap: 12,
+  },
   addButton: {
     ...tabletStyles.addButton,
+    alignSelf: "stretch",
+  },
+  goalButton: {
+    ...tabletStyles.goalButton,
     alignSelf: "stretch",
   },
   historyEntry: {
@@ -477,5 +668,27 @@ const mobileStyles = StyleSheet.create({
   showMoreText: {
     ...tabletStyles.showMoreText,
     fontSize: 13,
+  },
+  modalContent: {
+    ...tabletStyles.modalContent,
+    padding: 20,
+    paddingBottom: 36,
+  },
+  modalTitle: {
+    ...tabletStyles.modalTitle,
+    fontSize: 18,
+  },
+  modalButtons: {
+    ...tabletStyles.modalButtons,
+    flexDirection: "column",
+    gap: 12,
+  },
+  modalCancelButton: {
+    ...tabletStyles.modalCancelButton,
+    flex: 0,
+  },
+  modalSaveButton: {
+    ...tabletStyles.modalSaveButton,
+    flex: 0,
   },
 });
