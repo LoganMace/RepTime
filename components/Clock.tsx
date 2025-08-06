@@ -1,4 +1,5 @@
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 import React, { useEffect, useState } from "react";
 import {
   Modal,
@@ -35,10 +36,11 @@ const Clock = ({
   skipGetReady = false,
   quickTimer = false,
 }: ClockProps) => {
-  const { isMobile } = useResponsiveStyles();
+  const { colors } = useTheme();
+  const { getStyles, isMobile } = useResponsiveStyles();
   const { width } = useWindowDimensions();
 
-  const styles = isMobile ? mobileStyles : tabletStyles;
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   const circleSize = isMobile ? width * 0.85 : 600;
   const circleStrokeWidth = isMobile ? 18 : 24;
@@ -172,7 +174,7 @@ const Clock = ({
               duration={getTotalTimeForPhase()}
               isPaused={isPaused}
               color={getProgressColor()}
-              backgroundColor="#2c2c2c"
+              backgroundColor={colors.border}
             />
             <View style={styles.timerContent}>
               {!quickTimer && (
@@ -266,12 +268,12 @@ const Clock = ({
   );
 };
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgb(0, 0, 0)",
+    backgroundColor: colors.background,
     position: "relative",
   },
   closeButton: {
@@ -281,7 +283,7 @@ const tabletStyles = StyleSheet.create({
     zIndex: 1000,
   },
   closeButtonText: {
-    color: "white",
+    color: colors.text,
     fontSize: 48,
     fontWeight: "bold",
   },
@@ -301,12 +303,12 @@ const tabletStyles = StyleSheet.create({
   },
   round: {
     fontSize: 60,
-    color: "yellow",
+    color: colors.warning,
     marginBottom: 10,
   },
   phase: {
     fontSize: 120,
-    color: "white",
+    color: colors.text,
     marginBottom: 10,
     fontWeight: "bold",
   },
@@ -315,41 +317,41 @@ const tabletStyles = StyleSheet.create({
     fontWeight: "bold",
   },
   work: {
-    color: "lime",
+    color: colors.success,
   },
   rest: {
-    color: "cyan",
+    color: colors.info,
   },
   getReady: {
-    color: "white",
+    color: colors.text,
   },
   paused: {
-    color: "gray",
+    color: colors.textSecondary,
   },
   playButton: {
     fontSize: 400,
-    color: "lime",
+    color: colors.success,
   },
   sleekPlayButton: {
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: "#222",
+    backgroundColor: colors.card,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 8,
     borderWidth: 4,
-    borderColor: "lime",
+    borderColor: colors.success,
   },
   sleekPlayIcon: {
     fontSize: 120,
-    color: "lime",
+    color: colors.success,
     marginLeft: 10,
-    textShadowColor: "#000",
+    textShadowColor: colors.shadow,
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 8,
   },
@@ -358,18 +360,18 @@ const tabletStyles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 36,
     borderRadius: 24,
-    backgroundColor: "#333",
+    backgroundColor: colors.card,
     borderWidth: 2,
-    borderColor: "white",
+    borderColor: colors.text,
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.18,
     shadowRadius: 8,
     elevation: 2,
   },
   pauseButtonText: {
-    color: "white",
+    color: colors.text,
     fontSize: 22,
     fontWeight: "bold",
     letterSpacing: 1,
@@ -395,19 +397,19 @@ const tabletStyles = StyleSheet.create({
   timeText: {
     fontSize: 120,
     fontWeight: "bold",
-    color: "#fff",
+    color: colors.text,
     fontFamily: "monospace",
     marginBottom: 12,
     fontVariant: ["tabular-nums"],
   },
   roundText: {
     fontSize: 32,
-    color: "#ccc",
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   setLevelText: {
     fontSize: 30,
-    color: "#999",
+    color: colors.textSecondary,
   },
   doneContainer: {
     justifyContent: "center",
@@ -417,12 +419,12 @@ const tabletStyles = StyleSheet.create({
   doneText: {
     fontSize: 64,
     fontWeight: "bold",
-    color: "white",
+    color: colors.text,
     textAlign: "center",
   },
   doneSubText: {
     fontSize: 32,
-    color: "#ccc",
+    color: colors.textSecondary,
     textAlign: "center",
   },
   doneIcon: {
@@ -430,75 +432,78 @@ const tabletStyles = StyleSheet.create({
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
   closeButton: {
-    ...tabletStyles.closeButton,
+    ...tablet.closeButton,
     top: 50,
     left: 20,
     zIndex: 1000,
   },
   closeButtonText: {
-    ...tabletStyles.closeButtonText,
+    ...tablet.closeButtonText,
     fontSize: 36,
   },
   progressContainer: {
-    ...tabletStyles.progressContainer,
+    ...tablet.progressContainer,
     marginBottom: 40,
   },
   phaseText: {
-    ...tabletStyles.phaseText,
+    ...tablet.phaseText,
     fontSize: 44,
     fontWeight: "600",
   },
   timeText: {
-    ...tabletStyles.timeText,
+    ...tablet.timeText,
     fontSize: 80,
   },
   roundText: {
-    ...tabletStyles.roundText,
+    ...tablet.roundText,
     fontSize: 24,
   },
   setLevelText: {
-    ...tabletStyles.setLevelText,
+    ...tablet.setLevelText,
     fontSize: 22,
   },
   sleekPlayButton: {
-    ...tabletStyles.sleekPlayButton,
+    ...tablet.sleekPlayButton,
     width: 150,
     height: 150,
     borderRadius: 75,
   },
   sleekPlayIcon: {
-    ...tabletStyles.sleekPlayIcon,
+    ...tablet.sleekPlayIcon,
     fontSize: 90,
   },
   pauseButton: {
-    ...tabletStyles.pauseButton,
+    ...tablet.pauseButton,
     paddingVertical: 12,
     paddingHorizontal: 30,
     marginTop: 24,
   },
   pauseButtonText: {
-    ...tabletStyles.pauseButtonText,
+    ...tablet.pauseButtonText,
     fontSize: 18,
   },
   doneContainer: {
-    ...tabletStyles.doneContainer,
+    ...tablet.doneContainer,
     gap: 15,
   },
   doneText: {
-    ...tabletStyles.doneText,
+    ...tablet.doneText,
     fontSize: 48,
   },
   doneSubText: {
-    ...tabletStyles.doneSubText,
+    ...tablet.doneSubText,
     fontSize: 24,
   },
   doneIcon: {
-    ...tabletStyles.doneIcon,
+    ...tablet.doneIcon,
     marginVertical: 15,
   },
-});
+  });
+};
 
 export default Clock;

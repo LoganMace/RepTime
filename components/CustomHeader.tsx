@@ -4,13 +4,16 @@ import { useNavigation, usePathname } from "expo-router";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 
 export function CustomHeader() {
+  const { colors } = useTheme();
   const navigation = useNavigation();
   const pathname = usePathname();
-  const { isMobile } = useResponsiveStyles();
+  const { getStyles, isMobile } = useResponsiveStyles();
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   const openDrawer = () => {
     navigation.dispatch(DrawerActions.openDrawer());
@@ -32,7 +35,7 @@ export function CustomHeader() {
   return (
     <View style={styles.headerContainer}>
       <TouchableOpacity onPress={openDrawer} style={[styles.menuButton]}>
-        <Feather name="menu" size={isMobile ? 28 : 32} color="#fff" />
+        <Feather name="menu" size={isMobile ? 28 : 32} color={colors.text} />
       </TouchableOpacity>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">{getTitle()}</ThemedText>
@@ -41,7 +44,7 @@ export function CustomHeader() {
   );
 }
 
-const styles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -60,3 +63,10 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
 });
+
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+  });
+};

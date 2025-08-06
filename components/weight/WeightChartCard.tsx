@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
+import { useTheme } from "../../hooks/useTheme";
 import { useResponsiveStyles } from "../../hooks/useResponsiveStyles";
 import { ThemedText } from "../ThemedText";
 import { WeightTrendChart } from "../WeightTrendChart";
@@ -14,8 +15,9 @@ export default function WeightChartCard({
   weightEntries,
   goalWeight,
 }: WeightChartCardProps) {
+  const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   return (
     <View style={styles.chartCard}>
@@ -36,9 +38,9 @@ export default function WeightChartCard({
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   chartCard: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -60,15 +62,18 @@ const tabletStyles = StyleSheet.create({
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  chartDescription: {
-    ...tabletStyles.chartDescription,
-    marginTop: 30,
-    paddingHorizontal: 10,
-  },
-  chartDescriptionText: {
-    ...tabletStyles.chartDescriptionText,
-    fontSize: 12,
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    chartDescription: {
+      ...tablet.chartDescription,
+      marginTop: 30,
+      paddingHorizontal: 10,
+    },
+    chartDescriptionText: {
+      ...tablet.chartDescriptionText,
+      fontSize: 12,
+    },
+  });
+};

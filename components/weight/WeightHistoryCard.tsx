@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { useTheme } from "../../hooks/useTheme";
 import { useResponsiveStyles } from "../../hooks/useResponsiveStyles";
 import { ThemedText } from "../ThemedText";
 import {
@@ -20,8 +21,9 @@ export default function WeightHistoryCard({
   showAllHistory,
   onToggleHistory,
 }: WeightHistoryCardProps) {
+  const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   if (weightEntries.length === 0) {
     return (
@@ -95,9 +97,9 @@ export default function WeightHistoryCard({
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   historyCard: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -113,7 +115,7 @@ const tabletStyles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#2a2a2a",
+    borderBottomColor: colors.border,
   },
   historyLeft: {
     flexDirection: "row",
@@ -139,14 +141,14 @@ const tabletStyles = StyleSheet.create({
     marginTop: 16,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: "#2a2a2a",
+    backgroundColor: colors.inputBackground,
     borderRadius: 8,
     alignItems: "center",
   },
   showMoreText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#22c55e",
+    color: colors.success,
   },
   emptyContainer: {
     alignItems: "center",
@@ -154,25 +156,28 @@ const tabletStyles = StyleSheet.create({
     gap: 16,
   },
   emptyText: {
-    color: "#A0A0A0",
+    color: colors.textSecondary,
     fontSize: 14,
     textAlign: "center",
     lineHeight: 20,
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  historyEntry: {
-    ...tabletStyles.historyEntry,
-    paddingVertical: 16,
-  },
-  historyWeight: {
-    ...tabletStyles.historyWeight,
-    fontSize: 16,
-  },
-  showMoreText: {
-    ...tabletStyles.showMoreText,
-    fontSize: 13,
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    historyEntry: {
+      ...tablet.historyEntry,
+      paddingVertical: 16,
+    },
+    historyWeight: {
+      ...tablet.historyWeight,
+      fontSize: 16,
+    },
+    showMoreText: {
+      ...tablet.showMoreText,
+      fontSize: 13,
+    },
+  });
+};

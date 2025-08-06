@@ -15,10 +15,12 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function WorkoutsScreen() {
   const { getStyles, isMobile } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const { colors } = useTheme();
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
   const params = useLocalSearchParams();
   const router = useRouter();
 
@@ -136,7 +138,7 @@ export default function WorkoutsScreen() {
           <TextInput
             style={styles.workoutNameInput}
             placeholder="e.g., Morning Power Hour"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textSecondary}
             value={workoutName}
             onChangeText={setWorkoutName}
           />
@@ -158,7 +160,7 @@ export default function WorkoutsScreen() {
                         onPress={() => removeRow(idx)}
                         style={styles.removeButton}
                       >
-                        <Feather name="trash-2" size={24} color="#d9534f" />
+                        <Feather name="trash-2" size={24} color={colors.error} />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -170,7 +172,7 @@ export default function WorkoutsScreen() {
                     <TextInput
                       style={styles.input}
                       placeholder="e.g., Bench Press"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={colors.textSecondary}
                       value={row.exercise}
                       onChangeText={(v) => handleChange(idx, "exercise", v)}
                     />
@@ -182,7 +184,7 @@ export default function WorkoutsScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder="0"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         keyboardType="numeric"
                         value={row.sets}
                         onChangeText={(v) => handleChange(idx, "sets", v)}
@@ -193,7 +195,7 @@ export default function WorkoutsScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder="0"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         keyboardType="numeric"
                         value={row.reps}
                         onChangeText={(v) => handleChange(idx, "reps", v)}
@@ -204,7 +206,7 @@ export default function WorkoutsScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder="0"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         keyboardType="numeric"
                         value={row.weight}
                         onChangeText={(v) => handleChange(idx, "weight", v)}
@@ -220,7 +222,7 @@ export default function WorkoutsScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder="0"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         keyboardType="numeric"
                         value={row.workTime}
                         onChangeText={(v) => handleChange(idx, "workTime", v)}
@@ -233,7 +235,7 @@ export default function WorkoutsScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder="0"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         keyboardType="numeric"
                         value={row.restTime}
                         onChangeText={(v) => handleChange(idx, "restTime", v)}
@@ -256,7 +258,7 @@ export default function WorkoutsScreen() {
                         onPress={() => removeRow(idx)}
                         style={styles.removeButton}
                       >
-                        <Feather name="trash-2" size={32} color="#d9534f" />
+                        <Feather name="trash-2" size={32} color={colors.error} />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -270,7 +272,7 @@ export default function WorkoutsScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder="e.g., Bench Press"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         value={row.exercise}
                         onChangeText={(v) => handleChange(idx, "exercise", v)}
                       />
@@ -280,7 +282,7 @@ export default function WorkoutsScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder="0"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         keyboardType="numeric"
                         value={row.sets}
                         onChangeText={(v) => handleChange(idx, "sets", v)}
@@ -291,7 +293,7 @@ export default function WorkoutsScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder="0"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         keyboardType="numeric"
                         value={row.reps}
                         onChangeText={(v) => handleChange(idx, "reps", v)}
@@ -302,7 +304,7 @@ export default function WorkoutsScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder="0"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         keyboardType="numeric"
                         value={row.weight}
                         onChangeText={(v) => handleChange(idx, "weight", v)}
@@ -315,7 +317,7 @@ export default function WorkoutsScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder="0"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         keyboardType="numeric"
                         value={row.workTime}
                         onChangeText={(v) => handleChange(idx, "workTime", v)}
@@ -328,7 +330,7 @@ export default function WorkoutsScreen() {
                       <TextInput
                         style={styles.input}
                         placeholder="0"
-                        placeholderTextColor="#999"
+                        placeholderTextColor={colors.textSecondary}
                         keyboardType="numeric"
                         value={row.restTime}
                         onChangeText={(v) => handleChange(idx, "restTime", v)}
@@ -366,39 +368,39 @@ export default function WorkoutsScreen() {
   );
 }
 
-const baseButton = {
+const baseButton = (colors: ReturnType<typeof useTheme>['colors']) => ({
   borderRadius: 24,
   height: 60,
   justifyContent: "center",
   alignItems: "center",
   borderWidth: 2,
-  shadowColor: "#000",
+  shadowColor: colors.shadow,
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.18,
   shadowRadius: 8,
   elevation: 2,
   alignSelf: "center",
   paddingHorizontal: 24,
-} as const;
+} as const);
 
 const baseButtonText = {
   fontSize: 24,
-  fontWeight: "bold",
+  fontWeight: "bold" as const,
   letterSpacing: 1,
-  textTransform: "uppercase",
-} as const;
+  textTransform: "uppercase" as const,
+};
 
-const baseInput = {
+const baseInput = (colors: ReturnType<typeof useTheme>['colors']) => ({
   borderWidth: 1,
-  borderColor: "#555",
+  borderColor: colors.inputBackground,
   borderRadius: 8,
   padding: 8,
-  backgroundColor: "#333",
-  color: "#fff",
+  backgroundColor: colors.card,
+  color: colors.text,
   fontSize: 24,
-} as const;
+} as const);
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   headerImage: {
     bottom: -90,
     left: -35,
@@ -416,7 +418,7 @@ const tabletStyles = StyleSheet.create({
     gap: 8,
   },
   workoutNameInput: {
-    ...baseInput,
+    ...baseInput(colors),
     minWidth: 300,
     alignSelf: "center",
   },
@@ -429,7 +431,7 @@ const tabletStyles = StyleSheet.create({
     gap: 20,
   },
   tabletWorkoutCard: {
-    backgroundColor: "#2C2C2E",
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 20,
   },
@@ -440,7 +442,7 @@ const tabletStyles = StyleSheet.create({
     marginBottom: 16,
   },
   cardTitle: {
-    color: "gold",
+    color: colors.warning,
     fontSize: 22,
     fontWeight: "bold",
   },
@@ -458,11 +460,11 @@ const tabletStyles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 18,
-    color: "#EBEBF599",
+    color: colors.textSecondary,
     fontWeight: "600",
   },
   input: {
-    ...baseInput,
+    ...baseInput(colors),
     fontSize: 20,
   },
   removeButtonContainer: {
@@ -477,25 +479,25 @@ const tabletStyles = StyleSheet.create({
     alignItems: "center",
   },
   addButton: {
-    ...baseButton,
-    backgroundColor: "gold",
-    borderColor: "gold",
+    ...baseButton(colors),
+    backgroundColor: colors.warning,
+    borderColor: colors.warning,
     marginTop: 20,
     marginBottom: 0,
   },
   addButtonText: {
     ...baseButtonText,
-    color: "#222",
+    color: colors.background,
   },
   saveButton: {
-    ...baseButton,
-    backgroundColor: "#222",
-    borderColor: "gold",
+    ...baseButton(colors),
+    backgroundColor: colors.background,
+    borderColor: colors.warning,
     marginTop: 10,
   },
   saveButtonText: {
     ...baseButtonText,
-    color: "gold",
+    color: colors.warning,
   },
   // Removed timerCardsContainer and related styles
   // Properties for mobile styles that don't exist in tablet
@@ -508,104 +510,107 @@ const tabletStyles = StyleSheet.create({
   mobileWorkoutCard: {},
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  headerImage: {
-    bottom: -30,
-    left: -20,
-    position: "absolute",
-  },
-  centeredContainer: {
-    ...tabletStyles.centeredContainer,
-    justifyContent: "flex-start",
-  },
-  workoutNameContainer: {
-    width: "100%",
-    marginBottom: 12,
-    alignItems: "stretch",
-  },
-  workoutNameInput: {
-    ...tabletStyles.workoutNameInput,
-    width: "100%",
-    fontSize: 20,
-  },
-  formScroll: {
-    width: "100%",
-  },
-  mobileFormContainer: {
-    width: "100%",
-    gap: 16,
-  },
-  mobileWorkoutCard: {
-    backgroundColor: "#2C2C2E",
-    borderRadius: 12,
-    padding: 12,
-    width: "100%",
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  cardTitle: {
-    color: "gold",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  removeButton: {
-    padding: 4,
-  },
-  row: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 12,
-  },
-  inputGroup: {
-    flex: 1,
-    gap: 6,
-  },
-  inputLabel: {
-    ...tabletStyles.inputLabel,
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#EBEBF599", // Light gray for label
-  },
-  input: {
-    ...tabletStyles.input,
-    fontSize: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    minWidth: 0,
-    textAlign: "left",
-  },
-  buttonContainer: {
-    ...tabletStyles.buttonContainer,
-    flexDirection: "column",
-    width: "100%",
-    gap: 20,
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  addButton: {
-    ...tabletStyles.addButton,
-    width: "100%",
-    height: 50,
-    marginTop: 10,
-    marginBottom: 0,
-  },
-  saveButton: {
-    ...tabletStyles.saveButton,
-    width: "100%",
-    height: 50,
-    marginTop: 0,
-  },
-  addButtonText: {
-    ...tabletStyles.addButtonText,
-    fontSize: 20,
-  },
-  saveButtonText: {
-    ...tabletStyles.saveButtonText,
-    fontSize: 20,
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    headerImage: {
+      bottom: -30,
+      left: -20,
+      position: "absolute",
+    },
+    centeredContainer: {
+      ...tablet.centeredContainer,
+      justifyContent: "flex-start",
+    },
+    workoutNameContainer: {
+      width: "100%",
+      marginBottom: 12,
+      alignItems: "stretch",
+    },
+    workoutNameInput: {
+      ...tablet.workoutNameInput,
+      width: "100%",
+      fontSize: 20,
+    },
+    formScroll: {
+      width: "100%",
+    },
+    mobileFormContainer: {
+      width: "100%",
+      gap: 16,
+    },
+    mobileWorkoutCard: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 12,
+      width: "100%",
+    },
+    cardHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    cardTitle: {
+      color: colors.warning,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    removeButton: {
+      padding: 4,
+    },
+    row: {
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 12,
+    },
+    inputGroup: {
+      flex: 1,
+      gap: 6,
+    },
+    inputLabel: {
+      ...tablet.inputLabel,
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.textSecondary,
+    },
+    input: {
+      ...tablet.input,
+      fontSize: 16,
+      paddingVertical: 10,
+      paddingHorizontal: 8,
+      minWidth: 0,
+      textAlign: "left",
+    },
+    buttonContainer: {
+      ...tablet.buttonContainer,
+      flexDirection: "column",
+      width: "100%",
+      gap: 20,
+      marginTop: 10,
+      marginBottom: 20,
+    },
+    addButton: {
+      ...tablet.addButton,
+      width: "100%",
+      height: 50,
+      marginTop: 10,
+      marginBottom: 0,
+    },
+    saveButton: {
+      ...tablet.saveButton,
+      width: "100%",
+      height: 50,
+      marginTop: 0,
+    },
+    addButtonText: {
+      ...tablet.addButtonText,
+      fontSize: 20,
+    },
+    saveButtonText: {
+      ...tablet.saveButtonText,
+      fontSize: 20,
+    },
+  });
+};

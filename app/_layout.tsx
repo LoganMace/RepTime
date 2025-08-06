@@ -5,7 +5,31 @@ import { SafeAreaView, StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { MocksProvider } from "../contexts/MocksContext";
+import { useTheme } from "../hooks/useTheme";
 import { OrientationProvider } from "../hooks/useOrientation";
+
+function ThemedRootLayout() {
+  const { colors } = useTheme();
+
+  return (
+    <ThemeProvider value={DarkTheme}>
+      <StatusBar
+        backgroundColor={colors.background}
+        barStyle="light-content"
+        translucent={false}
+      />
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+        <Stack>
+          <Stack.Screen
+            name="(drawer)"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+      </SafeAreaView>
+    </ThemeProvider>
+  );
+}
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -13,7 +37,6 @@ export default function RootLayout() {
   });
 
   if (!loaded) {
-    // Async font loading only occurs in development.
     return null;
   }
 
@@ -21,22 +44,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <MocksProvider defaultUseMocks={true}>
         <OrientationProvider>
-          <ThemeProvider value={DarkTheme}>
-            <StatusBar
-              backgroundColor="black" // for Android
-              barStyle="light-content" // for iOS
-              translucent={false}
-            />
-            <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-              <Stack>
-                <Stack.Screen
-                  name="(drawer)"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen name="+not-found" />
-              </Stack>
-            </SafeAreaView>
-          </ThemeProvider>
+          <ThemedRootLayout />
         </OrientationProvider>
       </MocksProvider>
     </GestureHandlerRootView>

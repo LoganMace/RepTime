@@ -1,4 +1,5 @@
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useTheme } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import React from "react";
 import {
@@ -32,8 +33,9 @@ export default function AddMealModal({
   onAddMeal,
   onMealChange,
 }: AddMealModalProps) {
+  const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   return (
     <Modal
@@ -57,7 +59,7 @@ export default function AddMealModal({
                     ?.icon as any
                 }
                 size={20}
-                color="#fff"
+                color={colors.text}
               />
             )}
           </View>
@@ -67,7 +69,7 @@ export default function AddMealModal({
             placeholder="Food name"
             value={newMeal.name}
             onChangeText={(text) => onMealChange("name", text)}
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.placeholder}
           />
 
           <TextInput
@@ -76,7 +78,7 @@ export default function AddMealModal({
             value={newMeal.calories}
             onChangeText={(text) => onMealChange("calories", text)}
             keyboardType="numeric"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.placeholder}
           />
 
           <TextInput
@@ -85,7 +87,7 @@ export default function AddMealModal({
             value={newMeal.protein}
             onChangeText={(text) => onMealChange("protein", text)}
             keyboardType="numeric"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.placeholder}
           />
 
           <View style={styles.modalButtons}>
@@ -109,15 +111,15 @@ export default function AddMealModal({
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: colors.overlay,
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 24,
     width: "90%",
@@ -126,7 +128,7 @@ const tabletStyles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#fff",
+    color: colors.text,
     textAlign: "center",
   },
   modalTitleContainer: {
@@ -137,11 +139,11 @@ const tabletStyles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    backgroundColor: "#333",
+    backgroundColor: colors.inputBackground,
     borderRadius: 8,
     padding: 16,
     fontSize: 16,
-    color: "#fff",
+    color: colors.inputText,
     marginBottom: 16,
   },
   modalButtons: {
@@ -156,41 +158,44 @@ const tabletStyles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: "#333",
+    backgroundColor: colors.inputBackground,
   },
   cancelButtonText: {
-    color: "#CCCCCC",
+    color: colors.textSecondary,
     fontSize: 16,
     fontWeight: "500",
   },
   addButton: {
-    backgroundColor: "#3b82f6",
+    backgroundColor: colors.primary,
   },
   addButtonText: {
-    color: "#fff",
+    color: colors.textInverse,
     fontSize: 16,
     fontWeight: "600",
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  modalContent: {
-    ...tabletStyles.modalContent,
-    width: "95%",
-    margin: 16,
-  },
-  modalTitle: {
-    ...tabletStyles.modalTitle,
-    fontSize: 18,
-  },
-  cancelButtonText: {
-    ...tabletStyles.cancelButtonText,
-    color: "#CCCCCC",
-    fontSize: 14,
-  },
-  modalButton: {
-    ...tabletStyles.modalButton,
-    paddingVertical: 12,
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    modalContent: {
+      ...tablet.modalContent,
+      width: "95%",
+      margin: 16,
+    },
+    modalTitle: {
+      ...tablet.modalTitle,
+      fontSize: 18,
+    },
+    cancelButtonText: {
+      ...tablet.cancelButtonText,
+      color: colors.textSecondary,
+      fontSize: 14,
+    },
+    modalButton: {
+      ...tablet.modalButton,
+      paddingVertical: 12,
+    },
+  });
+};

@@ -1,4 +1,5 @@
 import { ThemedText } from "@/components/ThemedText";
+import { useTheme } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { StyleSheet, Text, View } from "react-native";
 import { DailyGoals } from "./MealConstants";
@@ -15,8 +16,9 @@ export default function DailySummary({
   dailyTotals,
   dailyGoals,
 }: DailySummaryProps) {
+  const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   const renderProgressBar = (
     current: number,
@@ -35,9 +37,9 @@ export default function DailySummary({
             {
               backgroundColor:
                 isOverGoal && category === "calories"
-                  ? "#ef4444"
+                  ? colors.error
                   : isOverGoal && category === "protein"
-                  ? "#f59e0b"
+                  ? colors.warning
                   : color,
               width: `${Math.min(percentage, 100)}%`,
             },
@@ -59,7 +61,7 @@ export default function DailySummary({
           {renderProgressBar(
             dailyTotals.calories,
             dailyGoals.calories,
-            "#6366f1",
+            colors.primary,
             "calories"
           )}
         </View>
@@ -71,7 +73,7 @@ export default function DailySummary({
           {renderProgressBar(
             dailyTotals.protein,
             dailyGoals.protein,
-            "#10b981",
+            colors.success,
             "protein"
           )}
         </View>
@@ -80,9 +82,9 @@ export default function DailySummary({
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   summarySection: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 20,
     marginBottom: 24,
@@ -104,23 +106,23 @@ const tabletStyles = StyleSheet.create({
   summaryValue: {
     fontSize: 28,
     fontWeight: "900",
-    color: "#fff",
+    color: colors.text,
     marginBottom: 4,
   },
   summaryLabel: {
     fontSize: 14,
-    color: "#A0A0A0",
+    color: colors.textSecondary,
     marginBottom: 4,
   },
   summaryGoal: {
     fontSize: 12,
-    color: "#666",
+    color: colors.textSecondary,
     marginBottom: 8,
   },
   progressBarContainer: {
     width: "100%",
     height: 8,
-    backgroundColor: "#333",
+    backgroundColor: colors.inputBackground,
     borderRadius: 4,
     overflow: "hidden",
     position: "relative",
@@ -131,18 +133,21 @@ const tabletStyles = StyleSheet.create({
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  summarySection: {
-    ...tabletStyles.summarySection,
-    padding: 16,
-  },
-  summaryRow: {
-    ...tabletStyles.summaryRow,
-    gap: 16,
-  },
-  summaryValue: {
-    ...tabletStyles.summaryValue,
-    fontSize: 24,
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    summarySection: {
+      ...tablet.summarySection,
+      padding: 16,
+    },
+    summaryRow: {
+      ...tablet.summaryRow,
+      gap: 16,
+    },
+    summaryValue: {
+      ...tablet.summaryValue,
+      fontSize: 24,
+    },
+  });
+};

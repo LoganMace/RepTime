@@ -3,12 +3,11 @@ import React from "react";
 
 import { CustomDrawerContent } from "@/components/CustomDrawerContent";
 import { CustomHeader } from "@/components/CustomHeader";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useThemeColors } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 
 function DrawerNavigator() {
-  const colorScheme = useColorScheme();
+  const colors = useThemeColors();
   const { isMobile } = useResponsiveStyles();
 
   const labelSize = isMobile ? 16 : 20;
@@ -19,12 +18,12 @@ function DrawerNavigator() {
         drawerType: "front",
         header: () => <CustomHeader />,
         headerShown: true,
-        drawerActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        drawerActiveTintColor: colors.primary,
         drawerLabelStyle: {
           fontSize: labelSize,
         },
         drawerStyle: {
-          backgroundColor: Colors[colorScheme ?? "dark"].background,
+          backgroundColor: colors.background,
         },
         overlayColor: "rgba(0, 0, 0, 0.5)",
       }}

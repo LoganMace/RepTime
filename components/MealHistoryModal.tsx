@@ -1,4 +1,5 @@
 import { loadMeals, type DayMeals } from "@/utils/mealStorage";
+import { useTheme } from "@/hooks/useTheme";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Modal,
@@ -54,10 +55,11 @@ export default function MealHistoryModal({
   visible,
   onClose,
 }: MealHistoryModalProps) {
+  const { colors } = useTheme();
   const [historyData, setHistoryData] = useState<DayData[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const styles = simpleStyles;
+  const styles = simpleStyles(colors);
 
   const loadHistoryData = useCallback(async () => {
     setLoading(true);
@@ -283,15 +285,15 @@ export default function MealHistoryModal({
   );
 }
 
-const simpleStyles = StyleSheet.create({
+const simpleStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: colors.overlay,
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.card,
     borderRadius: 16,
     width: "90%",
     maxWidth: 600,
@@ -307,12 +309,12 @@ const simpleStyles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#fff",
+    color: colors.text,
   },
   closeButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: "#333",
+    backgroundColor: colors.inputBackground,
   },
   loadingContainer: {
     flex: 1,
@@ -321,7 +323,7 @@ const simpleStyles = StyleSheet.create({
     minHeight: 200,
   },
   loadingText: {
-    color: "#A0A0A0",
+    color: colors.textSecondary,
     fontSize: 16,
   },
   emptyContainer: {
@@ -345,13 +347,13 @@ const simpleStyles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: colors.text,
     marginBottom: 12,
     textAlign: "center",
   },
   emptyText: {
     fontSize: 16,
-    color: "#666",
+    color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 30,
@@ -363,7 +365,7 @@ const simpleStyles = StyleSheet.create({
   emptyStep: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: colors.surface,
     padding: 16,
     borderRadius: 12,
     gap: 12,
@@ -371,14 +373,14 @@ const simpleStyles = StyleSheet.create({
   emptyStepIcon: {
     width: 32,
     height: 32,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
   },
   emptyStepText: {
     fontSize: 15,
-    color: "#444",
+    color: colors.text,
     fontWeight: "500",
     flex: 1,
   },
@@ -387,7 +389,7 @@ const simpleStyles = StyleSheet.create({
     width: "100%",
   },
   dayCard: {
-    backgroundColor: "#2a2a2a",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -401,14 +403,14 @@ const simpleStyles = StyleSheet.create({
   dayDate: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff",
+    color: colors.text,
   },
   dayTotals: {
     alignItems: "flex-end",
   },
   dayTotal: {
     fontSize: 14,
-    color: "#A0A0A0",
+    color: colors.textSecondary,
     fontWeight: "500",
   },
   categoriesContainer: {
@@ -435,11 +437,11 @@ const simpleStyles = StyleSheet.create({
   categoryName: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#fff",
+    color: colors.text,
   },
   categoryCount: {
     fontSize: 12,
-    color: "#A0A0A0",
+    color: colors.textSecondary,
   },
   categoryMeals: {
     flex: 1,
@@ -447,12 +449,12 @@ const simpleStyles = StyleSheet.create({
   },
   mealText: {
     fontSize: 13,
-    color: "#CCCCCC",
+    color: colors.textSecondary,
     lineHeight: 18,
   },
   moreText: {
     fontSize: 12,
-    color: "#A0A0A0",
+    color: colors.textSecondary,
     fontStyle: "italic",
   },
   bottomPadding: {

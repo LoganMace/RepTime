@@ -1,3 +1,4 @@
+import { useTheme } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
@@ -26,6 +27,7 @@ function toTotalSeconds(minutes: string, seconds: string) {
 }
 
 export default function TimersScreen() {
+  const { colors } = useTheme();
   const { getStyles, isMobile } = useResponsiveStyles();
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -61,7 +63,7 @@ export default function TimersScreen() {
     !timerName.trim() || (workSeconds === 0 && restSeconds === 0);
   const isStartDisabled = workSeconds === 0 && restSeconds === 0;
 
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   useEffect(() => {
     if (params.timer) {
@@ -440,21 +442,21 @@ const baseButtonText = {
   textTransform: "uppercase",
 } as const;
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   // Base Styles
   baseButton,
   baseButtonText,
   disabledButton: {
-    backgroundColor: "#444",
-    borderColor: "#666",
+    backgroundColor: colors.inputBackground,
+    borderColor: colors.border,
   },
   disabledButtonText: {
-    color: "#666",
+    color: colors.textSecondary,
   },
 
   // Header
   headerImage: {
-    color: "#808080",
+    color: colors.textSecondary,
     bottom: -90,
     left: -35,
     position: "absolute",
@@ -477,12 +479,12 @@ const tabletStyles = StyleSheet.create({
   },
   timerNameInput: {
     borderWidth: 1,
-    borderColor: "#555",
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 10,
     fontSize: 24,
-    backgroundColor: "#333",
-    color: "#fff",
+    backgroundColor: colors.inputBackground,
+    color: colors.inputText,
     minWidth: 200,
   },
   scrollableContainer: {
@@ -518,15 +520,15 @@ const tabletStyles = StyleSheet.create({
     paddingLeft: 20,
     paddingRight: 20,
     borderWidth: 1,
-    borderColor: "#555",
+    borderColor: colors.border,
     borderRadius: 10,
-    backgroundColor: "#333",
+    backgroundColor: colors.inputBackground,
     minWidth: 120,
   },
   inputText: {
     paddingTop: 3,
     fontSize: 24,
-    color: "#fff",
+    color: colors.inputText,
   },
 
   // Action Buttons
@@ -541,31 +543,31 @@ const tabletStyles = StyleSheet.create({
   },
   sleekStartIcon: {
     ...baseButtonText,
-    color: "#222",
+    color: colors.textInverse,
     marginLeft: 8,
   },
   saveButton: {
     ...baseButton,
-    backgroundColor: "#222",
-    borderColor: "#39FF14",
+    backgroundColor: colors.background,
+    borderColor: colors.success,
     marginTop: 8,
     paddingHorizontal: 24,
     alignSelf: "center",
   },
   saveButtonText: {
     ...baseButtonText,
-    color: "#39FF14",
+    color: colors.success,
   },
 
   // Modal & Picker
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: colors.overlay,
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: "#222",
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 24,
     width: 320,
@@ -577,27 +579,29 @@ const tabletStyles = StyleSheet.create({
   },
   confirmButton: {
     marginTop: 24,
-    backgroundColor: "#39FF14",
+    backgroundColor: colors.success,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 32,
   },
   confirmButtonText: {
-    color: "#222",
+    color: colors.textInverse,
     fontSize: 20,
     fontWeight: "bold",
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
   headerImage: {
     bottom: -30,
     left: -20,
     position: "absolute",
   },
   centeredContainer: {
-    ...tabletStyles.centeredContainer,
+    ...tablet.centeredContainer,
     alignItems: "flex-start",
   },
   timerNameContainer: {
@@ -608,7 +612,7 @@ const mobileStyles = StyleSheet.create({
     width: "100%",
   },
   timerNameInput: {
-    ...tabletStyles.timerNameInput,
+    ...tablet.timerNameInput,
     width: "100%",
     fontSize: 20,
     padding: 8,
@@ -616,57 +620,58 @@ const mobileStyles = StyleSheet.create({
     paddingRight: 15,
   },
   scrollableContainer: {
-    ...tabletStyles.scrollableContainer,
+    ...tablet.scrollableContainer,
     width: "100%",
     justifyContent: "space-between",
     gap: 0,
   },
   inputRow: {
-    ...tabletStyles.inputRow,
+    ...tablet.inputRow,
   },
   sectionContainer: {
-    ...tabletStyles.sectionContainer,
+    ...tablet.sectionContainer,
     width: "100%",
     marginBottom: 15,
   },
   rowContainer: {
-    ...tabletStyles.rowContainer,
+    ...tablet.rowContainer,
     justifyContent: "space-between",
     gap: 12,
   },
   label: {
-    ...tabletStyles.label,
+    ...tablet.label,
     fontSize: 20,
   },
   inputContainer: {
-    ...tabletStyles.inputContainer,
+    ...tablet.inputContainer,
     minWidth: 70,
     padding: 8,
     paddingLeft: 15,
     paddingRight: 15,
   },
   inputText: {
-    ...tabletStyles.inputText,
+    ...tablet.inputText,
     fontSize: 20,
     paddingTop: 0,
   },
   sleekStartButton: {
-    ...tabletStyles.sleekStartButton,
+    ...tablet.sleekStartButton,
     width: "100%",
     height: 50,
     marginBottom: 10,
   },
   sleekStartIcon: {
-    ...tabletStyles.sleekStartIcon,
+    ...tablet.sleekStartIcon,
     fontSize: 20,
   },
   saveButton: {
-    ...tabletStyles.saveButton,
+    ...tablet.saveButton,
     width: "100%",
     height: 50,
   },
   saveButtonText: {
-    ...tabletStyles.saveButtonText,
+    ...tablet.saveButtonText,
     fontSize: 20,
   },
-});
+  });
+};

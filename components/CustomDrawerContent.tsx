@@ -4,15 +4,14 @@ import { usePathname, useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleProp, StyleSheet, Text, TextStyle, View } from "react-native";
 
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useThemeColors } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { IconSymbol } from "./ui/IconSymbol";
 
 export function CustomDrawerContent(props: any) {
   const router = useRouter();
   const pathname = usePathname();
-  const colorScheme = useColorScheme();
+  const colors = useThemeColors();
   const { isMobile } = useResponsiveStyles();
 
   const [timersOpen, setTimersOpen] = useState(pathname.startsWith("/timers"));
@@ -23,15 +22,13 @@ export function CustomDrawerContent(props: any) {
     pathname.startsWith("/trackers")
   );
 
-  const colors = Colors[colorScheme ?? "light"];
-
   const iconSize = isMobile ? 24 : 28;
   const labelSize = isMobile ? 14 : 18;
 
   const getLabelStyle = (path: string): StyleProp<TextStyle> => {
     const isActive = pathname === path;
     return {
-      color: isActive ? colors.tint : colors.text,
+      color: isActive ? colors.primary : colors.text,
       fontWeight: isActive ? "bold" : "normal",
       fontSize: labelSize,
     };
@@ -77,7 +74,7 @@ export function CustomDrawerContent(props: any) {
             <IconSymbol
               name="house.fill"
               size={iconSize}
-              color={pathname === "/" ? colors.tint : colors.text}
+              color={pathname === "/" ? colors.primary : colors.text}
             />
           )}
           onPress={() => {
@@ -94,7 +91,7 @@ export function CustomDrawerContent(props: any) {
             <View style={styles.collapsibleLabelContainer}>
               <Text
                 style={{
-                  color: isTimersPath ? colors.tint : colors.text,
+                  color: isTimersPath ? colors.primary : colors.text,
                   fontSize: labelSize,
                   fontWeight: isTimersPath ? "bold" : "normal",
                 }}
@@ -104,7 +101,7 @@ export function CustomDrawerContent(props: any) {
               <Feather
                 name={timersOpen ? "chevron-down" : "chevron-right"}
                 size={iconSize}
-                color={isTimersPath ? colors.tint : colors.text}
+                color={isTimersPath ? colors.primary : colors.text}
                 style={styles.chevron}
               />
             </View>
@@ -113,7 +110,7 @@ export function CustomDrawerContent(props: any) {
             <IconSymbol
               name="timer"
               size={iconSize}
-              color={isTimersPath ? colors.tint : colors.text}
+              color={isTimersPath ? colors.primary : colors.text}
             />
           )}
           onPress={() => {
@@ -173,7 +170,7 @@ export function CustomDrawerContent(props: any) {
             <View style={styles.collapsibleLabelContainer}>
               <Text
                 style={{
-                  color: isWorkoutsPath ? colors.tint : colors.text,
+                  color: isWorkoutsPath ? colors.primary : colors.text,
                   fontSize: labelSize,
                   fontWeight: isWorkoutsPath ? "bold" : "normal",
                 }}
@@ -183,7 +180,7 @@ export function CustomDrawerContent(props: any) {
               <Feather
                 name={workoutsOpen ? "chevron-down" : "chevron-right"}
                 size={iconSize}
-                color={isWorkoutsPath ? colors.tint : colors.text}
+                color={isWorkoutsPath ? colors.primary : colors.text}
                 style={styles.chevron}
               />
             </View>
@@ -192,7 +189,7 @@ export function CustomDrawerContent(props: any) {
             <IconSymbol
               name="dumbbell"
               size={iconSize}
-              color={isWorkoutsPath ? colors.tint : colors.text}
+              color={isWorkoutsPath ? colors.primary : colors.text}
             />
           )}
           onPress={() => {
@@ -240,7 +237,7 @@ export function CustomDrawerContent(props: any) {
             <View style={styles.collapsibleLabelContainer}>
               <Text
                 style={{
-                  color: isTrackersPath ? colors.tint : colors.text,
+                  color: isTrackersPath ? colors.primary : colors.text,
                   fontSize: labelSize,
                   fontWeight: isTrackersPath ? "bold" : "normal",
                 }}
@@ -250,7 +247,7 @@ export function CustomDrawerContent(props: any) {
               <Feather
                 name={trackersOpen ? "chevron-down" : "chevron-right"}
                 size={iconSize}
-                color={isTrackersPath ? colors.tint : colors.text}
+                color={isTrackersPath ? colors.primary : colors.text}
                 style={styles.chevron}
               />
             </View>
@@ -259,7 +256,7 @@ export function CustomDrawerContent(props: any) {
             <IconSymbol
               name="chart.line.uptrend.xyaxis"
               size={iconSize}
-              color={isTrackersPath ? colors.tint : colors.text}
+              color={isTrackersPath ? colors.primary : colors.text}
             />
           )}
           onPress={() => {
