@@ -1,6 +1,7 @@
 import { StyleSheet, Text, type TextProps } from "react-native";
 
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 export type ThemedTextProps = TextProps & {
@@ -16,6 +17,7 @@ export function ThemedText({
   type = "default",
   ...rest
 }: ThemedTextProps) {
+  const { colors } = useTheme();
   const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
   const { isMobile } = useResponsiveStyles();
 
@@ -31,7 +33,7 @@ export function ThemedText({
           : undefined,
         type === "defaultSemiBold" ? styles.defaultSemiBold : undefined,
         type === "subtitle" ? styles.subtitle : undefined,
-        type === "link" ? styles.link : undefined,
+        type === "link" ? { ...styles.link, color: colors.primary } : undefined,
         style,
       ]}
       {...rest}
@@ -66,6 +68,5 @@ const styles = StyleSheet.create({
   link: {
     lineHeight: 30,
     fontSize: 16,
-    color: "#0a7ea4",
   },
 });

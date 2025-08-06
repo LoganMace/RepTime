@@ -1,4 +1,5 @@
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState } from "react";
 import {
@@ -17,6 +18,7 @@ import { ThemedText } from "@/components/ThemedText";
 
 export default function SavedTimersScreen() {
   const { getStyles } = useResponsiveStyles();
+  const { colors } = useTheme();
   const router = useRouter();
 
   const [clockVisible, setClockVisible] = useState(false);
@@ -39,7 +41,7 @@ export default function SavedTimersScreen() {
     }[]
   >([]);
 
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   const loadTimers = async () => {
     try {
@@ -96,13 +98,13 @@ export default function SavedTimersScreen() {
                         onPress={() => handleEdit(timer, idx)}
                         style={styles.iconButton}
                       >
-                        <Feather name="edit-2" size={26} color="#007AFF" />
+                        <Feather name="edit-2" size={26} color={colors.primary} />
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => handleDelete(idx)}
                         style={styles.iconButton}
                       >
-                        <Feather name="trash-2" size={26} color="#d9534f" />
+                        <Feather name="trash-2" size={26} color={colors.error} />
                       </TouchableOpacity>
                     </View>
                     <Text style={styles.timerCardTitle}>{timer.name}</Text>
@@ -132,7 +134,7 @@ export default function SavedTimersScreen() {
                       }}
                       style={styles.playButton}
                     >
-                      <Feather name="play-circle" size={60} color="#39FF14" />
+                      <Feather name="play-circle" size={60} color={colors.success} />
                     </TouchableOpacity>
                   </View>
                 ))
@@ -159,13 +161,13 @@ export default function SavedTimersScreen() {
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
   },
   headerImage: {
-    color: "#808080",
+    color: colors.textSecondary,
     bottom: -90,
     left: -35,
     position: "absolute",
@@ -184,7 +186,7 @@ const tabletStyles = StyleSheet.create({
     width: "100%",
   },
   timerCard: {
-    backgroundColor: "#333",
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -204,12 +206,12 @@ const tabletStyles = StyleSheet.create({
     zIndex: 10,
   },
   timerCardTitle: {
-    color: "#39FF14",
+    color: colors.success,
     fontSize: 24,
     fontWeight: "bold",
   },
   timerCardText: {
-    color: "#fff",
+    color: colors.text,
     fontSize: 18,
   },
   iconButton: {
@@ -231,25 +233,28 @@ const tabletStyles = StyleSheet.create({
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  headerImage: {
-    bottom: -30,
-    left: -20,
-    position: "absolute",
-  },
-  centeredContainer: {
-    ...tabletStyles.centeredContainer,
-    alignItems: "stretch",
-  },
-  timerCardsContainer: {
-    ...tabletStyles.timerCardsContainer,
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  timerCard: {
-    ...tabletStyles.timerCard,
-    width: "100%",
-    marginHorizontal: 0,
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    headerImage: {
+      bottom: -30,
+      left: -20,
+      position: "absolute",
+    },
+    centeredContainer: {
+      ...tablet.centeredContainer,
+      alignItems: "stretch",
+    },
+    timerCardsContainer: {
+      ...tablet.timerCardsContainer,
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    timerCard: {
+      ...tablet.timerCard,
+      width: "100%",
+      marginHorizontal: 0,
+    },
+  });
+};

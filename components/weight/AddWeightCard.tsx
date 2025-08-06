@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { useTheme } from "../../hooks/useTheme";
 import { useResponsiveStyles } from "../../hooks/useResponsiveStyles";
 import { ThemedText } from "../ThemedText";
 
@@ -14,8 +15,9 @@ export default function AddWeightCard({
   onWeightChange,
   onAddWeight,
 }: AddWeightCardProps) {
+  const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   return (
     <View style={styles.addWeightCard}>
@@ -24,7 +26,7 @@ export default function AddWeightCard({
         <TextInput
           style={styles.weightInput}
           placeholder="Enter weight (lbs)"
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={colors.placeholder}
           value={newWeight}
           onChangeText={onWeightChange}
           keyboardType="decimal-pad"
@@ -37,9 +39,9 @@ export default function AddWeightCard({
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   addWeightCard: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -55,36 +57,39 @@ const tabletStyles = StyleSheet.create({
   },
   weightInput: {
     flex: 1,
-    backgroundColor: "#2a2a2a",
+    backgroundColor: colors.inputBackground,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: "#FFFFFF",
+    color: colors.inputText,
   },
   addButton: {
-    backgroundColor: "#22c55e",
+    backgroundColor: colors.success,
     borderRadius: 12,
     paddingHorizontal: 24,
     paddingVertical: 12,
     justifyContent: "center",
   },
   addButtonText: {
-    color: "#FFFFFF",
+    color: colors.textInverse,
     fontSize: 16,
     fontWeight: "600",
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  addWeightForm: {
-    ...tabletStyles.addWeightForm,
-    flexDirection: "column",
-    gap: 12,
-  },
-  addButton: {
-    ...tabletStyles.addButton,
-    alignSelf: "stretch",
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    addWeightForm: {
+      ...tablet.addWeightForm,
+      flexDirection: "column",
+      gap: 12,
+    },
+    addButton: {
+      ...tablet.addButton,
+      alignSelf: "stretch",
+    },
+  });
+};

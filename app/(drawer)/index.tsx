@@ -6,10 +6,12 @@ import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useMocksContext } from "@/contexts/MocksContext";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function HomeScreen() {
+  const { colors } = useTheme();
   const { getStyles, isMobile } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
   const { useMocks, toggleMocks } = useMocksContext();
 
   return (
@@ -20,7 +22,7 @@ export default function HomeScreen() {
           <IconSymbol
             name="figure.walk"
             size={isMobile ? 180 : 310}
-            color="cyan"
+            color={colors.info}
             style={styles.headerIcon}
           />
         }
@@ -65,8 +67,8 @@ export default function HomeScreen() {
             <Switch
               value={useMocks}
               onValueChange={toggleMocks}
-              trackColor={{ false: "#767577", true: "#3b82f6" }}
-              thumbColor={useMocks ? "#ffffff" : "#f4f3f4"}
+              trackColor={{ false: colors.textSecondary, true: colors.primary }}
+              thumbColor={useMocks ? colors.text : colors.inputBackground}
             />
           </TouchableOpacity>
           <ThemedText style={styles.toggleDescription}>
@@ -79,7 +81,7 @@ export default function HomeScreen() {
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -98,7 +100,7 @@ const tabletStyles = StyleSheet.create({
     gap: 12,
     marginTop: 16,
     padding: 16,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.card,
     borderRadius: 12,
   },
   toggleContainer: {
@@ -118,23 +120,26 @@ const tabletStyles = StyleSheet.create({
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
   headerIcon: {
     bottom: -30,
     left: -20,
     position: "absolute",
   },
   settingsContainer: {
-    ...tabletStyles.settingsContainer,
+    ...tablet.settingsContainer,
     padding: 12,
   },
   toggleLabel: {
-    ...tabletStyles.toggleLabel,
+    ...tablet.toggleLabel,
     fontSize: 14,
   },
   toggleDescription: {
-    ...tabletStyles.toggleDescription,
+    ...tablet.toggleDescription,
     fontSize: 12,
   },
-});
+  });
+};

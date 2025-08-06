@@ -1,4 +1,5 @@
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 import React, { useEffect, useState } from "react";
 import {
   Modal,
@@ -21,9 +22,10 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
   workout,
   onClose,
 }) => {
+  const { colors } = useTheme();
   const [completed, setCompleted] = useState<number[]>([]);
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   useEffect(() => {
     if (!visible) {
@@ -46,7 +48,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
       transparent={false}
       onRequestClose={onClose}
     >
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#222" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
         <View style={styles.container}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeButtonText}>✕</Text>
@@ -121,7 +123,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
   );
 };
 
-const mobileStyles = StyleSheet.create({
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
@@ -134,7 +136,7 @@ const mobileStyles = StyleSheet.create({
     padding: 10,
   },
   closeButtonText: {
-    color: "white",
+    color: colors.text,
     fontSize: 36,
     fontWeight: "bold",
   },
@@ -143,14 +145,14 @@ const mobileStyles = StyleSheet.create({
     paddingBottom: 40,
   },
   title: {
-    color: "gold",
+    color: colors.warning,
     fontSize: 28,
     fontWeight: "bold",
     marginBottom: 12,
     textAlign: "center",
   },
   subtitle: {
-    color: "#fff",
+    color: colors.text,
     fontSize: 18,
     marginBottom: 16,
     textAlign: "center",
@@ -159,25 +161,25 @@ const mobileStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 24,
-    backgroundColor: "#333",
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
     flexWrap: "wrap",
     gap: 16,
   },
   exerciseTitle: {
-    color: "gold",
+    color: colors.warning,
     fontSize: 24,
     fontWeight: "bold",
     marginRight: 16,
   },
   detailRow: {
-    color: "#fff",
+    color: colors.text,
     fontSize: 18,
     marginRight: 16,
   },
   savedAt: {
-    color: "#aaa",
+    color: colors.textSecondary,
     fontSize: 12,
     textAlign: "center",
     marginTop: 16,
@@ -189,37 +191,37 @@ const mobileStyles = StyleSheet.create({
   progressBarBg: {
     width: "100%",
     height: 12,
-    backgroundColor: "#444",
+    backgroundColor: colors.inputBackground,
     borderRadius: 8,
     overflow: "hidden",
   },
   progressBarFill: {
     height: 12,
-    backgroundColor: "gold",
+    backgroundColor: colors.warning,
     borderRadius: 8,
   },
   progressText: {
-    color: "gold",
+    color: colors.warning,
     fontSize: 14,
     marginTop: 4,
     fontWeight: "bold",
   },
   completeButton: {
-    backgroundColor: "#555",
+    backgroundColor: colors.inputBackground,
     borderRadius: 8,
     paddingVertical: 6,
     paddingHorizontal: 12,
     marginRight: 12,
   },
   completeButtonDone: {
-    backgroundColor: "gold",
+    backgroundColor: colors.warning,
     borderRadius: 8,
     paddingVertical: 6,
     paddingHorizontal: 12,
     marginRight: 12,
   },
   completeButtonText: {
-    color: "#fff",
+    color: colors.text,
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -227,7 +229,7 @@ const mobileStyles = StyleSheet.create({
     flex: 1,
   },
   markCompleteLabel: {
-    color: "#fff",
+    color: colors.text,
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 8,
@@ -237,7 +239,7 @@ const mobileStyles = StyleSheet.create({
   },
 });
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
     padding: 24,
@@ -250,7 +252,7 @@ const tabletStyles = StyleSheet.create({
     padding: 10,
   },
   closeButtonText: {
-    color: "white",
+    color: colors.text,
     fontSize: 48,
     fontWeight: "bold",
   },
@@ -259,14 +261,14 @@ const tabletStyles = StyleSheet.create({
     paddingBottom: 40,
   },
   title: {
-    color: "gold",
+    color: colors.warning,
     fontSize: 36,
     fontWeight: "bold",
     marginBottom: 16,
     textAlign: "center",
   },
   subtitle: {
-    color: "#fff",
+    color: colors.text,
     fontSize: 24,
     marginBottom: 24,
     textAlign: "center",
@@ -275,25 +277,25 @@ const tabletStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 32,
-    backgroundColor: "#333",
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 20,
     flexWrap: "wrap",
     gap: 24,
   },
   exerciseTitle: {
-    color: "gold",
+    color: colors.warning,
     fontSize: 32,
     fontWeight: "bold",
     marginRight: 24,
   },
   detailRow: {
-    color: "#fff",
+    color: colors.text,
     fontSize: 28,
     marginRight: 24,
   },
   savedAt: {
-    color: "#aaa",
+    color: colors.textSecondary,
     fontSize: 14,
     textAlign: "center",
     marginTop: 24,
@@ -305,37 +307,37 @@ const tabletStyles = StyleSheet.create({
   progressBarBg: {
     width: "100%",
     height: 16,
-    backgroundColor: "#444",
+    backgroundColor: colors.inputBackground,
     borderRadius: 8,
     overflow: "hidden",
   },
   progressBarFill: {
     height: 16,
-    backgroundColor: "gold",
+    backgroundColor: colors.warning,
     borderRadius: 8,
   },
   progressText: {
-    color: "gold",
+    color: colors.warning,
     fontSize: 18,
     marginTop: 8,
     fontWeight: "bold",
   },
   completeButton: {
-    backgroundColor: "#555",
+    backgroundColor: colors.inputBackground,
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,
     marginRight: 16,
   },
   completeButtonDone: {
-    backgroundColor: "gold",
+    backgroundColor: colors.warning,
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,
     marginRight: 16,
   },
   completeButtonText: {
-    color: "#fff",
+    color: colors.text,
     fontSize: 22,
     fontWeight: "bold",
   },
@@ -343,7 +345,7 @@ const tabletStyles = StyleSheet.create({
     flex: 1,
   },
   markCompleteLabel: {
-    color: "#fff",
+    color: colors.text,
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 8,

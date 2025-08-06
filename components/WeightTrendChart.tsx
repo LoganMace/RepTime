@@ -10,6 +10,7 @@ import Svg, {
   Text as SvgText,
 } from "react-native-svg";
 import { useResponsiveStyles } from "../hooks/useResponsiveStyles";
+import { useTheme } from "../hooks/useTheme";
 import { ThemedText } from "./ThemedText";
 
 interface WeightEntry {
@@ -34,8 +35,9 @@ export function WeightTrendChart({
   height = 240, // Increased to accommodate date labels
   showSmoothing = true,
 }: WeightTrendChartProps) {
+  const { colors } = useTheme();
   const { getStyles, isMobile } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   if (data.length === 0) {
     return (
@@ -184,8 +186,8 @@ export function WeightTrendChart({
             x2="0%"
             y2="100%"
           >
-            <Stop offset="0%" stopColor="#22c55e" stopOpacity="0.8" />
-            <Stop offset="100%" stopColor="#22c55e" stopOpacity="0.2" />
+            <Stop offset="0%" stopColor={colors.success} stopOpacity="0.8" />
+            <Stop offset="100%" stopColor={colors.success} stopOpacity="0.2" />
           </LinearGradient>
         </Defs>
 
@@ -197,7 +199,7 @@ export function WeightTrendChart({
             y1={label.y}
             x2={width - padding}
             y2={label.y}
-            stroke="#333"
+            stroke={colors.border}
             strokeWidth="0.5"
             strokeDasharray="2,2"
           />
@@ -209,7 +211,7 @@ export function WeightTrendChart({
           y1={padding + chartHeight}
           x2={width - padding}
           y2={padding + chartHeight}
-          stroke="#444"
+          stroke={colors.border}
           strokeWidth="1"
         />
 
@@ -220,7 +222,7 @@ export function WeightTrendChart({
             y1={goalY}
             x2={width - padding}
             y2={goalY}
-            stroke="#fbbf24"
+            stroke={colors.warning}
             strokeWidth="2"
             strokeDasharray="5,3"
           />
@@ -229,7 +231,7 @@ export function WeightTrendChart({
         {/* Original weight line (dotted, lighter) */}
         <Path
           d={originalPath}
-          stroke="#6b7280"
+          stroke={colors.textSecondary}
           strokeWidth="1.5"
           strokeDasharray="3,3"
           fill="none"
@@ -237,7 +239,7 @@ export function WeightTrendChart({
 
         {/* Smoothed trend line */}
         {showSmoothing && smoothedPath && (
-          <Path d={smoothedPath} stroke="#22c55e" strokeWidth="3" fill="none" />
+          <Path d={smoothedPath} stroke={colors.success} strokeWidth="3" fill="none" />
         )}
 
         {/* Data points */}
@@ -247,8 +249,8 @@ export function WeightTrendChart({
             cx={getX(point.index)}
             cy={getY(point.weight)}
             r="4"
-            fill="#22c55e"
-            stroke="#1a1a1a"
+            fill={colors.success}
+            stroke={colors.background}
             strokeWidth="2"
           />
         ))}
@@ -260,7 +262,7 @@ export function WeightTrendChart({
             x={padding - 10}
             y={label.y + 3}
             fontSize={isMobile ? "10" : "12"}
-            fill="#9CA3AF"
+            fill={colors.textSecondary}
             textAnchor="end"
           >
             {label.weight}
@@ -274,7 +276,7 @@ export function WeightTrendChart({
             x={label.x}
             y={padding + chartHeight + 25}
             fontSize={isMobile ? "8" : "11"}
-            fill="#9CA3AF"
+            fill={colors.textSecondary}
             textAnchor="middle"
           >
             {label.label}
@@ -287,7 +289,7 @@ export function WeightTrendChart({
             x={width - padding + 5}
             y={goalY + 3}
             fontSize={isMobile ? "10" : "12"}
-            fill="#fbbf24"
+            fill={colors.warning}
             textAnchor="start"
           >
             Goal: {goalWeight}
@@ -298,12 +300,12 @@ export function WeightTrendChart({
       {/* Legend */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendLine, { backgroundColor: "#6b7280" }]} />
+          <View style={[styles.legendLine, { backgroundColor: colors.textSecondary }]} />
           <ThemedText style={styles.legendText}>Actual Weight</ThemedText>
         </View>
         {showSmoothing && (
           <View style={styles.legendItem}>
-            <View style={[styles.legendLine, { backgroundColor: "#22c55e" }]} />
+            <View style={[styles.legendLine, { backgroundColor: colors.success }]} />
             <ThemedText style={styles.legendText}>Trend (3-day avg)</ThemedText>
           </View>
         )}
@@ -312,7 +314,7 @@ export function WeightTrendChart({
             <View
               style={[
                 styles.legendLine,
-                { backgroundColor: "#fbbf24", height: 1 },
+                { backgroundColor: colors.warning, height: 1 },
               ]}
             />
             <ThemedText style={styles.legendText}>Goal Weight</ThemedText>
@@ -323,7 +325,7 @@ export function WeightTrendChart({
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     backgroundColor: "transparent",
     marginVertical: 10,
@@ -357,25 +359,28 @@ const tabletStyles = StyleSheet.create({
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
   legend: {
-    ...tabletStyles.legend,
+    ...tablet.legend,
     gap: 8,
     marginTop: 8,
   },
   legendItem: {
-    ...tabletStyles.legendItem,
+    ...tablet.legendItem,
     gap: 3,
     marginBottom: 4,
   },
   legendLine: {
-    ...tabletStyles.legendLine,
+    ...tablet.legendLine,
     width: 16,
     height: 2,
   },
   legendText: {
-    ...tabletStyles.legendText,
+    ...tablet.legendText,
     fontSize: 10,
   },
-});
+  });
+};

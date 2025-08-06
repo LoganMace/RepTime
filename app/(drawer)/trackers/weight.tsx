@@ -11,6 +11,7 @@ import WeightHistoryCard from "../../../components/weight/WeightHistoryCard";
 import WeightSummaryCard from "../../../components/weight/WeightSummaryCard";
 import { useMocksContext } from "../../../contexts/MocksContext";
 import { useResponsiveStyles } from "../../../hooks/useResponsiveStyles";
+import { useTheme } from "../../../hooks/useTheme";
 import {
   formatDateForDisplay,
   getWeightGoal,
@@ -22,7 +23,8 @@ import {
 
 export default function WeightTrackingScreen() {
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const { colors } = useTheme();
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
   const { useMocks } = useMocksContext();
 
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
@@ -177,7 +179,7 @@ export default function WeightTrackingScreen() {
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -201,20 +203,23 @@ const tabletStyles = StyleSheet.create({
     minHeight: 200,
   },
   loadingText: {
-    color: "#A0A0A0",
+    color: colors.textSecondary,
     fontSize: 16,
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  scrollContainer: {
-    ...tabletStyles.scrollContainer,
-    padding: 16,
-    paddingTop: 24,
-  },
-  subtitle: {
-    ...tabletStyles.subtitle,
-    fontSize: 14,
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    scrollContainer: {
+      ...tablet.scrollContainer,
+      padding: 16,
+      paddingTop: 24,
+    },
+    subtitle: {
+      ...tablet.subtitle,
+      fontSize: 14,
+    },
+  });
+};

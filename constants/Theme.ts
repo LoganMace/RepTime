@@ -18,6 +18,10 @@ const baseColors = {
   warning: '#F0AD4E',
   warningDark: '#EC971F',
   
+  // Info colors
+  info: '#17A2B8',
+  infoDark: '#138496',
+  
   // Error/danger colors
   error: '#D9534F',
   errorDark: '#C9302C',
@@ -71,6 +75,7 @@ export const Theme = {
       success: baseColors.success,
       warning: baseColors.warning,
       error: baseColors.error,
+      info: baseColors.info,
       
       // Border colors
       border: baseColors.gray300,
@@ -93,6 +98,9 @@ export const Theme = {
       
       // Overlay
       overlay: baseColors.overlay,
+      
+      // Shadow
+      shadow: baseColors.black,
     },
     dark: {
       // Text colors
@@ -114,6 +122,7 @@ export const Theme = {
       success: baseColors.success,
       warning: baseColors.warning,
       error: baseColors.error,
+      info: baseColors.info,
       
       // Border colors
       border: baseColors.darkBorder,
@@ -136,6 +145,9 @@ export const Theme = {
       
       // Overlay
       overlay: baseColors.overlay,
+      
+      // Shadow
+      shadow: baseColors.black,
     },
   },
   

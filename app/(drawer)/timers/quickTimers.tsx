@@ -5,6 +5,7 @@ import Clock from "@/components/Clock";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 
 const PRESET_TIMERS = [
   { name: "15s", duration: 15, color: "#dc2626", brightColor: "#ef4444" }, // Red - Fastest/Hottest
@@ -20,8 +21,9 @@ const PRESET_TIMERS = [
 ];
 
 export default function QuickTimersScreen() {
+  const { colors } = useTheme();
   const { getStyles, isMobile } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   const [clockVisible, setClockVisible] = useState(false);
   const [activeTimerData, setActiveTimerData] = useState<{
@@ -107,7 +109,7 @@ export default function QuickTimersScreen() {
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "flex-start",
@@ -123,7 +125,7 @@ const tabletStyles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     textAlign: "center",
-    color: "#A0A0A0",
+    color: colors.textSecondary,
     fontWeight: "400",
     lineHeight: 22,
   },
@@ -142,8 +144,8 @@ const tabletStyles = StyleSheet.create({
     alignItems: "center",
     minHeight: 140,
     width: "30%",
-    backgroundColor: "#1a1a1a",
-    shadowColor: "#000",
+    backgroundColor: colors.card,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
@@ -175,26 +177,28 @@ const tabletStyles = StyleSheet.create({
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
   container: {
-    ...tabletStyles.container,
+    ...tablet.container,
     padding: 15,
   },
   headerContainer: {
-    ...tabletStyles.headerContainer,
+    ...tablet.headerContainer,
     marginBottom: 30,
   },
   subtitle: {
-    ...tabletStyles.subtitle,
+    ...tablet.subtitle,
     fontSize: 14,
   },
   grid: {
-    ...tabletStyles.grid,
+    ...tablet.grid,
     paddingHorizontal: 12,
   },
   timerButton: {
-    ...tabletStyles.timerButton,
+    ...tablet.timerButton,
     paddingVertical: 20,
     margin: 6,
     minHeight: 95,
@@ -202,13 +206,14 @@ const mobileStyles = StyleSheet.create({
     borderRadius: 14,
   },
   timerButtonText: {
-    ...tabletStyles.timerButtonText,
+    ...tablet.timerButtonText,
     fontSize: 24,
   },
   row: {
-    ...tabletStyles.row,
+    ...tablet.row,
     justifyContent: "space-around",
     marginBottom: 12,
     gap: 12,
   },
-});
+  });
+};

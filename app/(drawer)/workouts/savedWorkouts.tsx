@@ -13,10 +13,12 @@ import {
 import { ThemedText } from "@/components/ThemedText";
 import WorkoutViewModal from "@/components/WorkoutViewModal";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function SavedWorkoutsScreen() {
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const { colors } = useTheme();
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
   const router = useRouter();
 
   const [savedWorkouts, setSavedWorkouts] = useState<any[]>([]);
@@ -75,13 +77,13 @@ export default function SavedWorkoutsScreen() {
                   onPress={() => handleEdit(plan, idx)}
                   style={{ padding: 4 }}
                 >
-                  <Feather name="edit-2" size={26} color="#007AFF" />
+                  <Feather name="edit-2" size={26} color={colors.primary} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => handleDelete(idx)}
                   style={{ padding: 4 }}
                 >
-                  <Feather name="trash-2" size={26} color="#d9534f" />
+                  <Feather name="trash-2" size={26} color={colors.error} />
                 </TouchableOpacity>
               </View>
               <Text style={styles.timerCardTitle}>{plan.name}</Text>
@@ -116,13 +118,13 @@ export default function SavedWorkoutsScreen() {
                   position: "absolute",
                   bottom: 12,
                   right: 12,
-                  backgroundColor: "#007AFF",
+                  backgroundColor: colors.primary,
                   borderRadius: 24,
                   padding: 10,
                   zIndex: 10,
                 }}
               >
-                <Feather name="eye" size={24} color="#fff" />
+                <Feather name="eye" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
           ))
@@ -137,7 +139,7 @@ export default function SavedWorkoutsScreen() {
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
@@ -148,30 +150,33 @@ const tabletStyles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   timerCard: {
-    backgroundColor: "#444",
+    backgroundColor: colors.inputBackground,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     width: "100%",
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 2,
   },
   timerCardTitle: {
-    color: "gold",
+    color: colors.warning,
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 8,
   },
   timerCardText: {
-    color: "white",
+    color: colors.text,
     fontSize: 16,
     marginBottom: 4,
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+  });
+};

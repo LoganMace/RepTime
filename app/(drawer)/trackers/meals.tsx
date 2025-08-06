@@ -12,6 +12,7 @@ import {
 import { ThemedView } from "@/components/ThemedView";
 import { useMocksContext } from "@/contexts/MocksContext";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 import {
   addMealEntry,
   addToFavorites,
@@ -37,7 +38,8 @@ import {
 
 export default function MealsScreen() {
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const { colors } = useTheme();
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
   const { useMocks } = useMocksContext();
 
   const [meals, setMeals] = useState<MealEntry[]>([]);
@@ -368,10 +370,10 @@ export default function MealsScreen() {
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
@@ -388,7 +390,7 @@ const tabletStyles = StyleSheet.create({
   dateText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff",
+    color: colors.text,
   },
   dateActions: {
     flexDirection: "row",
@@ -397,37 +399,40 @@ const tabletStyles = StyleSheet.create({
   actionButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: "#333",
+    backgroundColor: colors.card,
     borderRadius: 8,
   },
   actionButtonText: {
-    color: "#3b82f6",
+    color: colors.primary,
     fontSize: 14,
     fontWeight: "500",
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  scrollView: {
-    ...tabletStyles.scrollView,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  dateSection: {
-    ...tabletStyles.dateSection,
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  dateActions: {
-    ...tabletStyles.dateActions,
-    alignSelf: "stretch",
-    justifyContent: "space-between",
-  },
-  actionButton: {
-    ...tabletStyles.actionButton,
-    flex: 1,
-    alignItems: "center",
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    scrollView: {
+      ...tablet.scrollView,
+      paddingHorizontal: 16,
+      paddingTop: 16,
+    },
+    dateSection: {
+      ...tablet.dateSection,
+      flexDirection: "column",
+      alignItems: "flex-start",
+      gap: 12,
+    },
+    dateActions: {
+      ...tablet.dateActions,
+      alignSelf: "stretch",
+      justifyContent: "space-between",
+    },
+    actionButton: {
+      ...tablet.actionButton,
+      flex: 1,
+      alignItems: "center",
+    },
+  });
+};

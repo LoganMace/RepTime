@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { useTheme } from "../../hooks/useTheme";
 import { useResponsiveStyles } from "../../hooks/useResponsiveStyles";
 import { ThemedText } from "../ThemedText";
 import { getChangeColor, getChangeIcon } from "./WeightConstants";
@@ -17,8 +18,9 @@ export default function WeightSummaryCard({
   goalWeight,
   onEditGoal,
 }: WeightSummaryCardProps) {
+  const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   return (
     <View style={styles.summaryCard}>
@@ -44,9 +46,9 @@ export default function WeightSummaryCard({
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   summaryCard: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 24,
     marginBottom: 16,
@@ -72,22 +74,25 @@ const tabletStyles = StyleSheet.create({
     marginTop: 8,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: "#3b82f630",
+    backgroundColor: colors.primary + '30',
     borderRadius: 8,
     alignItems: "center",
   },
   editGoalText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#3b82f6",
+    color: colors.primary,
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  currentWeight: {
-    ...tabletStyles.currentWeight,
-    fontSize: 28,
-    lineHeight: 34,
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    currentWeight: {
+      ...tablet.currentWeight,
+      fontSize: 28,
+      lineHeight: 34,
+    },
+  });
+};

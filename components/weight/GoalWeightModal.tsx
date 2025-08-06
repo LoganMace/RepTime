@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTheme } from "../../hooks/useTheme";
 import { useResponsiveStyles } from "../../hooks/useResponsiveStyles";
 import { ThemedText } from "../ThemedText";
 
@@ -26,8 +27,9 @@ export default function GoalWeightModal({
   onSave,
   onGoalWeightChange,
 }: GoalWeightModalProps) {
+  const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   return (
     <Modal
@@ -47,7 +49,7 @@ export default function GoalWeightModal({
             <TextInput
               style={styles.modalInput}
               placeholder="Enter goal weight (lbs)"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.placeholder}
               value={newGoalWeight}
               onChangeText={onGoalWeightChange}
               keyboardType="decimal-pad"
@@ -73,14 +75,14 @@ export default function GoalWeightModal({
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: colors.overlay,
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.card,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
@@ -102,12 +104,12 @@ const tabletStyles = StyleSheet.create({
     gap: 20,
   },
   modalInput: {
-    backgroundColor: "#2a2a2a",
+    backgroundColor: colors.inputBackground,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 16,
     fontSize: 16,
-    color: "#FFFFFF",
+    color: colors.inputText,
     textAlign: "center",
   },
   modalButtons: {
@@ -116,52 +118,55 @@ const tabletStyles = StyleSheet.create({
   },
   modalCancelButton: {
     flex: 1,
-    backgroundColor: "#2a2a2a",
+    backgroundColor: colors.inputBackground,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
   },
   modalCancelText: {
-    color: "#FFFFFF",
+    color: colors.text,
     fontSize: 16,
     fontWeight: "600",
   },
   modalSaveButton: {
     flex: 1,
-    backgroundColor: "#3b82f6",
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
   },
   modalSaveText: {
-    color: "#FFFFFF",
+    color: colors.textInverse,
     fontSize: 16,
     fontWeight: "600",
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  modalContent: {
-    ...tabletStyles.modalContent,
-    padding: 20,
-    paddingBottom: 36,
-  },
-  modalTitle: {
-    ...tabletStyles.modalTitle,
-    fontSize: 18,
-  },
-  modalButtons: {
-    ...tabletStyles.modalButtons,
-    flexDirection: "column",
-    gap: 12,
-  },
-  modalCancelButton: {
-    ...tabletStyles.modalCancelButton,
-    flex: 0,
-  },
-  modalSaveButton: {
-    ...tabletStyles.modalSaveButton,
-    flex: 0,
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    modalContent: {
+      ...tablet.modalContent,
+      padding: 20,
+      paddingBottom: 36,
+    },
+    modalTitle: {
+      ...tablet.modalTitle,
+      fontSize: 18,
+    },
+    modalButtons: {
+      ...tablet.modalButtons,
+      flexDirection: "column",
+      gap: 12,
+    },
+    modalCancelButton: {
+      ...tablet.modalCancelButton,
+      flex: 0,
+    },
+    modalSaveButton: {
+      ...tablet.modalSaveButton,
+      flex: 0,
+    },
+  });
+};

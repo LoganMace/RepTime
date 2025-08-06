@@ -1,4 +1,5 @@
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useTheme } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { FavoriteMeal } from "@/utils/mealStorage";
 import React from "react";
@@ -27,8 +28,9 @@ export default function FavoritesModal({
   onClose,
   onAddFromFavorites,
 }: FavoritesModalProps) {
+  const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   return (
     <Modal
@@ -45,7 +47,7 @@ export default function FavoritesModal({
               borderWidth: 2,
               borderColor:
                 CATEGORIES.find((c) => c.key === selectedCategory)?.color ||
-                "#666",
+                colors.border,
             },
           ]}
         >
@@ -62,7 +64,7 @@ export default function FavoritesModal({
                   {
                     backgroundColor:
                       CATEGORIES.find((c) => c.key === selectedCategory)
-                        ?.color || "#666",
+                        ?.color || colors.border,
                   },
                 ]}
               >
@@ -72,7 +74,7 @@ export default function FavoritesModal({
                       ?.icon as any
                   }
                   size={18}
-                  color="#fff"
+                  color={colors.textInverse}
                 />
               </View>
             )}
@@ -84,7 +86,7 @@ export default function FavoritesModal({
           >
             {favoriteMeals.length === 0 ? (
               <View style={styles.noFavoritesContainer}>
-                <IconSymbol name="star" size={48} color="#666" />
+                <IconSymbol name="star" size={48} color={colors.textSecondary} />
                 <Text style={styles.noFavoritesText}>
                   No favorite meals yet. Add some meals to favorites by tapping
                   the heart icon!
@@ -99,12 +101,12 @@ export default function FavoritesModal({
                     selectedCategory && {
                       backgroundColor: `${
                         CATEGORIES.find((c) => c.key === selectedCategory)
-                          ?.lightColor || "#333"
+                          ?.lightColor || colors.inputBackground
                       }15`,
                       borderLeftWidth: 3,
                       borderLeftColor:
                         CATEGORIES.find((c) => c.key === selectedCategory)
-                          ?.color || "#666",
+                          ?.color || colors.border,
                       borderRadius: 8,
                       marginVertical: 2,
                       paddingHorizontal: 12,
@@ -125,8 +127,8 @@ export default function FavoritesModal({
                       color={
                         selectedCategory
                           ? CATEGORIES.find((c) => c.key === selectedCategory)
-                              ?.color || "#3b82f6"
-                          : "#3b82f6"
+                              ?.color || colors.primary
+                          : colors.primary
                       }
                     />
                   </View>
@@ -149,15 +151,15 @@ export default function FavoritesModal({
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: colors.overlay,
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 24,
     width: "90%",
@@ -166,7 +168,7 @@ const tabletStyles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#fff",
+    color: colors.text,
     textAlign: "center",
   },
   modalTitleContainer: {
@@ -193,7 +195,7 @@ const tabletStyles = StyleSheet.create({
     gap: 16,
   },
   noFavoritesText: {
-    color: "#A0A0A0",
+    color: colors.textSecondary,
     fontSize: 14,
     textAlign: "center",
     lineHeight: 20,
@@ -202,7 +204,7 @@ const tabletStyles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 4,
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    borderBottomColor: colors.border,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -215,12 +217,12 @@ const tabletStyles = StyleSheet.create({
   favoriteItemName: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#fff",
+    color: colors.text,
     marginBottom: 4,
   },
   favoriteItemNutrition: {
     fontSize: 14,
-    color: "#A0A0A0",
+    color: colors.textSecondary,
   },
   modalButtons: {
     flexDirection: "row",
@@ -234,41 +236,44 @@ const tabletStyles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: "#333",
+    backgroundColor: colors.inputBackground,
   },
   cancelButtonText: {
-    color: "#CCCCCC",
+    color: colors.textSecondary,
     fontSize: 16,
     fontWeight: "500",
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  modalContent: {
-    ...tabletStyles.modalContent,
-    width: "95%",
-    margin: 16,
-  },
-  modalTitle: {
-    ...tabletStyles.modalTitle,
-    fontSize: 18,
-  },
-  favoriteItemName: {
-    ...tabletStyles.favoriteItemName,
-    fontSize: 15,
-  },
-  favoriteItemNutrition: {
-    ...tabletStyles.favoriteItemNutrition,
-    fontSize: 13,
-  },
-  cancelButtonText: {
-    ...tabletStyles.cancelButtonText,
-    color: "#CCCCCC",
-    fontSize: 14,
-  },
-  modalButton: {
-    ...tabletStyles.modalButton,
-    paddingVertical: 12,
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    modalContent: {
+      ...tablet.modalContent,
+      width: "95%",
+      margin: 16,
+    },
+    modalTitle: {
+      ...tablet.modalTitle,
+      fontSize: 18,
+    },
+    favoriteItemName: {
+      ...tablet.favoriteItemName,
+      fontSize: 15,
+    },
+    favoriteItemNutrition: {
+      ...tablet.favoriteItemNutrition,
+      fontSize: 13,
+    },
+    cancelButtonText: {
+      ...tablet.cancelButtonText,
+      color: colors.textSecondary,
+      fontSize: 14,
+    },
+    modalButton: {
+      ...tablet.modalButton,
+      paddingVertical: 12,
+    },
+  });
+};

@@ -1,4 +1,5 @@
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useTheme } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { MealEntry } from "./MealConstants";
@@ -14,8 +15,9 @@ export default function MealItem({
   onToggleFavorite,
   onDelete,
 }: MealItemProps) {
+  const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   return (
     <View style={styles.mealItem}>
@@ -30,14 +32,14 @@ export default function MealItem({
           <IconSymbol
             name={meal.isFavorite ? "star.fill" : "star"}
             size={16}
-            color={meal.isFavorite ? "#fbbf24" : "#666"}
+            color={meal.isFavorite ? colors.warning : colors.textSecondary}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => onDelete(meal.id)}>
           <IconSymbol
             name="trash"
             size={16}
-            color="#ef4444"
+            color={colors.error}
             style={{ opacity: 0.7 }}
           />
         </TouchableOpacity>
@@ -46,14 +48,14 @@ export default function MealItem({
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   mealItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
+    borderBottomColor: colors.border,
   },
   mealInfo: {
     flex: 1,
@@ -61,12 +63,12 @@ const tabletStyles = StyleSheet.create({
   mealName: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#fff",
+    color: colors.text,
     marginBottom: 4,
   },
   mealNutrition: {
     fontSize: 14,
-    color: "#A0A0A0",
+    color: colors.textSecondary,
   },
   mealActions: {
     flexDirection: "row",
@@ -75,14 +77,17 @@ const tabletStyles = StyleSheet.create({
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  mealName: {
-    ...tabletStyles.mealName,
-    fontSize: 15,
-  },
-  mealNutrition: {
-    ...tabletStyles.mealNutrition,
-    fontSize: 13,
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    mealName: {
+      ...tablet.mealName,
+      fontSize: 15,
+    },
+    mealNutrition: {
+      ...tablet.mealNutrition,
+      fontSize: 13,
+    },
+  });
+};

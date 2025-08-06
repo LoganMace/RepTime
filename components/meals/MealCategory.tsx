@@ -1,4 +1,5 @@
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useTheme } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { FavoriteMeal } from "@/utils/mealStorage";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -24,8 +25,9 @@ export default function MealCategory({
   onToggleFavorite,
   onDeleteMeal,
 }: MealCategoryProps) {
+  const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles, tabletStyles);
+  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
   const categoryMeals = meals.filter((meal) => meal.category === category.key);
 
@@ -47,7 +49,7 @@ export default function MealCategory({
             <IconSymbol
               name={category.icon as any}
               size={22}
-              color="#fff"
+              color={colors.textInverse}
               style={styles.categoryIcon}
             />
           </View>
@@ -95,7 +97,7 @@ export default function MealCategory({
             onPress={() => onAddFromFavorites(category.key)}
           >
             <View style={styles.favoritesButtonContent}>
-              <IconSymbol name="star.fill" size={14} color="#A0A0A0" />
+              <IconSymbol name="star.fill" size={14} color={colors.textSecondary} />
               <Text style={styles.addFavoritesButtonText}>From Favorites</Text>
             </View>
           </TouchableOpacity>
@@ -105,9 +107,9 @@ export default function MealCategory({
   );
 }
 
-const tabletStyles = StyleSheet.create({
+const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   categorySection: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -136,7 +138,7 @@ const tabletStyles = StyleSheet.create({
   categoryTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff",
+    color: colors.text,
   },
   categoryCountBadge: {
     paddingHorizontal: 8,
@@ -149,7 +151,7 @@ const tabletStyles = StyleSheet.create({
   categoryCount: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#fff",
+    color: colors.textInverse,
   },
   addButtonContainer: {
     marginTop: 12,
@@ -170,17 +172,17 @@ const tabletStyles = StyleSheet.create({
     borderStyle: "dashed",
   },
   addFoodButtonSecondary: {
-    borderColor: "#666",
+    borderColor: colors.border,
     borderStyle: "dashed",
-    backgroundColor: "rgba(102, 102, 102, 0.05)",
+    backgroundColor: colors.border + '10',
   },
   addFoodButtonText: {
-    color: "#3b82f6",
+    color: colors.primary,
     fontSize: 16,
     fontWeight: "500",
   },
   addFavoritesButtonText: {
-    color: "#A0A0A0",
+    color: colors.textSecondary,
     fontSize: 16,
     fontWeight: "500",
   },
@@ -191,22 +193,25 @@ const tabletStyles = StyleSheet.create({
   },
 });
 
-const mobileStyles = StyleSheet.create({
-  ...tabletStyles,
-  categorySection: {
-    ...tabletStyles.categorySection,
-    padding: 12,
-  },
-  categoryTitle: {
-    ...tabletStyles.categoryTitle,
-    fontSize: 16,
-  },
-  categoryIcon: {
-    ...tabletStyles.categoryIcon,
-  },
-  addFavoritesButtonText: {
-    ...tabletStyles.addFavoritesButtonText,
-    fontSize: 14,
-    color: "#A0A0A0",
-  },
-});
+const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+  const tablet = tabletStyles(colors);
+  return StyleSheet.create({
+    ...tablet,
+    categorySection: {
+      ...tablet.categorySection,
+      padding: 12,
+    },
+    categoryTitle: {
+      ...tablet.categoryTitle,
+      fontSize: 16,
+    },
+    categoryIcon: {
+      ...tablet.categoryIcon,
+    },
+    addFavoritesButtonText: {
+      ...tablet.addFavoritesButtonText,
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+  });
+};
