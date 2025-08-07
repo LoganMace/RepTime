@@ -17,7 +17,7 @@ import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
 
 export default function WorkoutsScreen() {
-  const { getStyles } = useResponsiveStyles();
+  const { getStyles, isTablet } = useResponsiveStyles();
   const { colors } = useTheme();
   const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
   const params = useLocalSearchParams();
@@ -169,66 +169,130 @@ export default function WorkoutsScreen() {
                 />
               </View>
 
-              <View style={styles.inputRow}>
-                <View style={styles.inputGroup}>
-                  <ThemedText style={styles.inputLabel}>Sets</ThemedText>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="0"
-                    placeholderTextColor={colors.placeholder}
-                    keyboardType="numeric"
-                    value={row.sets}
-                    onChangeText={(v) => handleChange(idx, "sets", v)}
-                  />
+              {isTablet ? (
+                // Tablet layout: 5 columns in one row with adjusted widths
+                <View style={styles.inputRow}>
+                  <View style={[styles.inputGroup, styles.setsGroup]}>
+                    <ThemedText style={styles.inputLabel}>Sets</ThemedText>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="0"
+                      placeholderTextColor={colors.placeholder}
+                      keyboardType="numeric"
+                      value={row.sets}
+                      onChangeText={(v) => handleChange(idx, "sets", v)}
+                    />
+                  </View>
+                  <View style={[styles.inputGroup, styles.repsGroup]}>
+                    <ThemedText style={styles.inputLabel}>Reps</ThemedText>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="0"
+                      placeholderTextColor={colors.placeholder}
+                      keyboardType="numeric"
+                      value={row.reps}
+                      onChangeText={(v) => handleChange(idx, "reps", v)}
+                    />
+                  </View>
+                  <View style={[styles.inputGroup, styles.weightGroup]}>
+                    <ThemedText style={styles.inputLabel}>Weight (lbs)</ThemedText>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="0"
+                      placeholderTextColor={colors.placeholder}
+                      keyboardType="numeric"
+                      value={row.weight}
+                      onChangeText={(v) => handleChange(idx, "weight", v)}
+                    />
+                  </View>
+                  <View style={[styles.inputGroup, styles.workTimeGroup]}>
+                    <ThemedText style={styles.inputLabel}>Work Time (s)</ThemedText>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="0"
+                      placeholderTextColor={colors.placeholder}
+                      keyboardType="numeric"
+                      value={row.workTime}
+                      onChangeText={(v) => handleChange(idx, "workTime", v)}
+                    />
+                  </View>
+                  <View style={[styles.inputGroup, styles.restTimeGroup]}>
+                    <ThemedText style={styles.inputLabel}>Rest Time (s)</ThemedText>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="0"
+                      placeholderTextColor={colors.placeholder}
+                      keyboardType="numeric"
+                      value={row.restTime}
+                      onChangeText={(v) => handleChange(idx, "restTime", v)}
+                    />
+                  </View>
                 </View>
-                <View style={styles.inputGroup}>
-                  <ThemedText style={styles.inputLabel}>Reps</ThemedText>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="0"
-                    placeholderTextColor={colors.placeholder}
-                    keyboardType="numeric"
-                    value={row.reps}
-                    onChangeText={(v) => handleChange(idx, "reps", v)}
-                  />
-                </View>
-                <View style={styles.inputGroup}>
-                  <ThemedText style={styles.inputLabel}>Weight (lbs)</ThemedText>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="0"
-                    placeholderTextColor={colors.placeholder}
-                    keyboardType="numeric"
-                    value={row.weight}
-                    onChangeText={(v) => handleChange(idx, "weight", v)}
-                  />
-                </View>
-              </View>
+              ) : (
+                // Mobile layout: 3 columns, then 2 columns
+                <>
+                  <View style={styles.inputRow}>
+                    <View style={styles.inputGroup}>
+                      <ThemedText style={styles.inputLabel}>Sets</ThemedText>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="0"
+                        placeholderTextColor={colors.placeholder}
+                        keyboardType="numeric"
+                        value={row.sets}
+                        onChangeText={(v) => handleChange(idx, "sets", v)}
+                      />
+                    </View>
+                    <View style={styles.inputGroup}>
+                      <ThemedText style={styles.inputLabel}>Reps</ThemedText>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="0"
+                        placeholderTextColor={colors.placeholder}
+                        keyboardType="numeric"
+                        value={row.reps}
+                        onChangeText={(v) => handleChange(idx, "reps", v)}
+                      />
+                    </View>
+                    <View style={styles.inputGroup}>
+                      <ThemedText style={styles.inputLabel}>Weight (lbs)</ThemedText>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="0"
+                        placeholderTextColor={colors.placeholder}
+                        keyboardType="numeric"
+                        value={row.weight}
+                        onChangeText={(v) => handleChange(idx, "weight", v)}
+                      />
+                    </View>
+                  </View>
 
-              <View style={styles.inputRow}>
-                <View style={styles.inputGroup}>
-                  <ThemedText style={styles.inputLabel}>Work Time (s)</ThemedText>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="0"
-                    placeholderTextColor={colors.placeholder}
-                    keyboardType="numeric"
-                    value={row.workTime}
-                    onChangeText={(v) => handleChange(idx, "workTime", v)}
-                  />
-                </View>
-                <View style={styles.inputGroup}>
-                  <ThemedText style={styles.inputLabel}>Rest Time (s)</ThemedText>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="0"
-                    placeholderTextColor={colors.placeholder}
-                    keyboardType="numeric"
-                    value={row.restTime}
-                    onChangeText={(v) => handleChange(idx, "restTime", v)}
-                  />
-                </View>
-              </View>
+                  <View style={styles.inputRow}>
+                    <View style={styles.inputGroup}>
+                      <ThemedText style={styles.inputLabel}>Work Time (s)</ThemedText>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="0"
+                        placeholderTextColor={colors.placeholder}
+                        keyboardType="numeric"
+                        value={row.workTime}
+                        onChangeText={(v) => handleChange(idx, "workTime", v)}
+                      />
+                    </View>
+                    <View style={styles.inputGroup}>
+                      <ThemedText style={styles.inputLabel}>Rest Time (s)</ThemedText>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="0"
+                        placeholderTextColor={colors.placeholder}
+                        keyboardType="numeric"
+                        value={row.restTime}
+                        onChangeText={(v) => handleChange(idx, "restTime", v)}
+                      />
+                    </View>
+                  </View>
+                </>
+              )}
             </View>
           </View>
         ))}
@@ -305,6 +369,22 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => StyleShe
   inputGroup: {
     gap: 8,
   },
+  // Tablet-specific flex values for balanced input widths
+  setsGroup: {
+    flex: 1, // Small: Sets (single digit)
+  },
+  repsGroup: {
+    flex: 1, // Small: Reps (single/double digit)
+  },
+  weightGroup: {
+    flex: 1.5, // Medium: Weight (can be 3+ digits)
+  },
+  workTimeGroup: {
+    flex: 1.5, // Medium: Work Time (seconds can be 2-3 digits)
+  },
+  restTimeGroup: {
+    flex: 1.5, // Medium: Rest Time (seconds can be 2-3 digits)
+  },
   inputLabel: {
     fontSize: 14,
     fontWeight: "500",
@@ -378,6 +458,22 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
     },
     inputGroup: {
       ...tablet.inputGroup,
+      flex: 1,
+    },
+    // Reset tablet-specific flex values on mobile
+    setsGroup: {
+      flex: 1,
+    },
+    repsGroup: {
+      flex: 1,
+    },
+    weightGroup: {
+      flex: 1,
+    },
+    workTimeGroup: {
+      flex: 1,
+    },
+    restTimeGroup: {
       flex: 1,
     },
     inputLabel: {
