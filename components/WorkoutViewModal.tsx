@@ -3,7 +3,6 @@ import { useTheme } from "@/hooks/useTheme";
 import React, { useEffect, useState } from "react";
 import {
   Modal,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -45,14 +44,17 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      transparent={false}
+      transparent={true}
       onRequestClose={onClose}
     >
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <View style={styles.container}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>✕</Text>
-          </TouchableOpacity>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Workout</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>✕</Text>
+            </TouchableOpacity>
+          </View>
           {workout && (
             <ScrollView contentContainerStyle={styles.scrollContent}>
               {/* Progress Bar */}
@@ -118,31 +120,51 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
             </ScrollView>
           )}
         </View>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 };
 
 const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
+  modalOverlay: {
     flex: 1,
-    padding: 16,
+    backgroundColor: colors.overlay,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    width: "100%",
+    maxWidth: 600,
+    maxHeight: "90%",
+    padding: 24,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: colors.text,
   },
   closeButton: {
-    position: "absolute",
-    top: 16,
-    left: 16,
-    zIndex: 1000,
-    padding: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: colors.inputBackground,
   },
   closeButtonText: {
     color: colors.text,
-    fontSize: 36,
+    fontSize: 20,
     fontWeight: "bold",
   },
   scrollContent: {
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
   title: {
     color: colors.warning,
@@ -192,13 +214,13 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     width: "100%",
     height: 12,
     backgroundColor: colors.inputBackground,
-    borderRadius: 8,
+    borderRadius: 12,
     overflow: "hidden",
   },
   progressBarFill: {
     height: 12,
     backgroundColor: colors.warning,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   progressText: {
     color: colors.warning,
@@ -208,16 +230,16 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   completeButton: {
     backgroundColor: colors.inputBackground,
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     marginRight: 12,
   },
   completeButtonDone: {
     backgroundColor: colors.warning,
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     marginRight: 12,
   },
   completeButtonText: {
@@ -240,25 +262,45 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
 });
 
 const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
+  modalOverlay: {
     flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    width: "100%",
+    maxWidth: 800,
+    maxHeight: "90%",
     padding: 24,
   },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: colors.text,
+  },
   closeButton: {
-    position: "absolute",
-    top: 24,
-    left: 24,
-    zIndex: 1000,
-    padding: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: colors.inputBackground,
   },
   closeButtonText: {
     color: colors.text,
-    fontSize: 48,
+    fontSize: 24,
     fontWeight: "bold",
   },
   scrollContent: {
-    paddingTop: 80,
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
   title: {
     color: colors.warning,
@@ -308,13 +350,13 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     width: "100%",
     height: 16,
     backgroundColor: colors.inputBackground,
-    borderRadius: 8,
+    borderRadius: 12,
     overflow: "hidden",
   },
   progressBarFill: {
     height: 16,
     backgroundColor: colors.warning,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   progressText: {
     color: colors.warning,
@@ -324,16 +366,16 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   completeButton: {
     backgroundColor: colors.inputBackground,
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     marginRight: 16,
   },
   completeButtonDone: {
     backgroundColor: colors.warning,
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     marginRight: 16,
   },
   completeButtonText: {

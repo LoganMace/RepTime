@@ -218,7 +218,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     width: 44,
     height: 44,
     padding: 0,
-    borderRadius: 22,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
   },

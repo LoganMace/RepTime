@@ -521,7 +521,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     paddingRight: 20,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 10,
+    borderRadius: 8,
     backgroundColor: colors.inputBackground,
     minWidth: 120,
   },

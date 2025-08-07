@@ -79,14 +79,16 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   modalOverlay: {
     flex: 1,
     backgroundColor: colors.overlay,
-    justifyContent: "flex-end",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
   modalContent: {
     backgroundColor: colors.card,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 16,
     padding: 24,
-    paddingBottom: 40,
+    width: "100%",
+    maxWidth: 400,
   },
   modalTitle: {
     fontSize: 20,
@@ -101,7 +103,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     marginBottom: 24,
   },
   modalForm: {
-    gap: 20,
+    gap: 16,
   },
   modalInput: {
     backgroundColor: colors.inputBackground,
@@ -115,12 +117,14 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   modalButtons: {
     flexDirection: "row",
     gap: 12,
+    marginTop: 8,
   },
   modalCancelButton: {
     flex: 1,
     backgroundColor: colors.inputBackground,
     borderRadius: 12,
     paddingVertical: 16,
+    paddingHorizontal: 24,
     alignItems: "center",
   },
   modalCancelText: {
@@ -133,6 +137,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
+    paddingHorizontal: 24,
     alignItems: "center",
   },
   modalSaveText: {
@@ -149,7 +154,6 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
     modalContent: {
       ...tablet.modalContent,
       padding: 20,
-      paddingBottom: 36,
     },
     modalTitle: {
       ...tablet.modalTitle,
@@ -163,10 +167,12 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
     modalCancelButton: {
       ...tablet.modalCancelButton,
       flex: 0,
+      paddingHorizontal: 20,
     },
     modalSaveButton: {
       ...tablet.modalSaveButton,
       flex: 0,
+      paddingHorizontal: 20,
     },
   });
 };

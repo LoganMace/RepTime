@@ -75,7 +75,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     paddingVertical: 8,
     paddingHorizontal: 12,
     backgroundColor: colors.primary + '30',
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: "center",
   },
   editGoalText: {

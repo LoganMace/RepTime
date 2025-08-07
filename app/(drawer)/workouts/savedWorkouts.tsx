@@ -75,13 +75,13 @@ export default function SavedWorkoutsScreen() {
               >
                 <TouchableOpacity
                   onPress={() => handleEdit(plan, idx)}
-                  style={{ padding: 4 }}
+                  style={{ padding: 12 }}
                 >
                   <Feather name="edit-2" size={26} color={colors.primary} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => handleDelete(idx)}
-                  style={{ padding: 4 }}
+                  style={{ padding: 12 }}
                 >
                   <Feather name="trash-2" size={26} color={colors.error} />
                 </TouchableOpacity>
@@ -119,8 +119,8 @@ export default function SavedWorkoutsScreen() {
                   bottom: 12,
                   right: 12,
                   backgroundColor: colors.primary,
-                  borderRadius: 24,
-                  padding: 10,
+                  borderRadius: 12,
+                  padding: 12,
                   zIndex: 10,
                 }}
               >

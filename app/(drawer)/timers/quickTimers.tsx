@@ -136,7 +136,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     alignItems: "center",
   },
   timerButton: {
-    borderRadius: 16,
+    borderRadius: 12,
     paddingVertical: 32,
     paddingHorizontal: 16,
     margin: 8,
@@ -203,7 +203,7 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
     margin: 6,
     minHeight: 95,
     width: "45%",
-    borderRadius: 14,
+    borderRadius: 12,
   },
   timerButtonText: {
     ...tablet.timerButtonText,

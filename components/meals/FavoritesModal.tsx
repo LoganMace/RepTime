@@ -107,7 +107,7 @@ export default function FavoritesModal({
                       borderLeftColor:
                         CATEGORIES.find((c) => c.key === selectedCategory)
                           ?.color || colors.border,
-                      borderRadius: 8,
+                      borderRadius: 12,
                       marginVertical: 2,
                       paddingHorizontal: 12,
                     },
@@ -157,12 +157,13 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     backgroundColor: colors.overlay,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
   },
   modalContent: {
     backgroundColor: colors.card,
     borderRadius: 16,
     padding: 24,
-    width: "90%",
+    width: "100%",
     maxWidth: 400,
   },
   modalTitle: {
@@ -176,7 +177,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   categoryIconContainer: {
     width: 36,
@@ -227,12 +228,13 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   modalButtons: {
     flexDirection: "row",
     gap: 12,
-    marginTop: 8,
+    marginTop: 16,
   },
   modalButton: {
     flex: 1,
     paddingVertical: 16,
-    borderRadius: 8,
+    paddingHorizontal: 24,
+    borderRadius: 12,
     alignItems: "center",
   },
   cancelButton: {
@@ -274,6 +276,7 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
     modalButton: {
       ...tablet.modalButton,
       paddingVertical: 12,
+      paddingHorizontal: 20,
     },
   });
 };
