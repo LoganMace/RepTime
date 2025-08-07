@@ -399,15 +399,28 @@ const baseButtonText = {
   textTransform: "uppercase" as const,
 };
 
-const baseInput = (colors: ReturnType<typeof useTheme>["colors"]) =>
+const baseInputTablet = (colors: ReturnType<typeof useTheme>["colors"]) =>
   ({
     borderWidth: 1,
     borderColor: colors.inputBorder,
-    borderRadius: 8,
-    padding: 8,
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     backgroundColor: colors.inputBackground,
     color: colors.inputText,
-    fontSize: 24,
+    fontSize: 18,
+  } as const);
+
+const baseInputMobile = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  ({
+    borderWidth: 1,
+    borderColor: colors.inputBorder,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: colors.inputBackground,
+    color: colors.inputText,
+    fontSize: 16,
   } as const);
 
 const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
@@ -429,7 +442,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       gap: 8,
     },
     workoutNameInput: {
-      ...baseInput(colors),
+      ...baseInputTablet(colors),
       minWidth: 300,
       alignSelf: "center",
     },
@@ -475,8 +488,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontWeight: "600",
     },
     input: {
-      ...baseInput(colors),
-      fontSize: 20,
+      ...baseInputTablet(colors),
     },
     removeButtonContainer: {
       justifyContent: "center",
@@ -540,9 +552,10 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
       alignItems: "stretch",
     },
     workoutNameInput: {
-      ...tablet.workoutNameInput,
+      ...baseInputMobile(colors),
+      minWidth: 300,
+      alignSelf: "center",
       width: "100%",
-      fontSize: 20,
     },
     formScroll: {
       width: "100%",
@@ -587,10 +600,7 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
       color: colors.textSecondary,
     },
     input: {
-      ...tablet.input,
-      fontSize: 16,
-      paddingVertical: 10,
-      paddingHorizontal: 8,
+      ...baseInputMobile(colors),
       minWidth: 0,
       textAlign: "left",
     },

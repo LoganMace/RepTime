@@ -61,9 +61,9 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     borderWidth: 1,
     borderColor: colors.inputBorder,
     borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    fontSize: 18,
     color: colors.inputText,
   },
   addButton: {
@@ -93,6 +93,12 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
       ...tablet.addButton,
       alignSelf: "stretch",
       alignItems: "center",
+    },
+    weightInput: {
+      ...tablet.weightInput,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      fontSize: 16,
     },
   });
 };
