@@ -1,4 +1,3 @@
-import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -11,14 +10,14 @@ import {
   View,
 } from "react-native";
 
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
 
 export default function WorkoutsScreen() {
-  const { getStyles, isMobile } = useResponsiveStyles();
+  const { getStyles } = useResponsiveStyles();
   const { colors } = useTheme();
   const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
   const params = useLocalSearchParams();
@@ -121,517 +120,277 @@ export default function WorkoutsScreen() {
   };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      headerImage={
-        <IconSymbol
-          size={isMobile ? 180 : 310}
-          color="gold"
-          name="figure.strengthtraining.traditional"
-          style={styles.headerImage}
-        />
-      }
-    >
-      <View style={styles.centeredContainer}>
-        <View style={styles.workoutNameContainer}>
-          <ThemedText style={[styles.inputLabel]}>Workout Name</ThemedText>
+    <ThemedView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+
+        {/* Workout Name Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <IconSymbol size={24} color="gold" name="textformat" />
+            <ThemedText style={styles.cardTitle}>Workout Name</ThemedText>
+          </View>
           <TextInput
-            style={styles.workoutNameInput}
+            style={styles.input}
             placeholder="e.g., Morning Power Hour"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.placeholder}
             value={workoutName}
             onChangeText={setWorkoutName}
           />
         </View>
-        <ScrollView
-          style={styles.formScroll}
-          contentContainerStyle={{ alignItems: "center" }}
-        >
-          {isMobile ? (
-            <View style={styles.mobileFormContainer}>
-              {workouts.map((row, idx) => (
-                <View key={idx} style={styles.mobileWorkoutCard}>
-                  <View style={styles.cardHeader}>
-                    <ThemedText style={styles.cardTitle}>
-                      Exercise #{idx + 1}
-                    </ThemedText>
-                    {workouts.length > 1 && (
-                      <TouchableOpacity
-                        onPress={() => removeRow(idx)}
-                        style={styles.removeButton}
-                      >
-                        <Feather
-                          name="trash-2"
-                          size={24}
-                          color={colors.error}
-                        />
-                      </TouchableOpacity>
-                    )}
-                  </View>
 
-                  <View style={styles.inputGroup}>
-                    <ThemedText style={styles.inputLabel}>
-                      Exercise Name
-                    </ThemedText>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="e.g., Bench Press"
-                      placeholderTextColor={colors.textSecondary}
-                      value={row.exercise}
-                      onChangeText={(v) => handleChange(idx, "exercise", v)}
-                    />
-                  </View>
-
-                  <View style={styles.row}>
-                    <View style={styles.inputGroup}>
-                      <ThemedText style={styles.inputLabel}>Sets</ThemedText>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="0"
-                        placeholderTextColor={colors.textSecondary}
-                        keyboardType="numeric"
-                        value={row.sets}
-                        onChangeText={(v) => handleChange(idx, "sets", v)}
-                      />
-                    </View>
-                    <View style={styles.inputGroup}>
-                      <ThemedText style={styles.inputLabel}>Reps</ThemedText>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="0"
-                        placeholderTextColor={colors.textSecondary}
-                        keyboardType="numeric"
-                        value={row.reps}
-                        onChangeText={(v) => handleChange(idx, "reps", v)}
-                      />
-                    </View>
-                    <View style={styles.inputGroup}>
-                      <ThemedText style={styles.inputLabel}>Weight</ThemedText>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="0"
-                        placeholderTextColor={colors.textSecondary}
-                        keyboardType="numeric"
-                        value={row.weight}
-                        onChangeText={(v) => handleChange(idx, "weight", v)}
-                      />
-                    </View>
-                  </View>
-
-                  <View style={styles.row}>
-                    <View style={styles.inputGroup}>
-                      <ThemedText style={styles.inputLabel}>
-                        Work (s)
-                      </ThemedText>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="0"
-                        placeholderTextColor={colors.textSecondary}
-                        keyboardType="numeric"
-                        value={row.workTime}
-                        onChangeText={(v) => handleChange(idx, "workTime", v)}
-                      />
-                    </View>
-                    <View style={styles.inputGroup}>
-                      <ThemedText style={styles.inputLabel}>
-                        Rest (s)
-                      </ThemedText>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="0"
-                        placeholderTextColor={colors.textSecondary}
-                        keyboardType="numeric"
-                        value={row.restTime}
-                        onChangeText={(v) => handleChange(idx, "restTime", v)}
-                      />
-                    </View>
-                  </View>
-                </View>
-              ))}
+        {/* Exercises */}
+        {workouts.map((row, idx) => (
+          <View key={idx} style={styles.card}>
+            <View style={styles.cardHeader}>
+              <IconSymbol size={24} color="gold" name="figure.strengthtraining.traditional" />
+              <ThemedText style={styles.cardTitle}>Exercise #{idx + 1}</ThemedText>
+              {workouts.length > 1 && (
+                <TouchableOpacity
+                  onPress={() => removeRow(idx)}
+                  style={styles.removeButton}
+                >
+                  <IconSymbol size={20} color={colors.error} name="trash" />
+                </TouchableOpacity>
+              )}
             </View>
-          ) : (
-            <View style={styles.tabletFormContainer}>
-              {workouts.map((row, idx) => (
-                <View key={idx} style={styles.tabletWorkoutCard}>
-                  <View style={styles.cardHeader}>
-                    <ThemedText style={styles.cardTitle}>
-                      Exercise #{idx + 1}
-                    </ThemedText>
-                    {workouts.length > 1 && (
-                      <TouchableOpacity
-                        onPress={() => removeRow(idx)}
-                        style={styles.removeButton}
-                      >
-                        <Feather
-                          name="trash-2"
-                          size={32}
-                          color={colors.error}
-                        />
-                      </TouchableOpacity>
-                    )}
-                  </View>
 
-                  {/* All inputs in a single row for tablet */}
-                  <View style={styles.row}>
-                    <View style={[styles.inputGroup, { flex: 3 }]}>
-                      <ThemedText style={styles.inputLabel}>
-                        Exercise Name
-                      </ThemedText>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="e.g., Bench Press"
-                        placeholderTextColor={colors.textSecondary}
-                        value={row.exercise}
-                        onChangeText={(v) => handleChange(idx, "exercise", v)}
-                      />
-                    </View>
-                    <View style={styles.inputGroup}>
-                      <ThemedText style={styles.inputLabel}>Sets</ThemedText>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="0"
-                        placeholderTextColor={colors.textSecondary}
-                        keyboardType="numeric"
-                        value={row.sets}
-                        onChangeText={(v) => handleChange(idx, "sets", v)}
-                      />
-                    </View>
-                    <View style={styles.inputGroup}>
-                      <ThemedText style={styles.inputLabel}>Reps</ThemedText>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="0"
-                        placeholderTextColor={colors.textSecondary}
-                        keyboardType="numeric"
-                        value={row.reps}
-                        onChangeText={(v) => handleChange(idx, "reps", v)}
-                      />
-                    </View>
-                    <View style={styles.inputGroup}>
-                      <ThemedText style={styles.inputLabel}>Weight</ThemedText>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="0"
-                        placeholderTextColor={colors.textSecondary}
-                        keyboardType="numeric"
-                        value={row.weight}
-                        onChangeText={(v) => handleChange(idx, "weight", v)}
-                      />
-                    </View>
-                    <View style={styles.inputGroup}>
-                      <ThemedText style={styles.inputLabel}>
-                        Work (s)
-                      </ThemedText>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="0"
-                        placeholderTextColor={colors.textSecondary}
-                        keyboardType="numeric"
-                        value={row.workTime}
-                        onChangeText={(v) => handleChange(idx, "workTime", v)}
-                      />
-                    </View>
-                    <View style={styles.inputGroup}>
-                      <ThemedText style={styles.inputLabel}>
-                        Rest (s)
-                      </ThemedText>
-                      <TextInput
-                        style={styles.input}
-                        placeholder="0"
-                        placeholderTextColor={colors.textSecondary}
-                        keyboardType="numeric"
-                        value={row.restTime}
-                        onChangeText={(v) => handleChange(idx, "restTime", v)}
-                      />
-                    </View>
-                  </View>
+            <View style={styles.exerciseForm}>
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.inputLabel}>Exercise Name</ThemedText>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g., Bench Press"
+                  placeholderTextColor={colors.placeholder}
+                  value={row.exercise}
+                  onChangeText={(v) => handleChange(idx, "exercise", v)}
+                />
+              </View>
+
+              <View style={styles.inputRow}>
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.inputLabel}>Sets</ThemedText>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="0"
+                    placeholderTextColor={colors.placeholder}
+                    keyboardType="numeric"
+                    value={row.sets}
+                    onChangeText={(v) => handleChange(idx, "sets", v)}
+                  />
                 </View>
-              ))}
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.inputLabel}>Reps</ThemedText>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="0"
+                    placeholderTextColor={colors.placeholder}
+                    keyboardType="numeric"
+                    value={row.reps}
+                    onChangeText={(v) => handleChange(idx, "reps", v)}
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.inputLabel}>Weight (lbs)</ThemedText>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="0"
+                    placeholderTextColor={colors.placeholder}
+                    keyboardType="numeric"
+                    value={row.weight}
+                    onChangeText={(v) => handleChange(idx, "weight", v)}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputRow}>
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.inputLabel}>Work Time (s)</ThemedText>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="0"
+                    placeholderTextColor={colors.placeholder}
+                    keyboardType="numeric"
+                    value={row.workTime}
+                    onChangeText={(v) => handleChange(idx, "workTime", v)}
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <ThemedText style={styles.inputLabel}>Rest Time (s)</ThemedText>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="0"
+                    placeholderTextColor={colors.placeholder}
+                    keyboardType="numeric"
+                    value={row.restTime}
+                    onChangeText={(v) => handleChange(idx, "restTime", v)}
+                  />
+                </View>
+              </View>
             </View>
-          )}
-        </ScrollView>
-        <View style={styles.buttonContainer}>
-          {/* Add Exercise Button */}
+          </View>
+        ))}
+
+        {/* Action Buttons Card */}
+        <View style={styles.card}>
           <TouchableOpacity
             style={styles.addButton}
             onPress={addRow}
             activeOpacity={0.85}
           >
-            <Text style={styles.addButtonText}>+ Add Exercise</Text>
+            <IconSymbol size={20} color={colors.textInverse} name="plus" />
+            <Text style={styles.addButtonText}>Add Exercise</Text>
           </TouchableOpacity>
 
-          {/* Save Workout Plan Button */}
           <TouchableOpacity
             style={styles.saveButton}
             onPress={savePlan}
             activeOpacity={0.85}
           >
+            <IconSymbol size={20} color={colors.primary} name="square.and.arrow.down" />
             <Text style={styles.saveButtonText}>
-              {editIndex !== null ? "Update Workout Plan" : "Save Workout Plan"}
+              {editIndex !== null ? "Update Workout" : "Save Workout"}
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </ParallaxScrollView>
+      </ScrollView>
+    </ThemedView>
   );
 }
 
-const baseButton = (colors: ReturnType<typeof useTheme>["colors"]) =>
-  ({
-    borderRadius: 24,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 2,
-    alignSelf: "center",
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
     paddingHorizontal: 24,
-  } as const);
-
-const baseButtonText = {
-  fontSize: 24,
-  fontWeight: "bold" as const,
-  letterSpacing: 1,
-  textTransform: "uppercase" as const,
-};
-
-const baseInputTablet = (colors: ReturnType<typeof useTheme>["colors"]) =>
-  ({
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: colors.inputBackground,
-    color: colors.inputText,
+    paddingTop: 20,
+  },
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    gap: 8,
+  },
+  cardTitle: {
     fontSize: 18,
-  } as const);
-
-const baseInputMobile = (colors: ReturnType<typeof useTheme>["colors"]) =>
-  ({
+    fontWeight: "600",
+    flex: 1,
+  },
+  removeButton: {
+    padding: 4,
+  },
+  input: {
+    backgroundColor: colors.inputBackground,
     borderWidth: 1,
     borderColor: colors.inputBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: colors.inputBackground,
-    color: colors.inputText,
+    paddingVertical: 14,
     fontSize: 16,
-  } as const);
-
-const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
-  StyleSheet.create({
-    headerImage: {
-      bottom: -90,
-      left: -35,
-      position: "absolute",
-    },
-    centeredContainer: {
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      width: "100%",
-    },
-    workoutNameContainer: {
-      marginBottom: 20,
-      alignItems: "center",
-      gap: 8,
-    },
-    workoutNameInput: {
-      ...baseInputTablet(colors),
-      minWidth: 300,
-      alignSelf: "center",
-    },
-    formScroll: {
-      alignSelf: "center",
-      width: "100%",
-    },
-    tabletFormContainer: {
-      width: "90%",
-      gap: 20,
-    },
-    tabletWorkoutCard: {
-      backgroundColor: colors.card,
-      borderRadius: 16,
-      padding: 20,
-    },
-    cardHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 16,
-    },
-    cardTitle: {
-      color: colors.gold,
-      fontSize: 22,
-      fontWeight: "bold",
-    },
-    removeButton: {
-      padding: 4,
-    },
-    row: {
-      flexDirection: "row",
-      gap: 16,
-    },
-    inputGroup: {
-      flex: 1,
-      flexDirection: "column",
-      gap: 8,
-    },
-    inputLabel: {
-      fontSize: 18,
-      color: colors.textSecondary,
-      fontWeight: "600",
-    },
-    input: {
-      ...baseInputTablet(colors),
-    },
-    removeButtonContainer: {
-      justifyContent: "center",
-      paddingBottom: 4,
-    },
-    buttonContainer: {
-      marginTop: 20,
-      flexDirection: "column",
-      gap: 10,
-      width: "100%",
-      alignItems: "center",
-    },
-    addButton: {
-      ...baseButton(colors),
-      backgroundColor: colors.gold,
-      borderColor: colors.gold,
-      marginTop: 20,
-      marginBottom: 0,
-    },
-    addButtonText: {
-      ...baseButtonText,
-      color: colors.background,
-    },
-    saveButton: {
-      ...baseButton(colors),
-      backgroundColor: colors.background,
-      borderColor: colors.gold,
-      marginTop: 10,
-    },
-    saveButtonText: {
-      ...baseButtonText,
-      color: colors.gold,
-    },
-    // Removed timerCardsContainer and related styles
-    // Properties for mobile styles that don't exist in tablet
-    mobileFormContainer: {},
-    tableHeader: {},
-    workoutRow: {},
-    exerciseColumn: {},
-    smallColumn: {},
-    removeColumn: {},
-    mobileWorkoutCard: {},
-  });
+    color: colors.inputText,
+  },
+  exerciseForm: {
+    gap: 16,
+  },
+  inputGroup: {
+    gap: 8,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.textSecondary,
+  },
+  inputRow: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  addButton: {
+    backgroundColor: "gold",
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  addButtonText: {
+    color: colors.textInverse,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  saveButton: {
+    backgroundColor: colors.inputBackground,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  saveButtonText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});
 
 const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
-    headerImage: {
-      bottom: -30,
-      left: -20,
-      position: "absolute",
+    scrollView: {
+      ...tablet.scrollView,
+      paddingHorizontal: 16,
+      paddingTop: 16,
     },
-    centeredContainer: {
-      ...tablet.centeredContainer,
-      justifyContent: "flex-start",
-    },
-    workoutNameContainer: {
-      width: "100%",
+    card: {
+      ...tablet.card,
+      padding: 16,
       marginBottom: 12,
-      alignItems: "stretch",
-    },
-    workoutNameInput: {
-      ...baseInputMobile(colors),
-      minWidth: 300,
-      alignSelf: "center",
-      width: "100%",
-    },
-    formScroll: {
-      width: "100%",
-    },
-    mobileFormContainer: {
-      width: "100%",
-      gap: 16,
-    },
-    mobileWorkoutCard: {
-      backgroundColor: colors.card,
-      borderRadius: 12,
-      padding: 12,
-      width: "100%",
-    },
-    cardHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 8,
     },
     cardTitle: {
-      color: colors.gold,
-      fontSize: 18,
-      fontWeight: "bold",
+      ...tablet.cardTitle,
+      fontSize: 16,
     },
-    removeButton: {
-      padding: 4,
+    input: {
+      ...tablet.input,
+      paddingVertical: 12,
+      fontSize: 14,
     },
-    row: {
-      flexDirection: "row",
+    inputRow: {
+      ...tablet.inputRow,
       gap: 12,
-      marginTop: 12,
     },
     inputGroup: {
+      ...tablet.inputGroup,
       flex: 1,
-      gap: 6,
     },
     inputLabel: {
       ...tablet.inputLabel,
-      fontSize: 14,
-      fontWeight: "600",
-      color: colors.textSecondary,
-    },
-    input: {
-      ...baseInputMobile(colors),
-      minWidth: 0,
-      textAlign: "left",
-    },
-    buttonContainer: {
-      ...tablet.buttonContainer,
-      flexDirection: "column",
-      width: "100%",
-      gap: 20,
-      marginTop: 10,
-      marginBottom: 20,
+      fontSize: 13,
     },
     addButton: {
       ...tablet.addButton,
-      width: "100%",
-      height: 50,
-      marginTop: 10,
-      marginBottom: 0,
+      paddingVertical: 14,
     },
     saveButton: {
       ...tablet.saveButton,
-      width: "100%",
-      height: 50,
-      marginTop: 0,
-    },
-    addButtonText: {
-      ...tablet.addButtonText,
-      fontSize: 20,
-    },
-    saveButtonText: {
-      ...tablet.saveButtonText,
-      fontSize: 20,
+      paddingVertical: 14,
     },
   });
 };

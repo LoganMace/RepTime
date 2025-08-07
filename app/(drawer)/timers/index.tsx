@@ -15,8 +15,8 @@ import { Picker } from "@react-native-picker/picker";
 import { ScrollView } from "react-native-gesture-handler";
 
 import Clock from "@/components/Clock";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import TimePicker from "@/components/TimePicker";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -28,7 +28,7 @@ function toTotalSeconds(minutes: string, seconds: string) {
 
 export default function TimersScreen() {
   const { colors } = useTheme();
-  const { getStyles, isMobile } = useResponsiveStyles();
+  const { getStyles } = useResponsiveStyles();
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -150,155 +150,142 @@ export default function TimersScreen() {
   };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      headerImage={
-        <IconSymbol
-          size={isMobile ? 180 : 310}
-          color="lime"
-          name="timer.circle"
-          style={styles.headerImage}
-        />
-      }
-    >
-      <View style={styles.centeredContainer}>
-        <View style={styles.timerNameContainer}>
-          <ThemedText type="subtitle" style={styles.label}>
-            Timer Name
-          </ThemedText>
+    <ThemedView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+
+        {/* Timer Name Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <IconSymbol size={24} color="lime" name="textformat" />
+            <ThemedText style={styles.cardTitle}>Timer Name</ThemedText>
+          </View>
           <TextInput
-            style={styles.timerNameInput}
-            placeholder="Timer Name"
-            placeholderTextColor="#999"
+            style={styles.input}
+            placeholder="e.g., HIIT Workout"
+            placeholderTextColor={colors.placeholder}
             value={timerName}
             onChangeText={setTimerName}
           />
         </View>
-        <ScrollView contentContainerStyle={styles.scrollableContainer}>
-          <View style={styles.inputRow}>
-            {/* Rounds Picker */}
-            <View style={styles.sectionContainer}>
-              <View style={styles.rowContainer}>
-                <ThemedText type="subtitle" style={styles.label}>
-                  Rounds
+
+        {/* Timer Settings Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <IconSymbol size={24} color="lime" name="gear" />
+            <ThemedText style={styles.cardTitle}>Timer Settings</ThemedText>
+          </View>
+          
+          <View style={styles.settingsGrid}>
+            {/* Rounds */}
+            <View style={styles.settingItem}>
+              <ThemedText style={styles.settingLabel}>Rounds</ThemedText>
+              <TouchableOpacity
+                onPress={() => openPickerModal("rounds")}
+                style={styles.settingValue}
+              >
+                <ThemedText style={styles.settingValueText}>
+                  {selectedRounds}
                 </ThemedText>
-                <TouchableOpacity
-                  onPress={() => openPickerModal("rounds")}
-                  style={[styles.inputContainer]}
-                >
-                  <ThemedText style={styles.inputText}>
-                    {selectedRounds}
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
+                <IconSymbol size={16} color={colors.textSecondary} name="chevron.down" />
+              </TouchableOpacity>
             </View>
 
-            {/* Work Picker */}
-            <View style={styles.sectionContainer}>
-              <View style={styles.rowContainer}>
-                <ThemedText type="subtitle" style={styles.label}>
-                  Work
+            {/* Work Time */}
+            <View style={styles.settingItem}>
+              <ThemedText style={styles.settingLabel}>Work Time</ThemedText>
+              <TouchableOpacity
+                onPress={() => openPickerModal("work")}
+                style={styles.settingValue}
+              >
+                <ThemedText style={styles.settingValueText}>
+                  {formatTime(workSeconds)}
                 </ThemedText>
-                <TouchableOpacity
-                  onPress={() => openPickerModal("work")}
-                  style={[styles.inputContainer]}
-                >
-                  <ThemedText style={styles.inputText}>
-                    {formatTime(workSeconds)}
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
+                <IconSymbol size={16} color={colors.textSecondary} name="chevron.down" />
+              </TouchableOpacity>
             </View>
 
-            {/* Rest Picker */}
-            <View style={styles.sectionContainer}>
-              <View style={styles.rowContainer}>
-                <ThemedText type="subtitle" style={styles.label}>
-                  Rest
+            {/* Rest Time */}
+            <View style={styles.settingItem}>
+              <ThemedText style={styles.settingLabel}>Rest Time</ThemedText>
+              <TouchableOpacity
+                onPress={() => openPickerModal("rest")}
+                style={styles.settingValue}
+              >
+                <ThemedText style={styles.settingValueText}>
+                  {formatTime(restSeconds)}
                 </ThemedText>
-                <TouchableOpacity
-                  onPress={() => openPickerModal("rest")}
-                  style={[styles.inputContainer]}
-                >
-                  <ThemedText style={styles.inputText}>
-                    {formatTime(restSeconds)}
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
+                <IconSymbol size={16} color={colors.textSecondary} name="chevron.down" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Sets */}
+            <View style={styles.settingItem}>
+              <ThemedText style={styles.settingLabel}>Sets</ThemedText>
+              <TouchableOpacity
+                onPress={() => openPickerModal("sets")}
+                style={styles.settingValue}
+              >
+                <ThemedText style={styles.settingValueText}>
+                  {selectedSets}
+                </ThemedText>
+                <IconSymbol size={16} color={colors.textSecondary} name="chevron.down" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Set Rest */}
+            <View style={styles.settingItem}>
+              <ThemedText style={styles.settingLabel}>Set Rest</ThemedText>
+              <TouchableOpacity
+                onPress={() => openPickerModal("setRest")}
+                style={styles.settingValue}
+              >
+                <ThemedText style={styles.settingValueText}>
+                  {formatTime(setRestTimeSeconds)}
+                </ThemedText>
+                <IconSymbol size={16} color={colors.textSecondary} name="chevron.down" />
+              </TouchableOpacity>
             </View>
           </View>
+        </View>
 
-          <View style={styles.inputRow}>
-            {/* Sets Picker */}
-            <View style={styles.sectionContainer}>
-              <View style={styles.rowContainer}>
-                <ThemedText type="subtitle" style={styles.label}>
-                  Sets
-                </ThemedText>
-                <TouchableOpacity
-                  onPress={() => openPickerModal("sets")}
-                  style={[styles.inputContainer]}
-                >
-                  <ThemedText style={styles.inputText}>
-                    {selectedSets}
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Set Rest Picker */}
-            <View style={styles.sectionContainer}>
-              <View style={styles.rowContainer}>
-                <ThemedText type="subtitle" style={styles.label}>
-                  Set Rest
-                </ThemedText>
-                <TouchableOpacity
-                  onPress={() => openPickerModal("setRest")}
-                  style={[styles.inputContainer]}
-                >
-                  <ThemedText style={styles.inputText}>
-                    {formatTime(setRestTimeSeconds)}
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-
-        <TouchableOpacity
-          onPress={handleStart}
-          style={[
-            styles.sleekStartButton,
-            isStartDisabled && styles.disabledButton,
-          ]}
-          activeOpacity={0.8}
-          disabled={isStartDisabled}
-        >
-          <Text
-            style={[
-              styles.sleekStartIcon,
-              isStartDisabled && styles.disabledButtonText,
-            ]}
+        {/* Action Buttons Card */}
+        <View style={styles.card}>
+          <TouchableOpacity
+            onPress={handleStart}
+            style={[styles.startButton, isStartDisabled && styles.disabledButton]}
+            activeOpacity={0.8}
+            disabled={isStartDisabled}
           >
-            ▶ Start
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={saveTimer}
-          style={[styles.saveButton, isSaveDisabled && styles.disabledButton]}
-          activeOpacity={0.85}
-          disabled={isSaveDisabled}
-        >
-          <Text
-            style={[
-              styles.saveButtonText,
-              isSaveDisabled && styles.disabledButtonText,
-            ]}
+            <IconSymbol 
+              size={20} 
+              color={isStartDisabled ? colors.textSecondary : colors.textInverse} 
+              name="play.fill" 
+            />
+            <Text style={[styles.startButtonText, isStartDisabled && styles.disabledButtonText]}>
+              Start Timer
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            onPress={saveTimer}
+            style={[styles.saveButton, isSaveDisabled && styles.disabledButton]}
+            activeOpacity={0.85}
+            disabled={isSaveDisabled}
           >
-            {editIndex !== null ? "Update Timer" : "Save Timer"}
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <IconSymbol 
+              size={20} 
+              color={isSaveDisabled ? colors.textSecondary : colors.primary} 
+              name="square.and.arrow.down" 
+            />
+            <Text style={[styles.saveButtonText, isSaveDisabled && styles.disabledButtonText]}>
+              {editIndex !== null ? "Update Timer" : "Save Timer"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
 
       {/* Clock Component */}
       {activeTimerData && (
@@ -417,148 +404,117 @@ export default function TimersScreen() {
           </View>
         </View>
       </Modal>
-    </ParallaxScrollView>
+    </ThemedView>
   );
 }
 
-// Define base styles as plain objects first to avoid referencing 'styles' in its own initializer
-const baseButton = {
-  height: 60,
-  borderRadius: 24,
-  justifyContent: "center",
-  alignItems: "center",
-  borderWidth: 2,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.18,
-  shadowRadius: 8,
-  elevation: 2,
-} as const;
-
-const baseButtonText = {
-  fontSize: 24,
-  fontWeight: "bold",
-  letterSpacing: 1,
-  textTransform: "uppercase",
-} as const;
-
 const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  // Base Styles
-  baseButton,
-  baseButtonText,
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+  },
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    gap: 8,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  input: {
+    backgroundColor: colors.inputBackground,
+    borderWidth: 1,
+    borderColor: colors.inputBorder,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: colors.inputText,
+  },
+  settingsGrid: {
+    gap: 16,
+  },
+  settingItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  settingLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  settingValue: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.inputBackground,
+    borderWidth: 1,
+    borderColor: colors.inputBorder,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minWidth: 80,
+  },
+  settingValueText: {
+    fontSize: 14,
+    color: colors.inputText,
+    fontWeight: "500",
+  },
+  startButton: {
+    backgroundColor: "lime",
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  startButtonText: {
+    color: colors.textInverse,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  saveButton: {
+    backgroundColor: colors.inputBackground,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  saveButtonText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: "600",
+  },
   disabledButton: {
     backgroundColor: colors.inputBackground,
     borderColor: colors.border,
+    opacity: 0.6,
   },
   disabledButtonText: {
     color: colors.textSecondary,
   },
-
-  // Header
-  headerImage: {
-    color: colors.textSecondary,
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
-
-  // Main Container
-  centeredContainer: {
-    flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    position: "relative",
-  },
-
-  // Timer Creation Form
-  timerNameContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 20,
-    marginBottom: 40,
-  },
-  timerNameInput: {
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    fontSize: 18,
-    backgroundColor: colors.inputBackground,
-    color: colors.inputText,
-    minWidth: 200,
-  },
-  scrollableContainer: {
-    flexGrow: 1,
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 40,
-  },
-  inputRow: {
-    flexDirection: "column",
-  },
-  inputColumn: {
-    flexDirection: "column",
-  },
-  sectionContainer: {
-    marginBottom: 20,
-    width: "auto",
-  },
-  rowContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 20,
-  },
-  label: {
-    fontSize: 24,
-    fontWeight: "normal",
-  },
-  inputContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-    borderRadius: 12,
-    backgroundColor: colors.inputBackground,
-    minWidth: 120,
-  },
-  inputText: {
-    fontSize: 18,
-    color: colors.inputText,
-  },
-
-  // Action Buttons
-  sleekStartButton: {
-    ...baseButton,
-    paddingHorizontal: 24,
-    backgroundColor: "lime",
-    borderColor: "lime",
-    marginTop: 10,
-    marginBottom: 20,
-    flexDirection: "row",
-  },
-  sleekStartIcon: {
-    ...baseButtonText,
-    color: colors.textInverse,
-    marginLeft: 8,
-  },
-  saveButton: {
-    ...baseButton,
-    backgroundColor: colors.background,
-    borderColor: colors.success,
-    marginTop: 8,
-    paddingHorizontal: 24,
-    alignSelf: "center",
-  },
-  saveButtonText: {
-    ...baseButtonText,
-    color: colors.success,
-  },
-
-  // Modal & Picker
+  
+  // Modal styles
   modalOverlay: {
     flex: 1,
     backgroundColor: colors.overlay,
@@ -594,80 +550,50 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
-  headerImage: {
-    bottom: -30,
-    left: -20,
-    position: "absolute",
-  },
-  centeredContainer: {
-    ...tablet.centeredContainer,
-    alignItems: "flex-start",
-  },
-  timerNameContainer: {
-    flexDirection: "column",
-    alignItems: "stretch",
-    gap: 10,
-    marginBottom: 20,
-    width: "100%",
-  },
-  timerNameInput: {
-    ...tablet.timerNameInput,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    width: "100%",
-  },
-  scrollableContainer: {
-    ...tablet.scrollableContainer,
-    width: "100%",
-    justifyContent: "space-between",
-    gap: 0,
-  },
-  inputRow: {
-    ...tablet.inputRow,
-  },
-  sectionContainer: {
-    ...tablet.sectionContainer,
-    width: "100%",
-    marginBottom: 15,
-  },
-  rowContainer: {
-    ...tablet.rowContainer,
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  label: {
-    ...tablet.label,
-    fontSize: 20,
-  },
-  inputContainer: {
-    ...tablet.inputContainer,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    minWidth: 70,
-  },
-  inputText: {
-    ...tablet.inputText,
-    fontSize: 16,
-  },
-  sleekStartButton: {
-    ...tablet.sleekStartButton,
-    width: "100%",
-    height: 50,
-    marginBottom: 10,
-  },
-  sleekStartIcon: {
-    ...tablet.sleekStartIcon,
-    fontSize: 20,
-  },
-  saveButton: {
-    ...tablet.saveButton,
-    width: "100%",
-    height: 50,
-  },
-  saveButtonText: {
-    ...tablet.saveButtonText,
-    fontSize: 20,
-  },
+    scrollView: {
+      ...tablet.scrollView,
+      paddingHorizontal: 16,
+      paddingTop: 16,
+    },
+    card: {
+      ...tablet.card,
+      padding: 16,
+      marginBottom: 12,
+    },
+    cardTitle: {
+      ...tablet.cardTitle,
+      fontSize: 16,
+    },
+    input: {
+      ...tablet.input,
+      paddingVertical: 12,
+      fontSize: 14,
+    },
+    settingItem: {
+      ...tablet.settingItem,
+      gap: 12,
+    },
+    settingLabel: {
+      ...tablet.settingLabel,
+      fontSize: 14,
+      flex: 1,
+    },
+    settingValue: {
+      ...tablet.settingValue,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+    },
+    settingValueText: {
+      ...tablet.settingValueText,
+      fontSize: 13,
+    },
+    startButton: {
+      ...tablet.startButton,
+      paddingVertical: 14,
+    },
+    saveButton: {
+      ...tablet.saveButton,
+      paddingVertical: 14,
+    },
   });
 };
