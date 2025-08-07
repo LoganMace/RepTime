@@ -123,7 +123,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     progressBarContainer: {
       width: "100%",
       height: 8,
-      backgroundColor: colors.inputBackground,
+      backgroundColor: colors.borderLight,
       borderRadius: 4,
       overflow: "hidden",
       position: "relative",
