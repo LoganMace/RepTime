@@ -189,70 +189,73 @@ export const Theme = {
       loose: 2.0,
     },
     
-    // Text styles
+    // Text styles with responsive variants
     styles: {
       // Headlines
       h1: {
-        fontSize: 36,
-        fontWeight: '700',
-        lineHeight: 1.2,
+        mobile: { fontSize: 24, fontWeight: '700', lineHeight: 1.2 },
+        tablet: { fontSize: 36, fontWeight: '700', lineHeight: 1.2 },
       },
       h2: {
-        fontSize: 30,
-        fontWeight: '600',
-        lineHeight: 1.2,
+        mobile: { fontSize: 20, fontWeight: '600', lineHeight: 1.2 },
+        tablet: { fontSize: 30, fontWeight: '600', lineHeight: 1.2 },
       },
       h3: {
-        fontSize: 24,
-        fontWeight: '600',
-        lineHeight: 1.3,
+        mobile: { fontSize: 18, fontWeight: '600', lineHeight: 1.3 },
+        tablet: { fontSize: 24, fontWeight: '600', lineHeight: 1.3 },
       },
       h4: {
-        fontSize: 20,
-        fontWeight: '500',
-        lineHeight: 1.3,
+        mobile: { fontSize: 16, fontWeight: '500', lineHeight: 1.3 },
+        tablet: { fontSize: 20, fontWeight: '500', lineHeight: 1.3 },
       },
       
       // Body text
       body: {
-        fontSize: 16,
-        fontWeight: '400',
-        lineHeight: 1.5,
+        mobile: { fontSize: 14, fontWeight: '400', lineHeight: 1.5 },
+        tablet: { fontSize: 16, fontWeight: '400', lineHeight: 1.5 },
       },
       bodySmall: {
-        fontSize: 14,
-        fontWeight: '400',
-        lineHeight: 1.4,
+        mobile: { fontSize: 12, fontWeight: '400', lineHeight: 1.4 },
+        tablet: { fontSize: 14, fontWeight: '400', lineHeight: 1.4 },
       },
       
       // Captions and labels
       caption: {
-        fontSize: 12,
-        fontWeight: '400',
-        lineHeight: 1.3,
+        mobile: { fontSize: 10, fontWeight: '400', lineHeight: 1.3 },
+        tablet: { fontSize: 12, fontWeight: '400', lineHeight: 1.3 },
       },
       label: {
-        fontSize: 14,
-        fontWeight: '500',
-        lineHeight: 1.2,
+        mobile: { fontSize: 12, fontWeight: '500', lineHeight: 1.2 },
+        tablet: { fontSize: 14, fontWeight: '500', lineHeight: 1.2 },
       },
       
       // Button text
       button: {
-        fontSize: 16,
-        fontWeight: '600',
-        lineHeight: 1.2,
+        mobile: { fontSize: 14, fontWeight: '600', lineHeight: 1.2 },
+        tablet: { fontSize: 16, fontWeight: '600', lineHeight: 1.2 },
       },
       buttonSmall: {
-        fontSize: 14,
-        fontWeight: '600',
-        lineHeight: 1.2,
+        mobile: { fontSize: 12, fontWeight: '600', lineHeight: 1.2 },
+        tablet: { fontSize: 14, fontWeight: '600', lineHeight: 1.2 },
+      },
+      
+      // Page titles
+      pageTitle: {
+        mobile: { fontSize: 20, fontWeight: '700', lineHeight: 1.2 },
+        tablet: { fontSize: 28, fontWeight: '700', lineHeight: 1.2 },
+      },
+      
+      // Section titles
+      sectionTitle: {
+        mobile: { fontSize: 16, fontWeight: '600', lineHeight: 1.3 },
+        tablet: { fontSize: 20, fontWeight: '600', lineHeight: 1.3 },
       },
     },
   },
   
-  // Spacing scale
+  // Spacing scale with responsive variants
   spacing: {
+    // Base spacing values
     xs: 4,
     sm: 8,
     base: 16,
@@ -262,7 +265,35 @@ export const Theme = {
     '3xl': 64,
     '4xl': 96,
     
-    // Component-specific spacing
+    // Responsive component-specific spacing
+    responsive: {
+      card: {
+        mobile: { padding: 12, margin: 8, paddingLarge: 16 },
+        tablet: { padding: 16, margin: 12, paddingLarge: 24 },
+      },
+      button: {
+        mobile: { paddingVertical: 8, paddingHorizontal: 16, paddingSmall: 6 },
+        tablet: { paddingVertical: 12, paddingHorizontal: 24, paddingSmall: 8 },
+      },
+      input: {
+        mobile: { padding: 10, paddingHorizontal: 12 },
+        tablet: { padding: 12, paddingHorizontal: 16 },
+      },
+      modal: {
+        mobile: { padding: 16, margin: 16 },
+        tablet: { padding: 24, margin: 20 },
+      },
+      page: {
+        mobile: { padding: 16, marginBottom: 12 },
+        tablet: { padding: 20, marginBottom: 16 },
+      },
+      section: {
+        mobile: { marginBottom: 16, gap: 12 },
+        tablet: { marginBottom: 20, gap: 16 },
+      },
+    },
+    
+    // Legacy spacing (keep for backward compatibility)
     card: {
       padding: 16,
       margin: 12,
@@ -322,111 +353,229 @@ export const Theme = {
     },
   },
   
-  // Component styles
+  // Component styles with responsive variants
   components: {
     card: {
       standard: {
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 4,
+        mobile: {
+          borderRadius: 12,
+          padding: 12,
+          marginBottom: 12,
+          shadowOpacity: 0.08,
+          shadowRadius: 3,
+          shadowOffset: { width: 0, height: 1 },
+          elevation: 3,
+        },
+        tablet: {
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 16,
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          shadowOffset: { width: 0, height: 2 },
+          elevation: 4,
+        },
       },
       large: {
-        borderRadius: 16,
-        padding: 20,
-        marginBottom: 20,
-        shadowOpacity: 0.12,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 3 },
-        elevation: 6,
+        mobile: {
+          borderRadius: 16,
+          padding: 16,
+          marginBottom: 16,
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          shadowOffset: { width: 0, height: 2 },
+          elevation: 4,
+        },
+        tablet: {
+          borderRadius: 16,
+          padding: 20,
+          marginBottom: 20,
+          shadowOpacity: 0.12,
+          shadowRadius: 6,
+          shadowOffset: { width: 0, height: 3 },
+          elevation: 6,
+        },
       },
       small: {
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 12,
-        shadowOpacity: 0.08,
-        shadowRadius: 3,
-        shadowOffset: { width: 0, height: 1 },
-        elevation: 3,
+        mobile: {
+          borderRadius: 8,
+          padding: 8,
+          marginBottom: 8,
+          shadowOpacity: 0.06,
+          shadowRadius: 2,
+          shadowOffset: { width: 0, height: 1 },
+          elevation: 2,
+        },
+        tablet: {
+          borderRadius: 8,
+          padding: 12,
+          marginBottom: 12,
+          shadowOpacity: 0.08,
+          shadowRadius: 3,
+          shadowOffset: { width: 0, height: 1 },
+          elevation: 3,
+        },
       },
     },
     
     button: {
       primary: {
-        borderRadius: 12,
-        paddingVertical: 16,
-        paddingHorizontal: 24,
-        minHeight: 50,
-        fontSize: 16,
-        fontWeight: '600',
+        mobile: {
+          borderRadius: 12,
+          paddingVertical: 12,
+          paddingHorizontal: 20,
+          minHeight: 44,
+          fontSize: 14,
+          fontWeight: '600',
+        },
+        tablet: {
+          borderRadius: 12,
+          paddingVertical: 16,
+          paddingHorizontal: 24,
+          minHeight: 50,
+          fontSize: 16,
+          fontWeight: '600',
+        },
       },
       secondary: {
-        borderRadius: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderWidth: 1,
-        minHeight: 44,
-        fontSize: 14,
-        fontWeight: '500',
+        mobile: {
+          borderRadius: 12,
+          paddingVertical: 10,
+          paddingHorizontal: 16,
+          borderWidth: 1,
+          minHeight: 40,
+          fontSize: 14,
+          fontWeight: '500',
+        },
+        tablet: {
+          borderRadius: 12,
+          paddingVertical: 12,
+          paddingHorizontal: 20,
+          borderWidth: 1,
+          minHeight: 44,
+          fontSize: 16,
+          fontWeight: '500',
+        },
       },
       large: {
-        borderRadius: 16,
-        paddingVertical: 18,
-        paddingHorizontal: 32,
-        minHeight: 60,
-        fontSize: 18,
-        fontWeight: '600',
+        mobile: {
+          borderRadius: 16,
+          paddingVertical: 14,
+          paddingHorizontal: 24,
+          minHeight: 50,
+          fontSize: 16,
+          fontWeight: '600',
+        },
+        tablet: {
+          borderRadius: 16,
+          paddingVertical: 18,
+          paddingHorizontal: 32,
+          minHeight: 60,
+          fontSize: 18,
+          fontWeight: '600',
+        },
       },
       small: {
-        borderRadius: 8,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        minHeight: 36,
-        fontSize: 14,
-        fontWeight: '500',
+        mobile: {
+          borderRadius: 8,
+          paddingVertical: 6,
+          paddingHorizontal: 12,
+          minHeight: 32,
+          fontSize: 12,
+          fontWeight: '500',
+        },
+        tablet: {
+          borderRadius: 8,
+          paddingVertical: 8,
+          paddingHorizontal: 16,
+          minHeight: 36,
+          fontSize: 14,
+          fontWeight: '500',
+        },
       },
     },
     
     input: {
       standard: {
-        borderRadius: 8,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderWidth: 1,
-        minHeight: 48,
-        fontSize: 16,
+        mobile: {
+          borderRadius: 8,
+          paddingVertical: 10,
+          paddingHorizontal: 12,
+          borderWidth: 1,
+          minHeight: 44,
+          fontSize: 14,
+        },
+        tablet: {
+          borderRadius: 8,
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+          borderWidth: 1,
+          minHeight: 48,
+          fontSize: 16,
+        },
       },
       large: {
-        borderRadius: 10,
-        paddingVertical: 16,
-        paddingHorizontal: 20,
-        borderWidth: 1,
-        minHeight: 56,
-        fontSize: 18,
+        mobile: {
+          borderRadius: 10,
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+          borderWidth: 1,
+          minHeight: 50,
+          fontSize: 16,
+        },
+        tablet: {
+          borderRadius: 10,
+          paddingVertical: 16,
+          paddingHorizontal: 20,
+          borderWidth: 1,
+          minHeight: 56,
+          fontSize: 18,
+        },
       },
     },
     
     modal: {
       standard: {
-        borderRadius: 16,
-        padding: 24,
-        margin: 20,
-        maxHeight: '80%',
+        mobile: {
+          borderRadius: 16,
+          padding: 16,
+          margin: 16,
+          maxHeight: '85%',
+        },
+        tablet: {
+          borderRadius: 16,
+          padding: 24,
+          margin: 20,
+          maxHeight: '80%',
+        },
       },
       fullscreen: {
-        borderRadius: 0,
-        padding: 20,
-        margin: 0,
-        maxHeight: '100%',
+        mobile: {
+          borderRadius: 0,
+          padding: 16,
+          margin: 0,
+          maxHeight: '100%',
+        },
+        tablet: {
+          borderRadius: 0,
+          padding: 20,
+          margin: 0,
+          maxHeight: '100%',
+        },
       },
       compact: {
-        borderRadius: 12,
-        padding: 16,
-        margin: 16,
-        maxHeight: '70%',
+        mobile: {
+          borderRadius: 12,
+          padding: 12,
+          margin: 12,
+          maxHeight: '75%',
+        },
+        tablet: {
+          borderRadius: 12,
+          padding: 16,
+          margin: 16,
+          maxHeight: '70%',
+        },
       },
     },
   },
@@ -444,6 +593,63 @@ export function createThemedStyles<T>(
 ): T {
   return styles(getThemeColors(colorScheme));
 }
+
+// Responsive theme helper functions
+export function getResponsiveComponentStyle(
+  componentType: keyof typeof Theme.components,
+  variant: string,
+  isTablet: boolean
+) {
+  const component = Theme.components[componentType] as any;
+  const style = component[variant];
+  return isTablet ? style.tablet : style.mobile;
+}
+
+export function getResponsiveTypography(
+  styleType: keyof typeof Theme.typography.styles,
+  isTablet: boolean
+) {
+  const style = Theme.typography.styles[styleType] as any;
+  return isTablet ? style.tablet : style.mobile;
+}
+
+export function getResponsiveSpacing(
+  spacingType: keyof typeof Theme.spacing.responsive,
+  isTablet: boolean
+) {
+  const spacing = Theme.spacing.responsive[spacingType] as any;
+  return isTablet ? spacing.tablet : spacing.mobile;
+}
+
+// Helper function to merge responsive styles with base styles
+export function createResponsiveStyle(
+  baseStyle: object,
+  responsiveOverrides: { mobile?: object; tablet?: object },
+  isTablet: boolean
+) {
+  const deviceSpecificStyle = isTablet ? responsiveOverrides.tablet : responsiveOverrides.mobile;
+  return { ...baseStyle, ...deviceSpecificStyle };
+}
+
+// TypeScript types for responsive styles
+export type ResponsiveStyle<T = object> = {
+  mobile: T;
+  tablet: T;
+};
+
+export type ResponsiveComponentStyle = {
+  [K in keyof typeof Theme.components]: {
+    [V in keyof typeof Theme.components[K]]: ResponsiveStyle;
+  };
+};
+
+export type ResponsiveTypographyStyle = {
+  [K in keyof typeof Theme.typography.styles]: ResponsiveStyle<{
+    fontSize: number;
+    fontWeight: string;
+    lineHeight: number;
+  }>;
+};
 
 // Export base colors for special use cases
 export { baseColors };
