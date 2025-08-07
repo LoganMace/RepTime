@@ -1,5 +1,5 @@
-import { useTheme } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import {
@@ -139,6 +139,16 @@ export default function TimersScreen() {
     }
     await AsyncStorage.setItem("timers", JSON.stringify(timers));
     alert("Timer saved!");
+    resetForm();
+    router.push("/(drawer)/timers/savedTimers");
+  };
+
+  const cancelEdit = () => {
+    resetForm();
+    router.back();
+  };
+
+  const resetForm = () => {
     setTimerName("");
     setSelectedRounds(1);
     setWorkSeconds(0);
@@ -146,7 +156,6 @@ export default function TimersScreen() {
     setSelectedSets(1);
     setSetRestTimeSeconds(0);
     setEditIndex(null);
-    router.push("/(drawer)/timers/savedTimers");
   };
 
   return (
@@ -155,7 +164,6 @@ export default function TimersScreen() {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-
         {/* Timer Name Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -177,7 +185,7 @@ export default function TimersScreen() {
             <IconSymbol size={24} color="lime" name="gear" />
             <ThemedText style={styles.cardTitle}>Timer Settings</ThemedText>
           </View>
-          
+
           <View style={styles.settingsGrid}>
             {/* Rounds */}
             <View style={styles.settingItem}>
@@ -189,7 +197,11 @@ export default function TimersScreen() {
                 <ThemedText style={styles.settingValueText}>
                   {selectedRounds}
                 </ThemedText>
-                <IconSymbol size={16} color={colors.textSecondary} name="chevron.down" />
+                <IconSymbol
+                  size={16}
+                  color={colors.textSecondary}
+                  name="chevron.down"
+                />
               </TouchableOpacity>
             </View>
 
@@ -203,7 +215,11 @@ export default function TimersScreen() {
                 <ThemedText style={styles.settingValueText}>
                   {formatTime(workSeconds)}
                 </ThemedText>
-                <IconSymbol size={16} color={colors.textSecondary} name="chevron.down" />
+                <IconSymbol
+                  size={16}
+                  color={colors.textSecondary}
+                  name="chevron.down"
+                />
               </TouchableOpacity>
             </View>
 
@@ -217,7 +233,11 @@ export default function TimersScreen() {
                 <ThemedText style={styles.settingValueText}>
                   {formatTime(restSeconds)}
                 </ThemedText>
-                <IconSymbol size={16} color={colors.textSecondary} name="chevron.down" />
+                <IconSymbol
+                  size={16}
+                  color={colors.textSecondary}
+                  name="chevron.down"
+                />
               </TouchableOpacity>
             </View>
 
@@ -231,7 +251,11 @@ export default function TimersScreen() {
                 <ThemedText style={styles.settingValueText}>
                   {selectedSets}
                 </ThemedText>
-                <IconSymbol size={16} color={colors.textSecondary} name="chevron.down" />
+                <IconSymbol
+                  size={16}
+                  color={colors.textSecondary}
+                  name="chevron.down"
+                />
               </TouchableOpacity>
             </View>
 
@@ -245,7 +269,11 @@ export default function TimersScreen() {
                 <ThemedText style={styles.settingValueText}>
                   {formatTime(setRestTimeSeconds)}
                 </ThemedText>
-                <IconSymbol size={16} color={colors.textSecondary} name="chevron.down" />
+                <IconSymbol
+                  size={16}
+                  color={colors.textSecondary}
+                  name="chevron.down"
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -255,35 +283,60 @@ export default function TimersScreen() {
         <View style={styles.card}>
           <TouchableOpacity
             onPress={handleStart}
-            style={[styles.startButton, isStartDisabled && styles.disabledButton]}
+            style={[
+              styles.startButton,
+              isStartDisabled && styles.disabledButton,
+            ]}
             activeOpacity={0.8}
             disabled={isStartDisabled}
           >
-            <IconSymbol 
-              size={20} 
-              color={isStartDisabled ? colors.textSecondary : colors.textInverse} 
-              name="play.fill" 
+            <IconSymbol
+              size={20}
+              color={
+                isStartDisabled ? colors.textSecondary : colors.textInverse
+              }
+              name="play.fill"
             />
-            <Text style={[styles.startButtonText, isStartDisabled && styles.disabledButtonText]}>
+            <Text
+              style={[
+                styles.startButtonText,
+                isStartDisabled && styles.disabledButtonText,
+              ]}
+            >
               Start Timer
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             onPress={saveTimer}
             style={[styles.saveButton, isSaveDisabled && styles.disabledButton]}
             activeOpacity={0.85}
             disabled={isSaveDisabled}
           >
-            <IconSymbol 
-              size={20} 
-              color={isSaveDisabled ? colors.textSecondary : colors.primary} 
-              name="square.and.arrow.down" 
+            <IconSymbol
+              size={20}
+              color={isSaveDisabled ? colors.textSecondary : colors.primary}
+              name="square.and.arrow.down"
             />
-            <Text style={[styles.saveButtonText, isSaveDisabled && styles.disabledButtonText]}>
+            <Text
+              style={[
+                styles.saveButtonText,
+                isSaveDisabled && styles.disabledButtonText,
+              ]}
+            >
               {editIndex !== null ? "Update Timer" : "Save Timer"}
             </Text>
           </TouchableOpacity>
+
+          {editIndex !== null && (
+            <TouchableOpacity
+              onPress={cancelEdit}
+              style={styles.cancelButton}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
 
@@ -408,145 +461,164 @@ export default function TimersScreen() {
   );
 }
 
-const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 20,
-  },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-    gap: 8,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  input: {
-    backgroundColor: colors.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: colors.inputText,
-  },
-  settingsGrid: {
-    gap: 16,
-  },
-  settingItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  settingLabel: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  settingValue: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: colors.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    minWidth: 80,
-  },
-  settingValueText: {
-    fontSize: 14,
-    color: colors.inputText,
-    fontWeight: "500",
-  },
-  startButton: {
-    backgroundColor: "lime",
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    marginBottom: 12,
-  },
-  startButtonText: {
-    color: colors.textInverse,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  saveButton: {
-    backgroundColor: colors.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  saveButtonText: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  disabledButton: {
-    backgroundColor: colors.inputBackground,
-    borderColor: colors.border,
-    opacity: 0.6,
-  },
-  disabledButtonText: {
-    color: colors.textSecondary,
-  },
-  
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: colors.overlay,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 24,
-    width: 320,
-    alignItems: "center",
-  },
-  picker: {
-    flex: 1,
-    color: "white",
-  },
-  confirmButton: {
-    marginTop: 24,
-    backgroundColor: "lime",
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-  },
-  confirmButtonText: {
-    color: colors.textInverse,
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-});
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingTop: 20,
+    },
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 16,
+    },
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 16,
+      gap: 8,
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+    },
+    input: {
+      backgroundColor: colors.inputBackground,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: 16,
+      color: colors.inputText,
+    },
+    settingsGrid: {
+      gap: 16,
+    },
+    settingItem: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    settingLabel: {
+      fontSize: 16,
+      fontWeight: "500",
+    },
+    settingValue: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      backgroundColor: colors.inputBackground,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      minWidth: 80,
+    },
+    settingValueText: {
+      fontSize: 14,
+      color: colors.inputText,
+      fontWeight: "500",
+    },
+    startButton: {
+      backgroundColor: "lime",
+      borderRadius: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      marginBottom: 12,
+    },
+    startButtonText: {
+      color: colors.textInverse,
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    saveButton: {
+      backgroundColor: colors.inputBackground,
+      borderWidth: 1,
+      borderColor: colors.primary,
+      borderRadius: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+    },
+    saveButtonText: {
+      color: colors.primary,
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    disabledButton: {
+      backgroundColor: colors.inputBackground,
+      borderColor: colors.border,
+      opacity: 0.6,
+    },
+    disabledButtonText: {
+      color: colors.textSecondary,
+    },
+    cancelButton: {
+      backgroundColor: colors.inputBackground,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      marginTop: 12,
+    },
+    cancelButtonText: {
+      color: colors.textSecondary,
+      fontSize: 16,
+      fontWeight: "600",
+    },
 
-const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+    // Modal styles
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: colors.overlay,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalContent: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 24,
+      width: 320,
+      alignItems: "center",
+    },
+    picker: {
+      flex: 1,
+      color: "white",
+    },
+    confirmButton: {
+      marginTop: 24,
+      backgroundColor: "lime",
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+    },
+    confirmButtonText: {
+      color: colors.textInverse,
+      fontSize: 20,
+      fontWeight: "bold",
+    },
+  });
+
+const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
@@ -594,6 +666,14 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
     saveButton: {
       ...tablet.saveButton,
       paddingVertical: 14,
+    },
+    cancelButton: {
+      ...tablet.cancelButton,
+      paddingVertical: 14,
+    },
+    cancelButtonText: {
+      ...tablet.cancelButtonText,
+      fontSize: 14,
     },
   });
 };
