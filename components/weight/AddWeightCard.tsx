@@ -58,6 +58,8 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   weightInput: {
     flex: 1,
     backgroundColor: colors.inputBackground,
+    borderWidth: 1,
+    borderColor: colors.inputBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -90,6 +92,7 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
     addButton: {
       ...tablet.addButton,
       alignSelf: "stretch",
+      alignItems: "center",
     },
   });
 };

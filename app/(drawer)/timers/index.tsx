@@ -479,7 +479,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   timerNameInput: {
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.inputBorder,
     borderRadius: 8,
     padding: 10,
     fontSize: 24,
@@ -520,7 +520,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     paddingLeft: 20,
     paddingRight: 20,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.inputBorder,
     borderRadius: 8,
     backgroundColor: colors.inputBackground,
     minWidth: 120,

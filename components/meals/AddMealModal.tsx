@@ -140,6 +140,8 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   input: {
     backgroundColor: colors.inputBackground,
+    borderWidth: 1,
+    borderColor: colors.inputBorder,
     borderRadius: 8,
     padding: 16,
     fontSize: 16,

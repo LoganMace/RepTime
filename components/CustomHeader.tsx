@@ -48,8 +48,12 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     position: "relative",
+    backgroundColor: colors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   menuButton: {
     position: "absolute",
@@ -68,5 +72,10 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
+    headerContainer: {
+      ...tablet.headerContainer,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
   });
 };

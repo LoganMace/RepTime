@@ -268,241 +268,242 @@ const Clock = ({
   );
 };
 
-const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: colors.background,
-    position: "relative",
-  },
-  closeButton: {
-    position: "absolute",
-    top: 40,
-    left: 40,
-    zIndex: 1000,
-  },
-  closeButtonText: {
-    color: colors.text,
-    fontSize: 48,
-    fontWeight: "bold",
-  },
-  label: {
-    position: "absolute",
-    top: 50,
-    alignItems: "center",
-    paddingRight: 20,
-    paddingLeft: 20,
-  },
-  roundContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-    gap: 40,
-  },
-  round: {
-    fontSize: 60,
-    color: colors.warning,
-    marginBottom: 10,
-  },
-  phase: {
-    fontSize: 120,
-    color: colors.text,
-    marginBottom: 10,
-    fontWeight: "bold",
-  },
-  time: {
-    fontSize: 400,
-    fontWeight: "bold",
-  },
-  work: {
-    color: colors.success,
-  },
-  rest: {
-    color: colors.info,
-  },
-  getReady: {
-    color: colors.text,
-  },
-  paused: {
-    color: colors.textSecondary,
-  },
-  playButton: {
-    fontSize: 400,
-    color: colors.success,
-  },
-  sleekPlayButton: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: colors.card,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
-    borderWidth: 4,
-    borderColor: colors.success,
-  },
-  sleekPlayIcon: {
-    fontSize: 120,
-    color: colors.success,
-    marginLeft: 10,
-    textShadowColor: colors.shadow,
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 8,
-  },
-  pauseButton: {
-    marginTop: 32,
-    paddingVertical: 14,
-    paddingHorizontal: 36,
-    borderRadius: 24,
-    backgroundColor: colors.card,
-    borderWidth: 2,
-    borderColor: colors.text,
-    alignItems: "center",
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  pauseButtonText: {
-    color: colors.text,
-    fontSize: 22,
-    fontWeight: "bold",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
-  progressContainer: {
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 60,
-  },
-  timerContent: {
-    position: "absolute",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  phaseText: {
-    fontSize: 64,
-    fontWeight: "600",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  timeText: {
-    fontSize: 120,
-    fontWeight: "bold",
-    color: colors.text,
-    fontFamily: "monospace",
-    marginBottom: 12,
-    fontVariant: ["tabular-nums"],
-  },
-  roundText: {
-    fontSize: 32,
-    color: colors.textSecondary,
-    marginBottom: 4,
-  },
-  setLevelText: {
-    fontSize: 30,
-    color: colors.textSecondary,
-  },
-  doneContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 20,
-  },
-  doneText: {
-    fontSize: 64,
-    fontWeight: "bold",
-    color: colors.text,
-    textAlign: "center",
-  },
-  doneSubText: {
-    fontSize: 32,
-    color: colors.textSecondary,
-    textAlign: "center",
-  },
-  doneIcon: {
-    marginVertical: 20,
-  },
-});
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.background,
+      position: "relative",
+    },
+    closeButton: {
+      position: "absolute",
+      top: 40,
+      left: 40,
+      zIndex: 1000,
+    },
+    closeButtonText: {
+      color: colors.text,
+      fontSize: 48,
+      fontWeight: "bold",
+    },
+    label: {
+      position: "absolute",
+      top: 50,
+      alignItems: "center",
+      paddingRight: 20,
+      paddingLeft: 20,
+    },
+    roundContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 10,
+      gap: 40,
+    },
+    round: {
+      fontSize: 60,
+      color: colors.gold,
+      marginBottom: 10,
+    },
+    phase: {
+      fontSize: 120,
+      color: colors.text,
+      marginBottom: 10,
+      fontWeight: "bold",
+    },
+    time: {
+      fontSize: 400,
+      fontWeight: "bold",
+    },
+    work: {
+      color: colors.success,
+    },
+    rest: {
+      color: colors.info,
+    },
+    getReady: {
+      color: colors.text,
+    },
+    paused: {
+      color: colors.textSecondary,
+    },
+    playButton: {
+      fontSize: 400,
+      color: colors.success,
+    },
+    sleekPlayButton: {
+      width: 180,
+      height: 180,
+      borderRadius: 90,
+      backgroundColor: colors.card,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      elevation: 8,
+      borderWidth: 4,
+      borderColor: colors.success,
+    },
+    sleekPlayIcon: {
+      fontSize: 120,
+      color: colors.success,
+      marginLeft: 10,
+      textShadowColor: colors.shadow,
+      textShadowOffset: { width: 2, height: 2 },
+      textShadowRadius: 8,
+    },
+    pauseButton: {
+      marginTop: 32,
+      paddingVertical: 14,
+      paddingHorizontal: 36,
+      borderRadius: 24,
+      backgroundColor: colors.card,
+      borderWidth: 2,
+      borderColor: colors.text,
+      alignItems: "center",
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.18,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    pauseButtonText: {
+      color: colors.text,
+      fontSize: 22,
+      fontWeight: "bold",
+      letterSpacing: 1,
+      textTransform: "uppercase",
+    },
+    progressContainer: {
+      position: "relative",
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 60,
+    },
+    timerContent: {
+      position: "absolute",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    phaseText: {
+      fontSize: 64,
+      fontWeight: "600",
+      marginBottom: 8,
+      textAlign: "center",
+    },
+    timeText: {
+      fontSize: 120,
+      fontWeight: "bold",
+      color: colors.text,
+      fontFamily: "monospace",
+      marginBottom: 12,
+      fontVariant: ["tabular-nums"],
+    },
+    roundText: {
+      fontSize: 32,
+      color: colors.textSecondary,
+      marginBottom: 4,
+    },
+    setLevelText: {
+      fontSize: 30,
+      color: colors.textSecondary,
+    },
+    doneContainer: {
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 20,
+    },
+    doneText: {
+      fontSize: 64,
+      fontWeight: "bold",
+      color: colors.text,
+      textAlign: "center",
+    },
+    doneSubText: {
+      fontSize: 32,
+      color: colors.textSecondary,
+      textAlign: "center",
+    },
+    doneIcon: {
+      marginVertical: 20,
+    },
+  });
 
-const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
-  closeButton: {
-    ...tablet.closeButton,
-    top: 50,
-    left: 20,
-    zIndex: 1000,
-  },
-  closeButtonText: {
-    ...tablet.closeButtonText,
-    fontSize: 36,
-  },
-  progressContainer: {
-    ...tablet.progressContainer,
-    marginBottom: 40,
-  },
-  phaseText: {
-    ...tablet.phaseText,
-    fontSize: 44,
-    fontWeight: "600",
-  },
-  timeText: {
-    ...tablet.timeText,
-    fontSize: 80,
-  },
-  roundText: {
-    ...tablet.roundText,
-    fontSize: 24,
-  },
-  setLevelText: {
-    ...tablet.setLevelText,
-    fontSize: 22,
-  },
-  sleekPlayButton: {
-    ...tablet.sleekPlayButton,
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-  },
-  sleekPlayIcon: {
-    ...tablet.sleekPlayIcon,
-    fontSize: 90,
-  },
-  pauseButton: {
-    ...tablet.pauseButton,
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    marginTop: 24,
-  },
-  pauseButtonText: {
-    ...tablet.pauseButtonText,
-    fontSize: 18,
-  },
-  doneContainer: {
-    ...tablet.doneContainer,
-    gap: 15,
-  },
-  doneText: {
-    ...tablet.doneText,
-    fontSize: 48,
-  },
-  doneSubText: {
-    ...tablet.doneSubText,
-    fontSize: 24,
-  },
-  doneIcon: {
-    ...tablet.doneIcon,
-    marginVertical: 15,
-  },
+    closeButton: {
+      ...tablet.closeButton,
+      top: 50,
+      left: 20,
+      zIndex: 1000,
+    },
+    closeButtonText: {
+      ...tablet.closeButtonText,
+      fontSize: 36,
+    },
+    progressContainer: {
+      ...tablet.progressContainer,
+      marginBottom: 40,
+    },
+    phaseText: {
+      ...tablet.phaseText,
+      fontSize: 44,
+      fontWeight: "600",
+    },
+    timeText: {
+      ...tablet.timeText,
+      fontSize: 80,
+    },
+    roundText: {
+      ...tablet.roundText,
+      fontSize: 24,
+    },
+    setLevelText: {
+      ...tablet.setLevelText,
+      fontSize: 22,
+    },
+    sleekPlayButton: {
+      ...tablet.sleekPlayButton,
+      width: 150,
+      height: 150,
+      borderRadius: 75,
+    },
+    sleekPlayIcon: {
+      ...tablet.sleekPlayIcon,
+      fontSize: 90,
+    },
+    pauseButton: {
+      ...tablet.pauseButton,
+      paddingVertical: 12,
+      paddingHorizontal: 30,
+      marginTop: 24,
+    },
+    pauseButtonText: {
+      ...tablet.pauseButtonText,
+      fontSize: 18,
+    },
+    doneContainer: {
+      ...tablet.doneContainer,
+      gap: 15,
+    },
+    doneText: {
+      ...tablet.doneText,
+      fontSize: 48,
+    },
+    doneSubText: {
+      ...tablet.doneSubText,
+      fontSize: 24,
+    },
+    doneIcon: {
+      ...tablet.doneIcon,
+      marginVertical: 15,
+    },
   });
 };
 

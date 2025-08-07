@@ -222,7 +222,7 @@ export function WeightTrendChart({
             y1={goalY}
             x2={width - padding}
             y2={goalY}
-            stroke={colors.warning}
+            stroke={colors.gold}
             strokeWidth="2"
             strokeDasharray="5,3"
           />
@@ -239,7 +239,12 @@ export function WeightTrendChart({
 
         {/* Smoothed trend line */}
         {showSmoothing && smoothedPath && (
-          <Path d={smoothedPath} stroke={colors.success} strokeWidth="3" fill="none" />
+          <Path
+            d={smoothedPath}
+            stroke={colors.success}
+            strokeWidth="3"
+            fill="none"
+          />
         )}
 
         {/* Data points */}
@@ -289,7 +294,7 @@ export function WeightTrendChart({
             x={width - padding + 5}
             y={goalY + 3}
             fontSize={isMobile ? "10" : "12"}
-            fill={colors.warning}
+            fill={colors.gold}
             textAnchor="start"
           >
             Goal: {goalWeight}
@@ -300,12 +305,19 @@ export function WeightTrendChart({
       {/* Legend */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendLine, { backgroundColor: colors.textSecondary }]} />
+          <View
+            style={[
+              styles.legendLine,
+              { backgroundColor: colors.textSecondary },
+            ]}
+          />
           <ThemedText style={styles.legendText}>Actual Weight</ThemedText>
         </View>
         {showSmoothing && (
           <View style={styles.legendItem}>
-            <View style={[styles.legendLine, { backgroundColor: colors.success }]} />
+            <View
+              style={[styles.legendLine, { backgroundColor: colors.success }]}
+            />
             <ThemedText style={styles.legendText}>Trend (3-day avg)</ThemedText>
           </View>
         )}
@@ -314,7 +326,7 @@ export function WeightTrendChart({
             <View
               style={[
                 styles.legendLine,
-                { backgroundColor: colors.warning, height: 1 },
+                { backgroundColor: colors.gold, height: 1 },
               ]}
             />
             <ThemedText style={styles.legendText}>Goal Weight</ThemedText>
@@ -325,62 +337,63 @@ export function WeightTrendChart({
   );
 }
 
-const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    backgroundColor: "transparent",
-    marginVertical: 10,
-  },
-  noDataText: {
-    textAlign: "center",
-    fontSize: 16,
-    opacity: 0.7,
-    marginTop: 80,
-  },
-  legend: {
-    flexDirection: "row",
-    justifyContent: "center",
-    flexWrap: "wrap",
-    marginTop: 10,
-    gap: 15,
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  legendLine: {
-    width: 20,
-    height: 3,
-    borderRadius: 1.5,
-  },
-  legendText: {
-    fontSize: 12,
-    opacity: 0.8,
-  },
-});
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: "transparent",
+      marginVertical: 10,
+    },
+    noDataText: {
+      textAlign: "center",
+      fontSize: 16,
+      opacity: 0.7,
+      marginTop: 80,
+    },
+    legend: {
+      flexDirection: "row",
+      justifyContent: "center",
+      flexWrap: "wrap",
+      marginTop: 10,
+      gap: 15,
+    },
+    legendItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+    },
+    legendLine: {
+      width: 20,
+      height: 3,
+      borderRadius: 1.5,
+    },
+    legendText: {
+      fontSize: 12,
+      opacity: 0.8,
+    },
+  });
 
-const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
-  legend: {
-    ...tablet.legend,
-    gap: 8,
-    marginTop: 8,
-  },
-  legendItem: {
-    ...tablet.legendItem,
-    gap: 3,
-    marginBottom: 4,
-  },
-  legendLine: {
-    ...tablet.legendLine,
-    width: 16,
-    height: 2,
-  },
-  legendText: {
-    ...tablet.legendText,
-    fontSize: 10,
-  },
+    legend: {
+      ...tablet.legend,
+      gap: 8,
+      marginTop: 8,
+    },
+    legendItem: {
+      ...tablet.legendItem,
+      gap: 3,
+      marginBottom: 4,
+    },
+    legendLine: {
+      ...tablet.legendLine,
+      width: 16,
+      height: 2,
+    },
+    legendText: {
+      ...tablet.legendText,
+      fontSize: 10,
+    },
   });
 };

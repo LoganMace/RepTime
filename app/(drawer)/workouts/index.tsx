@@ -160,7 +160,11 @@ export default function WorkoutsScreen() {
                         onPress={() => removeRow(idx)}
                         style={styles.removeButton}
                       >
-                        <Feather name="trash-2" size={24} color={colors.error} />
+                        <Feather
+                          name="trash-2"
+                          size={24}
+                          color={colors.error}
+                        />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -258,7 +262,11 @@ export default function WorkoutsScreen() {
                         onPress={() => removeRow(idx)}
                         style={styles.removeButton}
                       >
-                        <Feather name="trash-2" size={32} color={colors.error} />
+                        <Feather
+                          name="trash-2"
+                          size={32}
+                          color={colors.error}
+                        />
                       </TouchableOpacity>
                     )}
                   </View>
@@ -368,20 +376,21 @@ export default function WorkoutsScreen() {
   );
 }
 
-const baseButton = (colors: ReturnType<typeof useTheme>['colors']) => ({
-  borderRadius: 24,
-  height: 60,
-  justifyContent: "center",
-  alignItems: "center",
-  borderWidth: 2,
-  shadowColor: colors.shadow,
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.18,
-  shadowRadius: 8,
-  elevation: 2,
-  alignSelf: "center",
-  paddingHorizontal: 24,
-} as const);
+const baseButton = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  ({
+    borderRadius: 24,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 2,
+    alignSelf: "center",
+    paddingHorizontal: 24,
+  } as const);
 
 const baseButtonText = {
   fontSize: 24,
@@ -390,127 +399,129 @@ const baseButtonText = {
   textTransform: "uppercase" as const,
 };
 
-const baseInput = (colors: ReturnType<typeof useTheme>['colors']) => ({
-  borderWidth: 1,
-  borderColor: colors.inputBackground,
-  borderRadius: 8,
-  padding: 8,
-  backgroundColor: colors.card,
-  color: colors.text,
-  fontSize: 24,
-} as const);
+const baseInput = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  ({
+    borderWidth: 1,
+    borderColor: colors.inputBorder,
+    borderRadius: 8,
+    padding: 8,
+    backgroundColor: colors.inputBackground,
+    color: colors.inputText,
+    fontSize: 24,
+  } as const);
 
-const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  headerImage: {
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
-  centeredContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-  },
-  workoutNameContainer: {
-    marginBottom: 20,
-    alignItems: "center",
-    gap: 8,
-  },
-  workoutNameInput: {
-    ...baseInput(colors),
-    minWidth: 300,
-    alignSelf: "center",
-  },
-  formScroll: {
-    alignSelf: "center",
-    width: "100%",
-  },
-  tabletFormContainer: {
-    width: "90%",
-    gap: 20,
-  },
-  tabletWorkoutCard: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 20,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  cardTitle: {
-    color: colors.warning,
-    fontSize: 22,
-    fontWeight: "bold",
-  },
-  removeButton: {
-    padding: 4,
-  },
-  row: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  inputGroup: {
-    flex: 1,
-    flexDirection: "column",
-    gap: 8,
-  },
-  inputLabel: {
-    fontSize: 18,
-    color: colors.textSecondary,
-    fontWeight: "600",
-  },
-  input: {
-    ...baseInput(colors),
-    fontSize: 20,
-  },
-  removeButtonContainer: {
-    justifyContent: "center",
-    paddingBottom: 4,
-  },
-  buttonContainer: {
-    marginTop: 20,
-    flexDirection: "column",
-    gap: 10,
-    width: "100%",
-    alignItems: "center",
-  },
-  addButton: {
-    ...baseButton(colors),
-    backgroundColor: colors.warning,
-    borderColor: colors.warning,
-    marginTop: 20,
-    marginBottom: 0,
-  },
-  addButtonText: {
-    ...baseButtonText,
-    color: colors.background,
-  },
-  saveButton: {
-    ...baseButton(colors),
-    backgroundColor: colors.background,
-    borderColor: colors.warning,
-    marginTop: 10,
-  },
-  saveButtonText: {
-    ...baseButtonText,
-    color: colors.warning,
-  },
-  // Removed timerCardsContainer and related styles
-  // Properties for mobile styles that don't exist in tablet
-  mobileFormContainer: {},
-  tableHeader: {},
-  workoutRow: {},
-  exerciseColumn: {},
-  smallColumn: {},
-  removeColumn: {},
-  mobileWorkoutCard: {},
-});
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    headerImage: {
+      bottom: -90,
+      left: -35,
+      position: "absolute",
+    },
+    centeredContainer: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      width: "100%",
+    },
+    workoutNameContainer: {
+      marginBottom: 20,
+      alignItems: "center",
+      gap: 8,
+    },
+    workoutNameInput: {
+      ...baseInput(colors),
+      minWidth: 300,
+      alignSelf: "center",
+    },
+    formScroll: {
+      alignSelf: "center",
+      width: "100%",
+    },
+    tabletFormContainer: {
+      width: "90%",
+      gap: 20,
+    },
+    tabletWorkoutCard: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 20,
+    },
+    cardHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 16,
+    },
+    cardTitle: {
+      color: colors.gold,
+      fontSize: 22,
+      fontWeight: "bold",
+    },
+    removeButton: {
+      padding: 4,
+    },
+    row: {
+      flexDirection: "row",
+      gap: 16,
+    },
+    inputGroup: {
+      flex: 1,
+      flexDirection: "column",
+      gap: 8,
+    },
+    inputLabel: {
+      fontSize: 18,
+      color: colors.textSecondary,
+      fontWeight: "600",
+    },
+    input: {
+      ...baseInput(colors),
+      fontSize: 20,
+    },
+    removeButtonContainer: {
+      justifyContent: "center",
+      paddingBottom: 4,
+    },
+    buttonContainer: {
+      marginTop: 20,
+      flexDirection: "column",
+      gap: 10,
+      width: "100%",
+      alignItems: "center",
+    },
+    addButton: {
+      ...baseButton(colors),
+      backgroundColor: colors.gold,
+      borderColor: colors.gold,
+      marginTop: 20,
+      marginBottom: 0,
+    },
+    addButtonText: {
+      ...baseButtonText,
+      color: colors.background,
+    },
+    saveButton: {
+      ...baseButton(colors),
+      backgroundColor: colors.background,
+      borderColor: colors.gold,
+      marginTop: 10,
+    },
+    saveButtonText: {
+      ...baseButtonText,
+      color: colors.gold,
+    },
+    // Removed timerCardsContainer and related styles
+    // Properties for mobile styles that don't exist in tablet
+    mobileFormContainer: {},
+    tableHeader: {},
+    workoutRow: {},
+    exerciseColumn: {},
+    smallColumn: {},
+    removeColumn: {},
+    mobileWorkoutCard: {},
+  });
 
-const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
@@ -553,7 +564,7 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
       marginBottom: 8,
     },
     cardTitle: {
-      color: colors.warning,
+      color: colors.gold,
       fontSize: 18,
       fontWeight: "bold",
     },

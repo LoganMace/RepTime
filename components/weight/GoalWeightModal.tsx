@@ -107,6 +107,8 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   modalInput: {
     backgroundColor: colors.inputBackground,
+    borderWidth: 1,
+    borderColor: colors.inputBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 16,

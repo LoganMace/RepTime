@@ -139,42 +139,43 @@ export default function SavedWorkoutsScreen() {
   );
 }
 
-const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    alignItems: "center",
-  },
-  timerCardsContainer: {
-    width: "100%",
-    paddingHorizontal: 16,
-  },
-  timerCard: {
-    backgroundColor: colors.inputBackground,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    width: "100%",
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  timerCardTitle: {
-    color: colors.warning,
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  timerCardText: {
-    color: colors.text,
-    fontSize: 16,
-    marginBottom: 4,
-  },
-});
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 16,
+      alignItems: "center",
+    },
+    timerCardsContainer: {
+      width: "100%",
+      paddingHorizontal: 16,
+    },
+    timerCard: {
+      backgroundColor: colors.inputBackground,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 16,
+      width: "100%",
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    timerCardTitle: {
+      color: colors.gold,
+      fontSize: 20,
+      fontWeight: "bold",
+      marginBottom: 8,
+    },
+    timerCardText: {
+      color: colors.text,
+      fontSize: 16,
+      marginBottom: 4,
+    },
+  });
 
-const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,

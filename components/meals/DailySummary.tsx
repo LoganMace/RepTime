@@ -1,6 +1,6 @@
 import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 import { StyleSheet, Text, View } from "react-native";
 import { DailyGoals } from "./MealConstants";
 
@@ -39,7 +39,7 @@ export default function DailySummary({
                 isOverGoal && category === "calories"
                   ? colors.error
                   : isOverGoal && category === "protein"
-                  ? colors.warning
+                  ? colors.info
                   : color,
               width: `${Math.min(percentage, 100)}%`,
             },
@@ -82,58 +82,59 @@ export default function DailySummary({
   );
 }
 
-const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  summarySection: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-  },
-  summaryTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  summaryRow: {
-    flexDirection: "row",
-    gap: 20,
-  },
-  summaryItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  summaryValue: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: colors.text,
-    marginBottom: 4,
-  },
-  summaryLabel: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginBottom: 4,
-  },
-  summaryGoal: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    marginBottom: 8,
-  },
-  progressBarContainer: {
-    width: "100%",
-    height: 8,
-    backgroundColor: colors.inputBackground,
-    borderRadius: 4,
-    overflow: "hidden",
-    position: "relative",
-  },
-  progressBar: {
-    height: "100%",
-    borderRadius: 4,
-  },
-});
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    summarySection: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 24,
+    },
+    summaryTitle: {
+      fontSize: 20,
+      fontWeight: "700",
+      marginBottom: 16,
+      textAlign: "center",
+    },
+    summaryRow: {
+      flexDirection: "row",
+      gap: 20,
+    },
+    summaryItem: {
+      flex: 1,
+      alignItems: "center",
+    },
+    summaryValue: {
+      fontSize: 28,
+      fontWeight: "900",
+      color: colors.text,
+      marginBottom: 4,
+    },
+    summaryLabel: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginBottom: 4,
+    },
+    summaryGoal: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      marginBottom: 8,
+    },
+    progressBarContainer: {
+      width: "100%",
+      height: 8,
+      backgroundColor: colors.inputBackground,
+      borderRadius: 4,
+      overflow: "hidden",
+      position: "relative",
+    },
+    progressBar: {
+      height: "100%",
+      borderRadius: 4,
+    },
+  });
 
-const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
