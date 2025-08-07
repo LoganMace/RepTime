@@ -3,6 +3,7 @@ import { useTheme } from "@/hooks/useTheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState } from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,11 +11,12 @@ import {
   View,
 } from "react-native";
 
-import { Feather } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 
 import Clock from "@/components/Clock";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 
 export default function SavedTimersScreen() {
   const { getStyles } = useResponsiveStyles();
@@ -43,6 +45,12 @@ export default function SavedTimersScreen() {
 
   const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
+  const formatTime = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
   const loadTimers = async () => {
     try {
       const timers = await AsyncStorage.getItem("timers");
@@ -59,9 +67,26 @@ export default function SavedTimersScreen() {
   );
 
   const handleDelete = async (idx: number) => {
-    const updated = savedTimers.filter((_, i) => i !== idx);
-    setSavedTimers(updated);
-    await AsyncStorage.setItem("timers", JSON.stringify(updated));
+    const timer = savedTimers[idx];
+    Alert.alert(
+      "Delete Timer",
+      `Are you sure you want to delete "${timer.name}"?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const updated = savedTimers.filter((_, i) => i !== idx);
+            setSavedTimers(updated);
+            await AsyncStorage.setItem("timers", JSON.stringify(updated));
+          },
+        },
+      ]
+    );
   };
 
   const handleEdit = (
@@ -83,153 +108,197 @@ export default function SavedTimersScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.centeredContainer}>
-        <View style={{ width: "100%", alignItems: "center" }}>
-          <ScrollView style={{ width: "100%" }}>
-            <View style={styles.timerCardsContainer}>
-              {savedTimers.length === 0 ? (
-                <ThemedText>No saved timers yet.</ThemedText>
-              ) : (
-                savedTimers.map((timer, idx) => (
-                  <View key={idx} style={styles.timerCard}>
-                    <View style={styles.timerCardActions}>
-                      <TouchableOpacity
-                        onPress={() => handleEdit(timer, idx)}
-                        style={styles.iconButton}
-                      >
-                        <Feather name="edit-2" size={26} color={colors.primary} />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => handleDelete(idx)}
-                        style={styles.iconButton}
-                      >
-                        <Feather name="trash-2" size={26} color={colors.error} />
-                      </TouchableOpacity>
-                    </View>
-                    <Text style={styles.timerCardTitle}>{timer.name}</Text>
-                    <Text style={styles.timerCardText}>
-                      Rounds: {timer.rounds}
-                    </Text>
-                    <Text style={styles.timerCardText}>
-                      Work: {timer.workTime}s
-                    </Text>
-                    <Text style={styles.timerCardText}>
-                      Rest: {timer.restTime}s
-                    </Text>
-                    <Text style={styles.timerCardText}>Sets: {timer.sets}</Text>
-                    <Text style={styles.timerCardText}>
-                      Set Rest: {timer.setRestTime}s
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setActiveTimerData({
-                          rounds: timer.rounds,
-                          workTime: timer.workTime,
-                          restTime: timer.restTime,
-                          sets: timer.sets,
-                          setRestTime: timer.setRestTime,
-                        });
-                        setClockVisible(true);
-                      }}
-                      style={styles.playButton}
-                    >
-                      <Feather name="play-circle" size={60} color={colors.success} />
-                    </TouchableOpacity>
-                  </View>
-                ))
-              )}
+    <ThemedView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {savedTimers.length === 0 ? (
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <IconSymbol size={24} color="lime" name="timer" />
+              <ThemedText style={styles.cardTitle}>No Saved Timers</ThemedText>
             </View>
-          </ScrollView>
-        </View>
-        {activeTimerData && (
-          <Clock
-            visible={clockVisible}
-            onClose={() => {
-              setClockVisible(false);
-              setActiveTimerData(null);
-            }}
-            rounds={activeTimerData.rounds}
-            workTime={activeTimerData.workTime}
-            restTime={activeTimerData.restTime}
-            sets={activeTimerData.sets}
-            setRestTime={activeTimerData.setRestTime}
-          />
+            <ThemedText style={styles.emptyText}>
+              Create and save your first timer to see it here.
+            </ThemedText>
+          </View>
+        ) : (
+          savedTimers.map((timer, idx) => (
+            <View key={idx} style={styles.card}>
+              <View style={styles.cardHeader}>
+                <IconSymbol size={24} color="lime" name="timer" />
+                <ThemedText style={styles.cardTitle}>{timer.name}</ThemedText>
+                <View style={styles.cardActions}>
+                  <TouchableOpacity
+                    onPress={() => handleEdit(timer, idx)}
+                    style={styles.actionButton}
+                  >
+                    <IconSymbol size={20} color={colors.primary} name="pencil" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(idx)}
+                    style={styles.actionButton}
+                  >
+                    <IconSymbol size={20} color={colors.error} name="trash" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={styles.timerDetails}>
+                <View style={styles.detailsGrid}>
+                  <View style={styles.detailItem}>
+                    <ThemedText style={styles.detailLabel}>Rounds</ThemedText>
+                    <ThemedText style={styles.detailValue}>{timer.rounds}</ThemedText>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <ThemedText style={styles.detailLabel}>Sets</ThemedText>
+                    <ThemedText style={styles.detailValue}>{timer.sets}</ThemedText>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <ThemedText style={styles.detailLabel}>Work</ThemedText>
+                    <ThemedText style={styles.detailValue}>
+                      {formatTime(timer.workTime)}
+                    </ThemedText>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <ThemedText style={styles.detailLabel}>Rest</ThemedText>
+                    <ThemedText style={styles.detailValue}>
+                      {formatTime(timer.restTime)}
+                    </ThemedText>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <ThemedText style={styles.detailLabel}>Set Rest</ThemedText>
+                    <ThemedText style={styles.detailValue}>
+                      {formatTime(timer.setRestTime)}
+                    </ThemedText>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setActiveTimerData({
+                      rounds: timer.rounds,
+                      workTime: timer.workTime,
+                      restTime: timer.restTime,
+                      sets: timer.sets,
+                      setRestTime: timer.setRestTime,
+                    });
+                    setClockVisible(true);
+                  }}
+                  style={styles.startButton}
+                  activeOpacity={0.8}
+                >
+                  <IconSymbol size={20} color={colors.textInverse} name="play.fill" />
+                  <Text style={styles.startButtonText}>Start Timer</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))
         )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+
+      {/* Clock Component */}
+      {activeTimerData && (
+        <Clock
+          visible={clockVisible}
+          onClose={() => {
+            setClockVisible(false);
+            setActiveTimerData(null);
+          }}
+          rounds={activeTimerData.rounds}
+          workTime={activeTimerData.workTime}
+          restTime={activeTimerData.restTime}
+          sets={activeTimerData.sets}
+          setRestTime={activeTimerData.setRestTime}
+        />
+      )}
+    </ThemedView>
   );
 }
 
 const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
-  headerImage: {
-    color: colors.textSecondary,
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
-  centeredContainer: {
+  scrollView: {
     flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    position: "relative",
+    paddingHorizontal: 24,
+    paddingTop: 20,
   },
-  timerCardsContainer: {
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    gap: 8,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    flex: 1,
+  },
+  cardActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  actionButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: colors.inputBackground,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: "center",
+    marginTop: 8,
+  },
+  timerDetails: {
+    gap: 16,
+  },
+  detailsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "center",
     gap: 16,
-    width: "100%",
   },
-  timerCard: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    width: 320,
-    minHeight: 120,
-    position: "relative",
-    marginHorizontal: 8,
-  },
-  timerCardActions: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    flexDirection: "row",
-    gap: 16,
-    minHeight: 44,
+  detailItem: {
+    flex: 1,
     minWidth: 100,
-    zIndex: 10,
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: colors.inputBackground,
+    borderRadius: 8,
   },
-  timerCardTitle: {
-    color: colors.success,
-    fontSize: 24,
-    fontWeight: "bold",
+  detailLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontWeight: "500",
+    marginBottom: 4,
   },
-  timerCardText: {
+  detailValue: {
+    fontSize: 16,
+    fontWeight: "600",
     color: colors.text,
-    fontSize: 18,
   },
-  iconButton: {
-    width: 44,
-    height: 44,
-    padding: 0,
+  startButton: {
+    backgroundColor: "lime",
     borderRadius: 12,
-    justifyContent: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
-  playButton: {
-    position: "absolute",
-    bottom: 12,
-    right: 12,
-    width: 60,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
+  startButtonText: {
+    color: colors.textInverse,
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 
@@ -237,24 +306,44 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
-    headerImage: {
-      bottom: -30,
-      left: -20,
-      position: "absolute",
+    scrollView: {
+      ...tablet.scrollView,
+      paddingHorizontal: 16,
+      paddingTop: 16,
     },
-    centeredContainer: {
-      ...tablet.centeredContainer,
-      alignItems: "stretch",
+    card: {
+      ...tablet.card,
+      padding: 16,
+      marginBottom: 12,
     },
-    timerCardsContainer: {
-      ...tablet.timerCardsContainer,
-      flexDirection: "column",
-      alignItems: "center",
+    cardTitle: {
+      ...tablet.cardTitle,
+      fontSize: 16,
     },
-    timerCard: {
-      ...tablet.timerCard,
-      width: "100%",
-      marginHorizontal: 0,
+    detailsGrid: {
+      ...tablet.detailsGrid,
+      gap: 12,
+    },
+    detailItem: {
+      ...tablet.detailItem,
+      minWidth: 80,
+      padding: 10,
+    },
+    detailLabel: {
+      ...tablet.detailLabel,
+      fontSize: 11,
+    },
+    detailValue: {
+      ...tablet.detailValue,
+      fontSize: 14,
+    },
+    startButton: {
+      ...tablet.startButton,
+      paddingVertical: 14,
+    },
+    startButtonText: {
+      ...tablet.startButtonText,
+      fontSize: 14,
     },
   });
 };

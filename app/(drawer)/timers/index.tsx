@@ -534,7 +534,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   confirmButton: {
     marginTop: 24,
-    backgroundColor: colors.success,
+    backgroundColor: "lime",
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 32,

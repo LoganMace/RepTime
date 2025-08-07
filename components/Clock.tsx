@@ -115,7 +115,7 @@ const Clock = ({
       case "work":
         return "#e74c3c"; // Red for work
       case "rest":
-        return "#2ecc71"; // Green for rest
+        return "lime"; // Lime green for rest
       case "setRest":
         return "#3498db"; // Blue for set rest
       case "getReady":
@@ -346,11 +346,11 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       shadowRadius: 16,
       elevation: 8,
       borderWidth: 4,
-      borderColor: colors.success,
+      borderColor: "lime",
     },
     sleekPlayIcon: {
       fontSize: 120,
-      color: colors.success,
+      color: "lime",
       marginLeft: 10,
       textShadowColor: colors.shadow,
       textShadowOffset: { width: 2, height: 2 },
