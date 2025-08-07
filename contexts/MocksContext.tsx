@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, { createContext, ReactNode, useContext, useState, useMemo } from "react";
 
 interface MocksContextType {
   useMocks: boolean;
@@ -23,8 +23,14 @@ export function MocksProvider({
     setUseMocks((prev) => !prev);
   };
 
+  const contextValue = useMemo(() => ({
+    useMocks,
+    setUseMocks,
+    toggleMocks,
+  }), [useMocks]);
+
   return (
-    <MocksContext.Provider value={{ useMocks, setUseMocks, toggleMocks }}>
+    <MocksContext.Provider value={contextValue}>
       {children}
     </MocksContext.Provider>
   );

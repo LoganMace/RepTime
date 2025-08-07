@@ -1,8 +1,8 @@
-import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,6 +11,8 @@ import {
 } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import WorkoutViewModal from "@/components/WorkoutViewModal";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
@@ -41,9 +43,26 @@ export default function SavedWorkoutsScreen() {
   );
 
   const handleDelete = async (idx: number) => {
-    const updated = savedWorkouts.filter((_, i) => i !== idx);
-    setSavedWorkouts(updated);
-    await AsyncStorage.setItem("workoutPlans", JSON.stringify(updated));
+    const workout = savedWorkouts[idx];
+    Alert.alert(
+      "Delete Workout",
+      `Are you sure you want to delete "${workout.name}"?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const updated = savedWorkouts.filter((_, i) => i !== idx);
+            setSavedWorkouts(updated);
+            await AsyncStorage.setItem("workoutPlans", JSON.stringify(updated));
+          },
+        },
+      ]
+    );
   };
 
   const handleEdit = (plan: any, idx: number) => {
@@ -59,83 +78,100 @@ export default function SavedWorkoutsScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.timerCardsContainer}>
+    <ThemedView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         {savedWorkouts.length === 0 ? (
-          <ThemedText>No saved workouts yet.</ThemedText>
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <IconSymbol size={24} color="gold" name="figure.strengthtraining.traditional" />
+              <ThemedText style={styles.cardTitle}>No Saved Workouts</ThemedText>
+            </View>
+            <ThemedText style={styles.emptyText}>
+              Create and save your first workout to see it here.
+            </ThemedText>
+          </View>
         ) : (
           savedWorkouts.map((plan, idx) => (
-            <View key={idx} style={styles.timerCard}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "flex-end",
-                  gap: 16,
-                }}
-              >
+            <View key={idx} style={styles.card}>
+              <View style={styles.cardHeader}>
+                <IconSymbol size={24} color="gold" name="figure.strengthtraining.traditional" />
+                <ThemedText style={styles.cardTitle}>{plan.name}</ThemedText>
+                <View style={styles.cardActions}>
+                  <TouchableOpacity
+                    onPress={() => handleEdit(plan, idx)}
+                    style={styles.actionButton}
+                  >
+                    <IconSymbol size={20} color={colors.primary} name="pencil" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(idx)}
+                    style={styles.actionButton}
+                  >
+                    <IconSymbol size={20} color={colors.error} name="trash" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={styles.workoutDetails}>
+                <View style={styles.workoutSummary}>
+                  <ThemedText style={styles.exerciseCount}>
+                    {plan.exercises.length} exercise{plan.exercises.length !== 1 ? "s" : ""}
+                  </ThemedText>
+                  <ThemedText style={styles.savedDate}>
+                    Saved: {new Date(plan.savedAt).toLocaleDateString()}
+                  </ThemedText>
+                </View>
+
+                <View style={styles.exercisesList}>
+                  {plan.exercises.slice(0, 3).map((ex: any, i: number) => {
+                    const details = [];
+                    if (ex.sets) details.push(`${ex.sets} sets`);
+                    if (ex.reps) details.push(`${ex.reps} reps`);
+                    if (ex.weight) details.push(`${ex.weight} lbs`);
+                    
+                    return (
+                      <View key={i} style={styles.exerciseItem}>
+                        <ThemedText style={styles.exerciseName}>
+                          {ex.exercise || `Exercise ${i + 1}`}
+                        </ThemedText>
+                        {details.length > 0 && (
+                          <ThemedText style={styles.exerciseDetails}>
+                            {details.join(" • ")}
+                          </ThemedText>
+                        )}
+                      </View>
+                    );
+                  })}
+                  {plan.exercises.length > 3 && (
+                    <ThemedText style={styles.moreExercises}>
+                      +{plan.exercises.length - 3} more exercise{plan.exercises.length - 3 !== 1 ? "s" : ""}
+                    </ThemedText>
+                  )}
+                </View>
+
                 <TouchableOpacity
-                  onPress={() => handleEdit(plan, idx)}
-                  style={{ padding: 12 }}
+                  onPress={() => handleView(plan)}
+                  style={styles.viewButton}
+                  activeOpacity={0.8}
                 >
-                  <Feather name="edit-2" size={26} color={colors.primary} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleDelete(idx)}
-                  style={{ padding: 12 }}
-                >
-                  <Feather name="trash-2" size={26} color={colors.error} />
+                  <IconSymbol size={20} color={colors.textInverse} name="eye" />
+                  <Text style={styles.viewButtonText}>View Workout</Text>
                 </TouchableOpacity>
               </View>
-              <Text style={styles.timerCardTitle}>{plan.name}</Text>
-              <Text style={styles.timerCardText}>
-                {plan.exercises.length} exercise
-                {plan.exercises.length !== 1 ? "s" : ""}
-              </Text>
-              <ScrollView style={{ maxHeight: 120 }}>
-                {plan.exercises.map((ex: any, i: number) => {
-                  const details = [];
-                  if (ex.sets) details.push(`Sets: ${ex.sets}`);
-                  if (ex.reps) details.push(`Reps: ${ex.reps}`);
-                  if (ex.weight) details.push(`Weight: ${ex.weight}`);
-                  if (ex.workTime) details.push(`Work: ${ex.workTime}s`);
-                  if (ex.restTime) details.push(`Rest: ${ex.restTime}s`);
-                  return (
-                    <Text key={i} style={styles.timerCardText}>
-                      {ex.exercise}
-                      {details.length > 0 ? " | " + details.join(" | ") : ""}
-                    </Text>
-                  );
-                })}
-              </ScrollView>
-              <Text
-                style={[styles.timerCardText, { fontSize: 12, marginTop: 8 }]}
-              >
-                Saved: {new Date(plan.savedAt).toLocaleString()}
-              </Text>
-              <TouchableOpacity
-                onPress={() => handleView(plan)}
-                style={{
-                  position: "absolute",
-                  bottom: 12,
-                  right: 12,
-                  backgroundColor: colors.primary,
-                  borderRadius: 12,
-                  padding: 12,
-                  zIndex: 10,
-                }}
-              >
-                <Feather name="eye" size={24} color={colors.text} />
-              </TouchableOpacity>
             </View>
           ))
         )}
-      </View>
+      </ScrollView>
+
       <WorkoutViewModal
         visible={viewModalVisible}
         workout={viewWorkout}
         onClose={() => setViewModalVisible(false)}
       />
-    </ScrollView>
+    </ThemedView>
   );
 }
 
@@ -143,35 +179,104 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      padding: 16,
-      alignItems: "center",
     },
-    timerCardsContainer: {
-      width: "100%",
-      paddingHorizontal: 16,
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingTop: 20,
     },
-    timerCard: {
-      backgroundColor: colors.inputBackground,
-      borderRadius: 12,
-      padding: 16,
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 20,
       marginBottom: 16,
-      width: "100%",
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 2,
     },
-    timerCardTitle: {
-      color: colors.gold,
-      fontSize: 20,
-      fontWeight: "bold",
-      marginBottom: 8,
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 16,
+      gap: 8,
     },
-    timerCardText: {
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      flex: 1,
+    },
+    cardActions: {
+      flexDirection: "row",
+      gap: 8,
+    },
+    actionButton: {
+      padding: 8,
+      borderRadius: 8,
+      backgroundColor: colors.inputBackground,
+    },
+    emptyText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      textAlign: "center",
+      marginTop: 8,
+    },
+    workoutDetails: {
+      gap: 16,
+    },
+    workoutSummary: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingBottom: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    exerciseCount: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.primary,
+    },
+    savedDate: {
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
+    exercisesList: {
+      gap: 8,
+    },
+    exerciseItem: {
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      backgroundColor: colors.inputBackground,
+      borderRadius: 8,
+    },
+    exerciseName: {
+      fontSize: 14,
+      fontWeight: "500",
       color: colors.text,
+    },
+    exerciseDetails: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+    moreExercises: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      textAlign: "center",
+      fontStyle: "italic",
+      paddingVertical: 8,
+    },
+    viewButton: {
+      backgroundColor: "gold",
+      borderRadius: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+    },
+    viewButtonText: {
+      color: colors.textInverse,
       fontSize: 16,
-      marginBottom: 4,
+      fontWeight: "600",
     },
   });
 
@@ -179,5 +284,35 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
+    scrollView: {
+      ...tablet.scrollView,
+      paddingHorizontal: 16,
+      paddingTop: 16,
+    },
+    card: {
+      ...tablet.card,
+      padding: 16,
+      marginBottom: 12,
+    },
+    cardTitle: {
+      ...tablet.cardTitle,
+      fontSize: 16,
+    },
+    exerciseName: {
+      ...tablet.exerciseName,
+      fontSize: 13,
+    },
+    exerciseDetails: {
+      ...tablet.exerciseDetails,
+      fontSize: 11,
+    },
+    viewButton: {
+      ...tablet.viewButton,
+      paddingVertical: 14,
+    },
+    viewButtonText: {
+      ...tablet.viewButtonText,
+      fontSize: 14,
+    },
   });
 };

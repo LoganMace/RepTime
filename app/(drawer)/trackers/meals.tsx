@@ -28,7 +28,7 @@ import {
   type MealType,
   type MealEntry as StoredMealEntry,
 } from "@/utils/mealStorage";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import {
   Alert,
   ScrollView,
@@ -40,7 +40,9 @@ import {
 export default function MealsScreen() {
   const { getStyles } = useResponsiveStyles();
   const { colors } = useTheme();
-  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
+  const styles = useMemo(() => {
+    return getStyles(mobileStyles(colors), tabletStyles(colors));
+  }, [getStyles, colors]);
   const { useMocks } = useMocksContext();
 
   const [meals, setMeals] = useState<MealEntry[]>([]);

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "../../../components/ThemedText";
@@ -24,7 +24,9 @@ import {
 export default function WeightTrackingScreen() {
   const { getStyles } = useResponsiveStyles();
   const { colors } = useTheme();
-  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
+  const styles = useMemo(() => {
+    return getStyles(mobileStyles(colors), tabletStyles(colors));
+  }, [getStyles, colors]);
   const { useMocks } = useMocksContext();
 
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);

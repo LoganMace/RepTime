@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -19,7 +19,10 @@ import { useTheme } from "@/hooks/useTheme";
 export default function WorkoutsScreen() {
   const { getStyles, isTablet } = useResponsiveStyles();
   const { colors } = useTheme();
-  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
+  
+  const styles = useMemo(() => {
+    return getStyles(mobileStyles(colors), tabletStyles(colors));
+  }, [getStyles, colors]);
   const params = useLocalSearchParams();
   const router = useRouter();
 
@@ -44,7 +47,7 @@ export default function WorkoutsScreen() {
       setWorkouts(workoutToEdit.exercises);
       setEditIndex(index);
     }
-  }, [params]);
+  }, [params.workout, params.editIndex]);
 
   const handleChange = (index: number, field: string, value: string) => {
     setWorkouts((prev) => {

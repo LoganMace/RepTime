@@ -1,7 +1,7 @@
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Modal,
   StyleSheet,
@@ -63,7 +63,9 @@ export default function TimersScreen() {
     !timerName.trim() || (workSeconds === 0 && restSeconds === 0);
   const isStartDisabled = workSeconds === 0 && restSeconds === 0;
 
-  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
+  const styles = useMemo(() => {
+    return getStyles(mobileStyles(colors), tabletStyles(colors));
+  }, [getStyles, colors]);
 
   useEffect(() => {
     if (params.timer) {
