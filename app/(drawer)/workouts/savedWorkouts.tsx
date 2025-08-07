@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import {
   Alert,
   ScrollView,
@@ -20,7 +20,10 @@ import { useTheme } from "@/hooks/useTheme";
 export default function SavedWorkoutsScreen() {
   const { getStyles } = useResponsiveStyles();
   const { colors } = useTheme();
-  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
+  
+  const styles = useMemo(() => {
+    return getStyles(mobileStyles(colors), tabletStyles(colors));
+  }, [getStyles, colors]);
   const router = useRouter();
 
   const [savedWorkouts, setSavedWorkouts] = useState<any[]>([]);
@@ -126,16 +129,20 @@ export default function SavedWorkoutsScreen() {
                 </View>
 
                 <View style={styles.exercisesList}>
-                  {plan.exercises.slice(0, 3).map((ex: any, i: number) => {
+                  {plan.exercises && plan.exercises.length > 0 ? plan.exercises.slice(0, 3).map((ex: any, i: number) => {
                     const details = [];
-                    if (ex.sets) details.push(`${ex.sets} sets`);
-                    if (ex.reps) details.push(`${ex.reps} reps`);
-                    if (ex.weight) details.push(`${ex.weight} lbs`);
+                    if (ex.sets && ex.sets.toString().trim()) details.push(`${ex.sets} sets`);
+                    if (ex.reps && ex.reps.toString().trim()) details.push(`${ex.reps} reps`);
+                    if (ex.weight && ex.weight.toString().trim()) details.push(`${ex.weight} lbs`);
+                    if (ex.workTime && ex.workTime.toString().trim()) details.push(`${ex.workTime}s work`);
+                    if (ex.restTime && ex.restTime.toString().trim()) details.push(`${ex.restTime}s rest`);
+                    
+                    const exerciseName = ex.exercise || `Exercise ${i + 1}`;
                     
                     return (
                       <View key={i} style={styles.exerciseItem}>
                         <ThemedText style={styles.exerciseName}>
-                          {ex.exercise || `Exercise ${i + 1}`}
+                          {exerciseName}
                         </ThemedText>
                         {details.length > 0 && (
                           <ThemedText style={styles.exerciseDetails}>
@@ -144,8 +151,12 @@ export default function SavedWorkoutsScreen() {
                         )}
                       </View>
                     );
-                  })}
-                  {plan.exercises.length > 3 && (
+                  }) : (
+                    <ThemedText style={styles.emptyText}>
+                      No exercises found in this workout
+                    </ThemedText>
+                  )}
+                  {plan.exercises && plan.exercises.length > 3 && (
                     <ThemedText style={styles.moreExercises}>
                       +{plan.exercises.length - 3} more exercise{plan.exercises.length - 3 !== 1 ? "s" : ""}
                     </ThemedText>
@@ -218,6 +229,8 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       marginTop: 8,
     },
     workoutDetails: {
+      paddingTop: 16,
+      minHeight: 100,
       gap: 16,
     },
     workoutSummary: {
@@ -241,20 +254,26 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       gap: 8,
     },
     exerciseItem: {
-      paddingVertical: 8,
+      paddingVertical: 12,
       paddingHorizontal: 12,
       backgroundColor: colors.inputBackground,
       borderRadius: 8,
+      marginBottom: 8,
+      minHeight: 50,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
     exerciseName: {
-      fontSize: 14,
-      fontWeight: "500",
+      fontSize: 16,
+      fontWeight: "600",
       color: colors.text,
+      lineHeight: 20,
     },
     exerciseDetails: {
-      fontSize: 12,
+      fontSize: 14,
       color: colors.textSecondary,
-      marginTop: 2,
+      marginTop: 4,
+      lineHeight: 18,
     },
     moreExercises: {
       fontSize: 12,
