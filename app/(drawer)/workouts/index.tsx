@@ -104,22 +104,31 @@ export default function WorkoutsScreen() {
       }
       await AsyncStorage.setItem("workoutPlans", JSON.stringify(plans));
       alert("Workout plan saved!");
-      setWorkoutName("");
-      setWorkouts([
-        {
-          exercise: "",
-          sets: "",
-          reps: "",
-          weight: "",
-          workTime: "",
-          restTime: "",
-        },
-      ]);
-      setEditIndex(null);
+      resetForm();
       router.push("/workouts/savedWorkouts");
     } catch {
       alert("Failed to save workout plan.");
     }
+  };
+
+  const cancelEdit = () => {
+    resetForm();
+    router.back();
+  };
+
+  const resetForm = () => {
+    setWorkoutName("");
+    setWorkouts([
+      {
+        exercise: "",
+        sets: "",
+        reps: "",
+        weight: "",
+        workTime: "",
+        restTime: "",
+      },
+    ]);
+    setEditIndex(null);
   };
 
   return (
@@ -321,6 +330,21 @@ export default function WorkoutsScreen() {
               {editIndex !== null ? "Update Workout" : "Save Workout"}
             </Text>
           </TouchableOpacity>
+
+          {editIndex !== null && (
+            <TouchableOpacity
+              onPress={cancelEdit}
+              style={styles.cancelButton}
+              activeOpacity={0.85}
+            >
+              <IconSymbol 
+                size={20} 
+                color={colors.textSecondary} 
+                name="xmark" 
+              />
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
     </ThemedView>
@@ -430,6 +454,24 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => StyleShe
     fontSize: 16,
     fontWeight: "600",
   },
+  cancelButton: {
+    backgroundColor: colors.inputBackground,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 12,
+  },
+  cancelButtonText: {
+    color: colors.textSecondary,
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });
 
 const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
@@ -490,6 +532,14 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
     saveButton: {
       ...tablet.saveButton,
       paddingVertical: 14,
+    },
+    cancelButton: {
+      ...tablet.cancelButton,
+      paddingVertical: 14,
+    },
+    cancelButtonText: {
+      ...tablet.cancelButtonText,
+      fontSize: 14,
     },
   });
 };
