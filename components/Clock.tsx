@@ -152,6 +152,17 @@ const Clock = ({
   }, [currentPhase]);
   
   const isPaused = useMemo(() => currentPhase === "paused", [currentPhase]);
+  
+  // Create a stable phase identifier for animation component
+  const phaseId = useMemo(() => {
+    // Generate unique ID for each phase transition
+    // Include a timestamp component for phases to ensure uniqueness
+    if (currentPhase === "paused") {
+      return phaseBeforePause ? `${currentSet}-${currentRound}-${phaseBeforePause}` : "";
+    }
+    // For active phases, create a unique ID that changes with each new phase
+    return `${currentSet}-${currentRound}-${currentPhase}-${getTotalTimeForPhase()}`;
+  }, [currentSet, currentRound, currentPhase, phaseBeforePause, getTotalTimeForPhase]);
 
   return (
     <Modal
@@ -174,6 +185,8 @@ const Clock = ({
               strokeWidth={circleStrokeWidth}
               duration={getTotalTimeForPhase()}
               isPaused={isPaused}
+              timeLeft={timeLeft}
+              phaseId={phaseId}
               color={getProgressColor}
               backgroundColor={colors.border}
             />
