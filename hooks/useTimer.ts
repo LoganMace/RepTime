@@ -298,6 +298,23 @@ export const useTimer = ({
     }
   };
 
+  const handleReset = useCallback(() => {
+    setCurrentRound(1);
+    setCurrentSet(1);
+    setCurrentPhase("start");
+    setTimeLeft(0);
+    setEndTime(null);
+    setTimeRemainingOnPause(0);
+    setHasBeepedForCompletion(false);
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (quickTimer) {
+      startTimer();
+    }
+  }, [quickTimer, startTimer]);
+
   useEffect(() => {
     if (visible) {
       setCurrentRound(1);
@@ -368,5 +385,6 @@ export const useTimer = ({
     handleStart,
     handlePause,
     handleResume,
+    handleReset,
   };
 };

@@ -23,6 +23,7 @@ type ClockProps = {
   onClose: () => void;
   skipGetReady?: boolean;
   quickTimer?: boolean;
+  onRestart?: () => void;
 };
 
 const Clock = ({
@@ -35,6 +36,7 @@ const Clock = ({
   onClose,
   skipGetReady = false,
   quickTimer = false,
+  onRestart,
 }: ClockProps) => {
   const { colors } = useTheme();
   const { getStyles, isMobile } = useResponsiveStyles();
@@ -54,6 +56,7 @@ const Clock = ({
     handleStart,
     handlePause,
     handleResume,
+    handleReset,
   } = useTimer({
     visible,
     rounds,
@@ -81,16 +84,16 @@ const Clock = ({
     }
   }, [currentPhase, visible]);
 
-  // Auto-close for quick timers when done
+  // Auto-close for quick timers when done (only if no onRestart prop)
   useEffect(() => {
-    if (quickTimer && currentPhase === "start" && visible && hasRun) {
+    if (quickTimer && !onRestart && currentPhase === "start" && visible && hasRun) {
       // Small delay to ensure beep plays
       const timer = setTimeout(() => {
         onClose();
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [quickTimer, currentPhase, onClose, visible, hasRun]);
+  }, [quickTimer, onRestart, currentPhase, onClose, visible, hasRun]);
 
   // Helper function to get total time for current phase
   const getTotalTimeForPhase = () => {
@@ -227,6 +230,37 @@ const Clock = ({
               style={styles.doneIcon}
             />
             <Text style={styles.doneSubText}>Great job!</Text>
+          </View>
+        )}
+
+        {/* Quick Timer Completion Screen */}
+        {((quickTimer && currentPhase === "start" && visible && hasRun && onRestart) || (quickTimer && currentPhase === "done")) && (
+          <View style={styles.doneContainer}>
+            <Text style={styles.doneText}>Timer Complete!</Text>
+            <IconSymbol
+              name="checkmark.circle"
+              size={isMobile ? 100 : 120}
+              color="lime"
+              style={styles.doneIcon}
+            />
+            <View style={styles.quickTimerButtonContainer}>
+              {onRestart && (
+                <TouchableOpacity
+                  onPress={handleReset}
+                  style={[styles.pauseButton, styles.restartButton]}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.pauseButtonText, styles.restartButtonText]}>Restart</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                onPress={handleClose}
+                style={[styles.pauseButton, styles.closeTimerButton]}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.pauseButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
 
@@ -431,6 +465,22 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     doneIcon: {
       marginVertical: 20,
     },
+    quickTimerButtonContainer: {
+      flexDirection: "row",
+      gap: 16,
+      marginTop: 20,
+    },
+    restartButton: {
+      backgroundColor: "gold",
+      borderColor: "gold",
+    },
+    closeTimerButton: {
+      backgroundColor: colors.card,
+      borderColor: colors.textSecondary,
+    },
+    restartButtonText: {
+      color: colors.textInverse,
+    },
   });
 
 const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
@@ -503,6 +553,11 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
     doneIcon: {
       ...tablet.doneIcon,
       marginVertical: 15,
+    },
+    quickTimerButtonContainer: {
+      ...tablet.quickTimerButtonContainer,
+      gap: 12,
+      marginTop: 15,
     },
   });
 };

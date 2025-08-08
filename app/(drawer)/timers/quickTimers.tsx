@@ -46,6 +46,11 @@ export default function QuickTimersScreen() {
     setClockVisible(true);
   };
 
+  const handleRestartTimer = () => {
+    // The restart functionality is now handled directly by the Clock component
+    // using the handleReset function from useTimer hook
+  };
+
   const renderTimerButton = (timer: {
     name: string;
     duration: number;
@@ -113,6 +118,7 @@ export default function QuickTimersScreen() {
             setClockVisible(false);
             setActiveTimerData(null);
           }}
+          onRestart={handleRestartTimer}
           rounds={1}
           workTime={activeTimerData.workTime}
           restTime={0}
