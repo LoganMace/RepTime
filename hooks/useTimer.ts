@@ -1,11 +1,11 @@
-import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
+import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export type Phase =
   | "start"
-  | "getReady" 
+  | "getReady"
   | "work"
   | "rest"
   | "setRest"
@@ -48,7 +48,7 @@ export const useTimer = ({
       try {
         // Use expo-audio's native configuration - it DOES support silent mode!
         await setAudioModeAsync({
-          playsInSilentMode: true,  // This enables audio in silent mode!
+          playsInSilentMode: true, // This enables audio in silent mode!
         });
         console.log("✅ Audio session configured with expo-audio");
         console.log("✅ Audio will play even when device is in silent mode!");
@@ -56,7 +56,7 @@ export const useTimer = ({
         console.error("Error configuring audio session:", error);
       }
     };
-    
+
     setupAudio();
   }, []);
 
@@ -65,30 +65,33 @@ export const useTimer = ({
   const highBeep = useAudioPlayer(require("../assets/sounds/high-beep.mp3"));
 
   // Audio utility functions with error handling and haptic fallback
-  const playAudio = useCallback((player: typeof lowBeep, name: string, useHaptic: boolean = true) => {
-    try {
-      console.log(`Attempting to play ${name}`);
-      player.seekTo(0);
-      player.play();
-      console.log(`${name} played successfully`);
-      
-      // Also trigger haptic feedback for silent mode
-      if (useHaptic) {
-        if (name.includes("high")) {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        } else {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  const playAudio = useCallback(
+    (player: typeof lowBeep, name: string, useHaptic: boolean = true) => {
+      try {
+        console.log(`Attempting to play ${name}`);
+        player.seekTo(0);
+        player.play();
+        console.log(`${name} played successfully`);
+
+        // Also trigger haptic feedback for silent mode
+        if (useHaptic) {
+          if (name.includes("high")) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          } else {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          }
+          console.log("Haptic feedback triggered");
         }
-        console.log("Haptic feedback triggered");
+      } catch (error) {
+        console.error(`Error playing ${name}:`, error);
+        // Fallback to haptic only
+        if (useHaptic) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        }
       }
-    } catch (error) {
-      console.error(`Error playing ${name}:`, error);
-      // Fallback to haptic only
-      if (useHaptic) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      }
-    }
-  }, []);
+    },
+    []
+  );
 
   // Audio test function (for debugging)
   const testAudio = useCallback(() => {
@@ -117,34 +120,34 @@ export const useTimer = ({
   const [phaseBeforePause, setPhaseBeforePause] = useState<Phase>("start");
   const [timeLeft, setTimeLeft] = useState(0);
   const [hasBeepedForCompletion, setHasBeepedForCompletion] = useState(false);
-  
+
   // High-precision timing refs
   const animationFrameRef = useRef<number | null>(null);
   const timerStateRef = useRef<TimerState | null>(null);
-  
+
   // Precise timer update using requestAnimationFrame
   const updateTimer = useCallback(() => {
     const state = timerStateRef.current;
-    
+
     if (!state || state.phase === "start" || state.phase === "done") {
       return;
     }
-    
+
     if (state.phase === "paused") {
       // Don't update during pause
       animationFrameRef.current = requestAnimationFrame(updateTimer);
       return;
     }
-    
+
     const now = Date.now();
     // Calculate elapsed time since phase started (excluding paused time)
     const elapsedSinceStart = now - state.startTime - state.totalPausedDuration;
     const remaining = Math.max(0, state.duration * 1000 - elapsedSinceStart);
     const remainingSeconds = Math.ceil(remaining / 1000);
-    
+
     // Update time left
     setTimeLeft(remainingSeconds);
-    
+
     // Check if phase is complete
     if (remaining <= 0) {
       console.log(`Phase ${state.phase} completed`);
@@ -153,11 +156,11 @@ export const useTimer = ({
       // Phase end will trigger in useEffect
       return;
     }
-    
+
     // Continue the loop
     animationFrameRef.current = requestAnimationFrame(updateTimer);
   }, []);
-  
+
   // Stop the animation frame loop
   const stopTimer = useCallback(() => {
     if (animationFrameRef.current) {
@@ -165,36 +168,41 @@ export const useTimer = ({
       animationFrameRef.current = null;
     }
   }, []);
-  
+
   // Start a new phase with precise timing
-  const startPhase = useCallback((phase: Phase, duration: number) => {
-    console.log(`Starting phase: ${phase}, duration: ${duration}s`);
-    
-    stopTimer();
-    
-    const now = Date.now();
-    timerStateRef.current = {
-      phase,
-      startTime: now,
-      duration,
-      pausedTime: 0,
-      totalPausedDuration: 0,
-    };
-    
-    setCurrentPhase(phase);
-    setTimeLeft(duration);
-    
-    if (duration > 0 && phase !== "paused") {
-      // Start the update loop after a brief delay to ensure state is set
-      setTimeout(() => {
-        animationFrameRef.current = requestAnimationFrame(updateTimer);
-      }, 50);
-    }
-  }, [stopTimer, updateTimer]);
-  
+  const startPhase = useCallback(
+    (phase: Phase, duration: number) => {
+      console.log(`Starting phase: ${phase}, duration: ${duration}s`);
+
+      stopTimer();
+
+      const now = Date.now();
+      timerStateRef.current = {
+        phase,
+        startTime: now,
+        duration,
+        pausedTime: 0,
+        totalPausedDuration: 0,
+      };
+
+      setCurrentPhase(phase);
+      setTimeLeft(duration);
+
+      if (duration > 0 && phase !== "paused") {
+        // Start the update loop after a brief delay to ensure state is set
+        setTimeout(() => {
+          animationFrameRef.current = requestAnimationFrame(updateTimer);
+        }, 50);
+      }
+    },
+    [stopTimer, updateTimer]
+  );
+
   // Handle phase transitions
   const handlePhaseEnd = useCallback(() => {
-    console.log(`Phase ended: ${currentPhase}, round: ${currentRound}, set: ${currentSet}`);
+    console.log(
+      `Phase ended: ${currentPhase}, round: ${currentRound}, set: ${currentSet}`
+    );
 
     if (currentPhase === "getReady") {
       if (workTime > 0) {
@@ -210,7 +218,7 @@ export const useTimer = ({
       if (quickTimer && !hasBeepedForCompletion) {
         setHasBeepedForCompletion(true);
         playAudio(highBeep, "high beep (completion)");
-        
+
         setTimeout(() => {
           setCurrentPhase("start");
           stopTimer();
@@ -222,7 +230,7 @@ export const useTimer = ({
         if (restTime > 0) {
           startPhase("rest", restTime);
         } else {
-          setCurrentRound(prev => prev + 1);
+          setCurrentRound((prev) => prev + 1);
           startPhase("work", workTime);
         }
       } else {
@@ -231,7 +239,7 @@ export const useTimer = ({
           if (setRestTime > 0) {
             startPhase("setRest", setRestTime);
           } else {
-            setCurrentSet(prev => prev + 1);
+            setCurrentSet((prev) => prev + 1);
             setCurrentRound(1);
             startPhase("work", workTime);
           }
@@ -243,7 +251,7 @@ export const useTimer = ({
     } else if (currentPhase === "rest") {
       const nextRound = currentRound + 1;
       setCurrentRound(nextRound);
-      
+
       if (nextRound <= rounds) {
         if (workTime > 0) {
           startPhase("work", workTime);
@@ -257,7 +265,7 @@ export const useTimer = ({
           if (setRestTime > 0) {
             startPhase("setRest", setRestTime);
           } else {
-            setCurrentSet(prev => prev + 1);
+            setCurrentSet((prev) => prev + 1);
             setCurrentRound(1);
             startPhase("work", workTime);
           }
@@ -267,7 +275,7 @@ export const useTimer = ({
         }
       }
     } else if (currentPhase === "setRest") {
-      setCurrentSet(prev => prev + 1);
+      setCurrentSet((prev) => prev + 1);
       setCurrentRound(1);
       if (workTime > 0) {
         startPhase("work", workTime);
@@ -276,11 +284,31 @@ export const useTimer = ({
         stopTimer();
       }
     }
-  }, [currentPhase, currentRound, currentSet, rounds, sets, workTime, restTime, setRestTime, quickTimer, hasBeepedForCompletion, highBeep, playAudio, startPhase, stopTimer]);
+  }, [
+    currentPhase,
+    currentRound,
+    currentSet,
+    rounds,
+    sets,
+    workTime,
+    restTime,
+    setRestTime,
+    quickTimer,
+    hasBeepedForCompletion,
+    highBeep,
+    playAudio,
+    startPhase,
+    stopTimer,
+  ]);
 
   // Handle phase end when timeLeft reaches 0
   useEffect(() => {
-    if (timeLeft === 0 && currentPhase !== "start" && currentPhase !== "paused" && currentPhase !== "done") {
+    if (
+      timeLeft === 0 &&
+      currentPhase !== "start" &&
+      currentPhase !== "paused" &&
+      currentPhase !== "done"
+    ) {
       // Only handle phase end if timer state is null (meaning the timer completed naturally)
       if (!timerStateRef.current) {
         handlePhaseEnd();
@@ -315,20 +343,54 @@ export const useTimer = ({
       }
     }
 
+    // Countdown beeps for all phases (3, 2, 1)
+    if (
+      currentPhase === "work" ||
+      currentPhase === "rest" ||
+      currentPhase === "setRest" ||
+      currentPhase === "getReady"
+    ) {
+      if (timeLeft === 3) {
+        playAudio(lowBeep, "countdown 3");
+      } else if (timeLeft === 2) {
+        playAudio(lowBeep, "countdown 2");
+      } else if (timeLeft === 1) {
+        playAudio(lowBeep, "countdown 1");
+      }
+    }
+
     // Sound effects for phase starts
     if (
-      ((currentPhase === "work" && timeLeft === workTime && workTime > 0) ||
-        (currentPhase === "rest" && timeLeft === restTime && restTime > 0) ||
-        (currentPhase === "setRest" && timeLeft === setRestTime && setRestTime > 0))
+      (currentPhase === "work" && timeLeft === workTime && workTime > 0) ||
+      (currentPhase === "rest" && timeLeft === restTime && restTime > 0) ||
+      (currentPhase === "setRest" &&
+        timeLeft === setRestTime &&
+        setRestTime > 0)
     ) {
       playAudio(highBeep, `high beep (${currentPhase} start)`);
     }
 
     // Halfway beep for work
-    if (currentPhase === "work" && timeLeft === Math.floor(workTime / 2) && workTime > 20) {
+    if (
+      currentPhase === "work" &&
+      timeLeft === Math.floor(workTime / 2) &&
+      workTime > 20
+    ) {
       playAudio(lowBeep, "low beep (halfway)");
     }
-  }, [currentPhase, currentRound, currentSet, timeLeft, workTime, restTime, setRestTime, highBeep, lowBeep, quickTimer, playAudio]);
+  }, [
+    currentPhase,
+    currentRound,
+    currentSet,
+    timeLeft,
+    workTime,
+    restTime,
+    setRestTime,
+    highBeep,
+    lowBeep,
+    quickTimer,
+    playAudio,
+  ]);
 
   // Main timer start function
   const handleStart = useCallback(() => {
@@ -349,16 +411,16 @@ export const useTimer = ({
   const handlePause = useCallback(() => {
     const state = timerStateRef.current;
     if (!state || state.phase === "paused") return;
-    
+
     console.log("Pausing timer");
     stopTimer();
-    
+
     const now = Date.now();
     state.pausedTime = now;
-    
+
     setPhaseBeforePause(currentPhase);
     setCurrentPhase("paused");
-    
+
     // Update timer state to paused
     timerStateRef.current = {
       ...state,
@@ -370,12 +432,12 @@ export const useTimer = ({
   const handleResume = useCallback(() => {
     const state = timerStateRef.current;
     if (!state || state.phase !== "paused" || !state.pausedTime) return;
-    
+
     console.log("Resuming timer");
-    
+
     const now = Date.now();
     const pauseDuration = now - state.pausedTime;
-    
+
     // Update state with accumulated pause time
     timerStateRef.current = {
       ...state,
@@ -383,9 +445,9 @@ export const useTimer = ({
       totalPausedDuration: state.totalPausedDuration + pauseDuration,
       pausedTime: 0,
     };
-    
+
     setCurrentPhase(phaseBeforePause);
-    
+
     // Resume the animation loop
     animationFrameRef.current = requestAnimationFrame(updateTimer);
   }, [phaseBeforePause, updateTimer]);
@@ -394,14 +456,14 @@ export const useTimer = ({
   const handleReset = useCallback(() => {
     console.log("Resetting timer");
     stopTimer();
-    
+
     timerStateRef.current = null;
     setCurrentRound(1);
     setCurrentSet(1);
     setCurrentPhase("start");
     setTimeLeft(0);
     setHasBeepedForCompletion(false);
-    
+
     if (quickTimer) {
       handleStart();
     }
@@ -417,7 +479,7 @@ export const useTimer = ({
       setCurrentPhase("start");
       setTimeLeft(0);
       setHasBeepedForCompletion(false);
-      
+
       if (quickTimer) {
         handleStart();
       }
