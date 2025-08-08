@@ -1,4 +1,5 @@
-import { useAudioPlayer } from "expo-audio";
+import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
+import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -41,8 +42,73 @@ export const useTimer = ({
   skipGetReady = false,
   quickTimer = false,
 }: TimerProps) => {
+  // Configure audio session for iOS devices to play in silent mode
+  useEffect(() => {
+    const setupAudio = async () => {
+      try {
+        // Use expo-audio's native configuration - it DOES support silent mode!
+        await setAudioModeAsync({
+          playsInSilentMode: true,  // This enables audio in silent mode!
+        });
+        console.log("✅ Audio session configured with expo-audio");
+        console.log("✅ Audio will play even when device is in silent mode!");
+      } catch (error) {
+        console.error("Error configuring audio session:", error);
+      }
+    };
+    
+    setupAudio();
+  }, []);
+
+  // Audio players with error handling
   const lowBeep = useAudioPlayer(require("../assets/sounds/low-beep.mp3"));
   const highBeep = useAudioPlayer(require("../assets/sounds/high-beep.mp3"));
+
+  // Audio utility functions with error handling and haptic fallback
+  const playAudio = useCallback((player: typeof lowBeep, name: string, useHaptic: boolean = true) => {
+    try {
+      console.log(`Attempting to play ${name}`);
+      player.seekTo(0);
+      player.play();
+      console.log(`${name} played successfully`);
+      
+      // Also trigger haptic feedback for silent mode
+      if (useHaptic) {
+        if (name.includes("high")) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } else {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        }
+        console.log("Haptic feedback triggered");
+      }
+    } catch (error) {
+      console.error(`Error playing ${name}:`, error);
+      // Fallback to haptic only
+      if (useHaptic) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      }
+    }
+  }, []);
+
+  // Audio test function (for debugging)
+  const testAudio = useCallback(() => {
+    console.log("Testing audio playback...");
+    playAudio(highBeep, "test high beep");
+    setTimeout(() => {
+      playAudio(lowBeep, "test low beep");
+    }, 1000);
+  }, [playAudio, highBeep, lowBeep]);
+
+  // Debug audio loading
+  useEffect(() => {
+    console.log("Audio players initialized");
+    // Test audio playback capability
+    if (lowBeep && highBeep) {
+      console.log("Audio players are ready");
+      // Uncomment the next line to test audio on load:
+      // testAudio();
+    }
+  }, [lowBeep, highBeep, testAudio]);
 
   // Core state
   const [currentRound, setCurrentRound] = useState(1);
@@ -143,8 +209,7 @@ export const useTimer = ({
       // Quick timer completion
       if (quickTimer && !hasBeepedForCompletion) {
         setHasBeepedForCompletion(true);
-        highBeep.seekTo(0);
-        highBeep.play();
+        playAudio(highBeep, "high beep (completion)");
         
         setTimeout(() => {
           setCurrentPhase("start");
@@ -211,7 +276,7 @@ export const useTimer = ({
         stopTimer();
       }
     }
-  }, [currentPhase, currentRound, currentSet, rounds, sets, workTime, restTime, setRestTime, quickTimer, hasBeepedForCompletion, highBeep, startPhase, stopTimer]);
+  }, [currentPhase, currentRound, currentSet, rounds, sets, workTime, restTime, setRestTime, quickTimer, hasBeepedForCompletion, highBeep, playAudio, startPhase, stopTimer]);
 
   // Handle phase end when timeLeft reaches 0
   useEffect(() => {
@@ -256,16 +321,14 @@ export const useTimer = ({
         (currentPhase === "rest" && timeLeft === restTime && restTime > 0) ||
         (currentPhase === "setRest" && timeLeft === setRestTime && setRestTime > 0))
     ) {
-      highBeep.seekTo(0);
-      highBeep.play();
+      playAudio(highBeep, `high beep (${currentPhase} start)`);
     }
 
     // Halfway beep for work
     if (currentPhase === "work" && timeLeft === Math.floor(workTime / 2) && workTime > 20) {
-      lowBeep.seekTo(0);
-      lowBeep.play();
+      playAudio(lowBeep, "low beep (halfway)");
     }
-  }, [currentPhase, currentRound, currentSet, timeLeft, workTime, restTime, setRestTime, highBeep, lowBeep, quickTimer]);
+  }, [currentPhase, currentRound, currentSet, timeLeft, workTime, restTime, setRestTime, highBeep, lowBeep, quickTimer, playAudio]);
 
   // Main timer start function
   const handleStart = useCallback(() => {
