@@ -15,8 +15,22 @@ const baseColors = {
   successDark: "#009b00ff",
 
   // Workout colors
-  gold: "gold",
-  warningDark: "#EC971F",
+  gold: "#FFD700",
+  goldDark: "#c8aa00ff",
+
+  // Workout phase colors - Animation colors
+  workPhase: "#FF6B6B", // Energetic red for work/intensity
+  restPhase: "#4ECDC4", // Calming teal for rest/recovery
+  setRestPhase: "#45B7D1", // Cool blue for longer set breaks
+  getReadyPhase: "#FFA726", // Warm orange for preparation/focus
+  pausedPhase: "#95A5A6", // Neutral gray for paused state
+
+  // Workout phase text colors - Complementary to animation colors
+  workPhaseText: "#E74C3C", // Deeper red for work text
+  restPhaseText: "#16A085", // Deeper teal for rest text
+  setRestPhaseText: "#2980B9", // Deeper blue for set rest text
+  getReadyPhaseText: "#E67E22", // Deeper orange for get ready text
+  pausedPhaseText: "#7F8C8D", // Darker gray for paused text
 
   // Info colors
   info: "#17A2B8",
@@ -80,6 +94,20 @@ export const Theme = {
       error: baseColors.error,
       info: baseColors.info,
 
+      // Workout phase colors
+      workPhase: baseColors.workPhase,
+      restPhase: baseColors.restPhase,
+      setRestPhase: baseColors.setRestPhase,
+      getReadyPhase: baseColors.getReadyPhase,
+      pausedPhase: baseColors.pausedPhase,
+
+      // Workout phase text colors
+      workPhaseText: baseColors.workPhaseText,
+      restPhaseText: baseColors.restPhaseText,
+      setRestPhaseText: baseColors.setRestPhaseText,
+      getReadyPhaseText: baseColors.getReadyPhaseText,
+      pausedPhaseText: baseColors.pausedPhaseText,
+
       // Border colors
       border: baseColors.gray300,
       borderLight: baseColors.gray200,
@@ -126,6 +154,20 @@ export const Theme = {
       gold: baseColors.gold,
       error: baseColors.error,
       info: baseColors.info,
+
+      // Workout phase colors
+      workPhase: baseColors.workPhase,
+      restPhase: baseColors.restPhase,
+      setRestPhase: baseColors.setRestPhase,
+      getReadyPhase: baseColors.getReadyPhase,
+      pausedPhase: baseColors.pausedPhase,
+
+      // Workout phase text colors
+      workPhaseText: baseColors.workPhaseText,
+      restPhaseText: baseColors.restPhaseText,
+      setRestPhaseText: baseColors.setRestPhaseText,
+      getReadyPhaseText: baseColors.getReadyPhaseText,
+      pausedPhaseText: baseColors.pausedPhaseText,
 
       // Border colors
       border: baseColors.darkBorder,

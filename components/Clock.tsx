@@ -123,19 +123,39 @@ const Clock = ({
     }
   }, [currentPhase, phaseBeforePause, workTime, restTime, setRestTime]);
 
-  // Helper function to get color based on phase
+  // Helper function to get animation color based on phase
   const getProgressColor = useMemo(() => {
     switch (currentPhase) {
       case "work":
-        return "#e74c3c"; // Red for work
+        return colors.workPhase; // Energetic red for work/intensity
       case "rest":
-        return colors.success; // Theme success green for rest
+        return colors.restPhase; // Calming teal for rest/recovery
       case "setRest":
-        return "#3498db"; // Blue for set rest
+        return colors.setRestPhase; // Cool blue for longer set breaks
       case "getReady":
-        return "#f39c12"; // Orange for get ready
+        return colors.getReadyPhase; // Warm orange for preparation/focus
+      case "paused":
+        return colors.pausedPhase; // Neutral gray for paused state
       default:
-        return "#95a5a6"; // Gray for other phases
+        return colors.pausedPhase; // Default to paused color
+    }
+  }, [currentPhase, colors]);
+
+  // Helper function to get text color based on phase
+  const getTextColor = useMemo(() => {
+    switch (currentPhase) {
+      case "work":
+        return colors.workPhaseText; // Deeper red for work text
+      case "rest":
+        return colors.restPhaseText; // Deeper teal for rest text
+      case "setRest":
+        return colors.setRestPhaseText; // Deeper blue for set rest text
+      case "getReady":
+        return colors.getReadyPhaseText; // Deeper orange for get ready text
+      case "paused":
+        return colors.pausedPhaseText; // Darker gray for paused text
+      default:
+        return colors.pausedPhaseText; // Default to paused text color
     }
   }, [currentPhase, colors]);
 
@@ -209,20 +229,7 @@ const Clock = ({
             />
             <View style={styles.timerContent}>
               {!quickTimer && (
-                <Text
-                  style={[
-                    styles.phaseText,
-                    currentPhase === "work"
-                      ? styles.work
-                      : currentPhase === "rest"
-                      ? styles.rest
-                      : currentPhase === "setRest"
-                      ? styles.rest
-                      : currentPhase === "paused"
-                      ? styles.paused
-                      : styles.getReady,
-                  ]}
-                >
+                <Text style={[styles.phaseText, { color: getTextColor }]}>
                   {phaseLabel}
                 </Text>
               )}
@@ -388,18 +395,6 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       fontSize: 400,
       fontWeight: "bold",
     },
-    work: {
-      color: colors.success,
-    },
-    rest: {
-      color: colors.info,
-    },
-    getReady: {
-      color: colors.text,
-    },
-    paused: {
-      color: colors.textSecondary,
-    },
     playButton: {
       fontSize: 400,
       color: colors.success,
@@ -545,7 +540,7 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
     },
     timeText: {
       ...tablet.timeText,
-      fontSize: 72,
+      fontSize: 64,
     },
     roundText: {
       ...tablet.roundText,
