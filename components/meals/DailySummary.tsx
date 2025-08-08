@@ -1,4 +1,3 @@
-import { ThemedText } from "@/components/ThemedText";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
 import { StyleSheet, Text, View } from "react-native";
@@ -51,8 +50,6 @@ export default function DailySummary({
 
   return (
     <View style={styles.summarySection}>
-      <ThemedText style={styles.summaryTitle}>Daily Summary</ThemedText>
-
       <View style={styles.summaryRow}>
         <View style={styles.summaryItem}>
           <Text style={styles.summaryValue}>{dailyTotals.calories}</Text>
@@ -89,12 +86,6 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       borderRadius: 16,
       padding: 20,
       marginBottom: 24,
-    },
-    summaryTitle: {
-      fontSize: 20,
-      fontWeight: "700",
-      marginBottom: 16,
-      textAlign: "center",
     },
     summaryRow: {
       flexDirection: "row",
