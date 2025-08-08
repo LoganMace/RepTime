@@ -28,7 +28,7 @@ import {
   type MealType,
   type MealEntry as StoredMealEntry,
 } from "@/utils/mealStorage";
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -319,10 +319,16 @@ export default function MealsScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <IconSymbol size={24} color="orange" name="chart.bar" />
-            <ThemedText style={styles.cardTitle}>Today&apos;s Summary</ThemedText>
+            <ThemedText style={styles.cardTitle}>
+              Today&apos;s Summary
+            </ThemedText>
             <TouchableOpacity onPress={viewHistory} style={styles.headerAction}>
               <ThemedText style={styles.headerActionText}>History</ThemedText>
-              <IconSymbol size={16} color={colors.textSecondary} name="chevron.right" />
+              <IconSymbol
+                size={16}
+                color={colors.textSecondary}
+                name="chevron.right"
+              />
             </TouchableOpacity>
           </View>
           <DailySummary dailyTotals={dailyTotals} dailyGoals={DAILY_GOALS} />
@@ -330,7 +336,7 @@ export default function MealsScreen() {
 
         {/* Meal Categories */}
         {CATEGORIES.map((category) => (
-          <View key={category.key} style={styles.card}>
+          <View key={category.key}>
             <MealCategory
               category={category}
               meals={meals}
@@ -372,45 +378,46 @@ export default function MealsScreen() {
   );
 }
 
-const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 20,
-  },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-    gap: 8,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    flex: 1,
-  },
-  headerAction: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  headerActionText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: colors.textSecondary,
-  },
-});
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingTop: 20,
+    },
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 16,
+    },
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 16,
+      gap: 8,
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      flex: 1,
+    },
+    headerAction: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+    headerActionText: {
+      fontSize: 14,
+      fontWeight: "500",
+      color: colors.textSecondary,
+    },
+  });
 
-const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
