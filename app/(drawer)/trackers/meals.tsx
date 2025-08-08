@@ -233,8 +233,11 @@ export default function MealsScreen() {
       };
 
       if (meal.isFavorite) {
-        // Remove from favorites
-        await removeFromFavorites(mealId);
+        // Remove from favorites - need to find the favorite ID first
+        const favoriteId = await getFavoriteId(mealEntry);
+        if (favoriteId) {
+          await removeFromFavorites(favoriteId);
+        }
       } else {
         // Add to favorites
         await addToFavorites(mealEntry);
