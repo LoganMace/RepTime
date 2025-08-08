@@ -11,8 +11,8 @@ const baseColors = {
   primaryLight: "#6BA3E8",
 
   // Success/positive colors
-  success: "#5CB85C",
-  successDark: "#449D44",
+  success: "#00ff00ff",
+  successDark: "#009b00ff",
 
   // Workout colors
   gold: "gold",
@@ -40,10 +40,10 @@ const baseColors = {
   gray900: "#212529",
 
   // Dark theme specific - Background elevation hierarchy
-  darkBackground: "#151718",  // Pages (darkest)
-  darkCard: "#1f1f1f",       // Cards (elevated)
-  darkSurface: "#242424",    // Surfaces (more elevated)
-  darkInput: "#2a2a2a",      // Inputs (most elevated)
+  darkBackground: "#151718", // Pages (darkest)
+  darkCard: "#1f1f1f", // Cards (elevated)
+  darkSurface: "#242424", // Surfaces (more elevated)
+  darkInput: "#2a2a2a", // Inputs (most elevated)
   darkBorder: "#2a2a2a",
   darkInputBorder: "#3a3a3a", // Lighter border for better definition
   darkText: "#ECEDEE",
@@ -94,7 +94,7 @@ export const Theme = {
       tabIconSelected: baseColors.primary,
 
       // Input colors
-      inputBackground: baseColors.gray100,  // Slightly elevated from white background
+      inputBackground: baseColors.gray100, // Slightly elevated from white background
       inputBorder: baseColors.gray300,
       inputText: baseColors.gray900,
       placeholder: baseColors.gray500,
@@ -112,10 +112,10 @@ export const Theme = {
       textInverse: baseColors.black,
 
       // Background colors - proper elevation hierarchy
-      background: baseColors.darkBackground,        // Pages (darkest)
-      backgroundSecondary: baseColors.darkCard,     // Secondary backgrounds
-      surface: baseColors.darkSurface,              // Surfaces (more elevated)
-      card: baseColors.darkCard,                    // Cards (elevated)
+      background: baseColors.darkBackground, // Pages (darkest)
+      backgroundSecondary: baseColors.darkCard, // Secondary backgrounds
+      surface: baseColors.darkSurface, // Surfaces (more elevated)
+      card: baseColors.darkCard, // Cards (elevated)
 
       // Interactive colors
       primary: baseColors.white,

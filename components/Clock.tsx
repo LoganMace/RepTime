@@ -1,6 +1,6 @@
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Modal,
   StyleSheet,
@@ -46,8 +46,11 @@ const Clock = ({
     return getStyles(mobileStyles(colors), tabletStyles(colors));
   }, [getStyles, colors]);
 
-  const circleSize = useMemo(() => isMobile ? width * 0.85 : 600, [isMobile, width]);
-  const circleStrokeWidth = useMemo(() => isMobile ? 18 : 24, [isMobile]);
+  const circleSize = useMemo(
+    () => (isMobile ? width * 0.85 : 600),
+    [isMobile, width]
+  );
+  const circleStrokeWidth = useMemo(() => (isMobile ? 18 : 24), [isMobile]);
 
   const {
     currentRound,
@@ -88,7 +91,13 @@ const Clock = ({
 
   // Auto-close for quick timers when done (only if no onRestart prop)
   useEffect(() => {
-    if (quickTimer && !onRestart && currentPhase === "start" && visible && hasRun) {
+    if (
+      quickTimer &&
+      !onRestart &&
+      currentPhase === "start" &&
+      visible &&
+      hasRun
+    ) {
       // Small delay to ensure beep plays
       const timer = setTimeout(() => {
         onClose();
@@ -120,7 +129,7 @@ const Clock = ({
       case "work":
         return "#e74c3c"; // Red for work
       case "rest":
-        return "lime"; // Lime green for rest
+        return colors.success; // Theme success green for rest
       case "setRest":
         return "#3498db"; // Blue for set rest
       case "getReady":
@@ -128,7 +137,7 @@ const Clock = ({
       default:
         return "#95a5a6"; // Gray for other phases
     }
-  }, [currentPhase]);
+  }, [currentPhase, colors]);
 
   const phaseLabel = useMemo(() => {
     switch (currentPhase) {
@@ -150,19 +159,27 @@ const Clock = ({
         return currentPhase;
     }
   }, [currentPhase]);
-  
+
   const isPaused = useMemo(() => currentPhase === "paused", [currentPhase]);
-  
+
   // Create a stable phase identifier for animation component
   const phaseId = useMemo(() => {
     // Generate unique ID for each phase transition
     // Include a timestamp component for phases to ensure uniqueness
     if (currentPhase === "paused") {
-      return phaseBeforePause ? `${currentSet}-${currentRound}-${phaseBeforePause}` : "";
+      return phaseBeforePause
+        ? `${currentSet}-${currentRound}-${phaseBeforePause}`
+        : "";
     }
     // For active phases, create a unique ID that changes with each new phase
     return `${currentSet}-${currentRound}-${currentPhase}-${getTotalTimeForPhase()}`;
-  }, [currentSet, currentRound, currentPhase, phaseBeforePause, getTotalTimeForPhase]);
+  }, [
+    currentSet,
+    currentRound,
+    currentPhase,
+    phaseBeforePause,
+    getTotalTimeForPhase,
+  ]);
 
   return (
     <Modal
@@ -245,13 +262,18 @@ const Clock = ({
         )}
 
         {/* Quick Timer Completion Screen */}
-        {((quickTimer && currentPhase === "start" && visible && hasRun && onRestart) || (quickTimer && currentPhase === "done")) && (
+        {((quickTimer &&
+          currentPhase === "start" &&
+          visible &&
+          hasRun &&
+          onRestart) ||
+          (quickTimer && currentPhase === "done")) && (
           <View style={styles.doneContainer}>
             <Text style={styles.doneText}>Timer Complete!</Text>
             <IconSymbol
               name="checkmark.circle"
               size={isMobile ? 100 : 120}
-              color="lime"
+              color={colors.success}
               style={styles.doneIcon}
             />
             <View style={styles.quickTimerButtonContainer}>
@@ -261,7 +283,11 @@ const Clock = ({
                   style={[styles.pauseButton, styles.restartButton]}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.pauseButtonText, styles.restartButtonText]}>Restart</Text>
+                  <Text
+                    style={[styles.pauseButtonText, styles.restartButtonText]}
+                  >
+                    Restart
+                  </Text>
                 </TouchableOpacity>
               )}
               <TouchableOpacity
@@ -391,11 +417,11 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       shadowRadius: 16,
       elevation: 8,
       borderWidth: 4,
-      borderColor: "lime",
+      borderColor: colors.success,
     },
     sleekPlayIcon: {
       fontSize: 120,
-      color: "lime",
+      color: colors.success,
       marginLeft: 10,
       textShadowColor: colors.shadow,
       textShadowOffset: { width: 2, height: 2 },
@@ -519,7 +545,7 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
     },
     timeText: {
       ...tablet.timeText,
-      fontSize: 80,
+      fontSize: 72,
     },
     roundText: {
       ...tablet.roundText,
