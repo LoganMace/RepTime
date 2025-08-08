@@ -353,7 +353,7 @@ export const useTimer = ({
               handlePhaseEnd();
             }
           }
-        }, 100); // Smaller interval for precision, but using Math.floor for consistent display
+        }, 250); // Reduced frequency for better performance while maintaining smooth updates
       }, 1000); // 1 second delay before starting the countdown
 
       return () => {

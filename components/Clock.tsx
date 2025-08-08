@@ -1,6 +1,6 @@
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Modal,
   StyleSheet,
@@ -42,10 +42,12 @@ const Clock = ({
   const { getStyles, isMobile } = useResponsiveStyles();
   const { width } = useWindowDimensions();
 
-  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
+  const styles = useMemo(() => {
+    return getStyles(mobileStyles(colors), tabletStyles(colors));
+  }, [getStyles, colors]);
 
-  const circleSize = isMobile ? width * 0.85 : 600;
-  const circleStrokeWidth = isMobile ? 18 : 24;
+  const circleSize = useMemo(() => isMobile ? width * 0.85 : 600, [isMobile, width]);
+  const circleStrokeWidth = useMemo(() => isMobile ? 18 : 24, [isMobile]);
 
   const {
     currentRound,
@@ -96,7 +98,7 @@ const Clock = ({
   }, [quickTimer, onRestart, currentPhase, onClose, visible, hasRun]);
 
   // Helper function to get total time for current phase
-  const getTotalTimeForPhase = () => {
+  const getTotalTimeForPhase = useCallback(() => {
     const phase = currentPhase === "paused" ? phaseBeforePause : currentPhase;
     switch (phase) {
       case "getReady":
@@ -110,10 +112,10 @@ const Clock = ({
       default:
         return 0;
     }
-  };
+  }, [currentPhase, phaseBeforePause, workTime, restTime, setRestTime]);
 
   // Helper function to get color based on phase
-  const getProgressColor = () => {
+  const getProgressColor = useMemo(() => {
     switch (currentPhase) {
       case "work":
         return "#e74c3c"; // Red for work
@@ -126,9 +128,9 @@ const Clock = ({
       default:
         return "#95a5a6"; // Gray for other phases
     }
-  };
+  }, [currentPhase]);
 
-  const getPhaseLabel = () => {
+  const phaseLabel = useMemo(() => {
     switch (currentPhase) {
       case "start":
         return "";
@@ -147,12 +149,9 @@ const Clock = ({
       default:
         return currentPhase;
     }
-  };
-  const phaseLabel = getPhaseLabel();
-  const isPaused = currentPhase === "paused";
-  const phaseIdentifier =
-    currentPhase === "paused" ? phaseBeforePause : currentPhase;
-  const animationKey = `${currentSet}-${currentRound}-${phaseIdentifier}`;
+  }, [currentPhase]);
+  
+  const isPaused = useMemo(() => currentPhase === "paused", [currentPhase]);
 
   return (
     <Modal
@@ -171,12 +170,11 @@ const Clock = ({
         {currentPhase !== "start" && currentPhase !== "done" && (
           <View style={styles.progressContainer}>
             <AnimatedCircleProgress
-              key={animationKey}
               size={circleSize}
               strokeWidth={circleStrokeWidth}
               duration={getTotalTimeForPhase()}
               isPaused={isPaused}
-              color={getProgressColor()}
+              color={getProgressColor}
               backgroundColor={colors.border}
             />
             <View style={styles.timerContent}>

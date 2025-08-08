@@ -1,4 +1,4 @@
-import React, { memo, useEffect } from "react";
+import React, { memo, useEffect, useMemo } from "react";
 import { View } from "react-native";
 import Animated, {
   cancelAnimation,
@@ -28,12 +28,15 @@ function AnimatedCircleProgress({
   color = "#3498db",
   backgroundColor = "#eee",
 }: AnimatedCircleProgressProps) {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
+  const radius = useMemo(() => (size - strokeWidth) / 2, [size, strokeWidth]);
+  const circumference = useMemo(() => 2 * Math.PI * radius, [radius]);
 
   const progressValue = useSharedValue(0);
 
   useEffect(() => {
+    // Reset animation when duration changes (new phase)
+    progressValue.value = 0;
+    
     // This effect handles starting, pausing, and resuming the animation.
     if (isPaused) {
       // If paused, cancel any ongoing animation. The progressValue will hold its current state.
@@ -58,7 +61,7 @@ function AnimatedCircleProgress({
     return {
       strokeDashoffset,
     };
-  });
+  }, [circumference]);
 
   return (
     <View>
