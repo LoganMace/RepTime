@@ -1,7 +1,7 @@
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Modal,
   StyleSheet,
@@ -105,6 +105,37 @@ export default function TimersScreen() {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  const formatDuration = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${seconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  };
+
+  // Calculate total duration
+  const calculateTotalDuration = (includeRest: boolean = true) => {
+    const workTimePerRound = workSeconds;
+    const restTimePerRound = includeRest ? restSeconds : 0;
+    const timePerRound = workTimePerRound + restTimePerRound;
+
+    // Total time for all rounds in all sets
+    const totalRoundTime = timePerRound * selectedRounds * selectedSets;
+
+    // Add set rest time (applied between sets, so sets - 1)
+    const totalSetRestTime = includeRest
+      ? setRestTimeSeconds * (selectedSets - 1)
+      : 0;
+
+    return totalRoundTime + totalSetRestTime;
   };
 
   const handleStart = () => {
@@ -277,6 +308,27 @@ export default function TimersScreen() {
                   name="chevron.down"
                 />
               </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Total Duration Summary */}
+          <View style={styles.durationSummary}>
+            <View style={styles.durationRow}>
+              <View style={styles.durationHeader}>
+                <IconSymbol size={16} color="lime" name="clock" />
+                <ThemedText style={styles.durationTitle}>Duration:</ThemedText>
+              </View>
+              <View style={styles.durationValues}>
+                <ThemedText style={styles.durationLabel}>Work: </ThemedText>
+                <ThemedText style={styles.durationValue}>
+                  {formatDuration(calculateTotalDuration(false))}
+                </ThemedText>
+                <ThemedText style={styles.durationSeparator}> • </ThemedText>
+                <ThemedText style={styles.durationLabel}>Total: </ThemedText>
+                <ThemedText style={styles.durationValue}>
+                  {formatDuration(calculateTotalDuration(true))}
+                </ThemedText>
+              </View>
             </View>
           </View>
         </View>
@@ -528,6 +580,44 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       color: colors.inputText,
       fontWeight: "500",
     },
+    durationSummary: {
+      marginTop: 20,
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    durationHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+    durationTitle: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.textSecondary,
+    },
+    durationRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    durationValues: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    durationLabel: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    durationValue: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.text,
+    },
+    durationSeparator: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
     startButton: {
       backgroundColor: "lime",
       borderRadius: 12,
@@ -660,6 +750,27 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
     settingValueText: {
       ...tablet.settingValueText,
       fontSize: 13,
+    },
+    durationSummary: {
+      ...tablet.durationSummary,
+      marginTop: 16,
+      paddingTop: 12,
+    },
+    durationTitle: {
+      ...tablet.durationTitle,
+      fontSize: 12,
+    },
+    durationLabel: {
+      ...tablet.durationLabel,
+      fontSize: 12,
+    },
+    durationValue: {
+      ...tablet.durationValue,
+      fontSize: 12,
+    },
+    durationSeparator: {
+      ...tablet.durationSeparator,
+      fontSize: 12,
     },
     startButton: {
       ...tablet.startButton,

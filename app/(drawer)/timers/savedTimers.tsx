@@ -1,7 +1,7 @@
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Alert,
   ScrollView,
@@ -43,12 +43,43 @@ export default function SavedTimersScreen() {
     }[]
   >([]);
 
-  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
+  const styles = useMemo(() => {
+    return getStyles(mobileStyles(colors), tabletStyles(colors));
+  }, [getStyles, colors]);
 
   const formatTime = (totalSeconds: number) => {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  const formatDuration = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${seconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  };
+
+  // Calculate total duration for a saved timer
+  const calculateTimerDuration = (timer: any, includeRest: boolean = true) => {
+    const workTimePerRound = timer.workTime;
+    const restTimePerRound = includeRest ? timer.restTime : 0;
+    const timePerRound = workTimePerRound + restTimePerRound;
+    
+    // Total time for all rounds in all sets
+    const totalRoundTime = timePerRound * timer.rounds * timer.sets;
+    
+    // Add set rest time (applied between sets, so sets - 1)
+    const totalSetRestTime = includeRest ? timer.setRestTime * (timer.sets - 1) : 0;
+    
+    return totalRoundTime + totalSetRestTime;
   };
 
   const loadTimers = async () => {
@@ -172,6 +203,27 @@ export default function SavedTimersScreen() {
                     <ThemedText style={styles.detailValue}>
                       {formatTime(timer.setRestTime)}
                     </ThemedText>
+                  </View>
+                </View>
+
+                {/* Duration Summary */}
+                <View style={styles.durationSummary}>
+                  <View style={styles.durationRow}>
+                    <View style={styles.durationHeader}>
+                      <IconSymbol size={14} color="lime" name="clock" />
+                      <ThemedText style={styles.durationTitle}>Duration:</ThemedText>
+                    </View>
+                    <View style={styles.durationValues}>
+                      <ThemedText style={styles.durationLabel}>Work: </ThemedText>
+                      <ThemedText style={styles.durationValue}>
+                        {formatDuration(calculateTimerDuration(timer, false))}
+                      </ThemedText>
+                      <ThemedText style={styles.durationSeparator}> • </ThemedText>
+                      <ThemedText style={styles.durationLabel}>Total: </ThemedText>
+                      <ThemedText style={styles.durationValue}>
+                        {formatDuration(calculateTimerDuration(timer, true))}
+                      </ThemedText>
+                    </View>
                   </View>
                 </View>
 
@@ -300,6 +352,43 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     fontSize: 16,
     fontWeight: "600",
   },
+  durationSummary: {
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  durationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  durationTitle: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.textSecondary,
+  },
+  durationRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  durationValues: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  durationLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  durationValue: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  durationSeparator: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
 });
 
 const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
@@ -344,6 +433,26 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
     startButtonText: {
       ...tablet.startButtonText,
       fontSize: 14,
+    },
+    durationSummary: {
+      ...tablet.durationSummary,
+      paddingTop: 10,
+    },
+    durationTitle: {
+      ...tablet.durationTitle,
+      fontSize: 11,
+    },
+    durationLabel: {
+      ...tablet.durationLabel,
+      fontSize: 11,
+    },
+    durationValue: {
+      ...tablet.durationValue,
+      fontSize: 11,
+    },
+    durationSeparator: {
+      ...tablet.durationSeparator,
+      fontSize: 11,
     },
   });
 };
