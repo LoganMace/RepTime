@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -20,7 +20,7 @@ import { useTheme } from "@/hooks/useTheme";
 export default function SavedWorkoutsScreen() {
   const { getStyles } = useResponsiveStyles();
   const { colors } = useTheme();
-  
+
   const styles = useMemo(() => {
     return getStyles(mobileStyles(colors), tabletStyles(colors));
   }, [getStyles, colors]);
@@ -89,8 +89,14 @@ export default function SavedWorkoutsScreen() {
         {savedWorkouts.length === 0 ? (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <IconSymbol size={24} color="gold" name="figure.strengthtraining.traditional" />
-              <ThemedText style={styles.cardTitle}>No Saved Workouts</ThemedText>
+              <IconSymbol
+                size={24}
+                color="gold"
+                name="figure.strengthtraining.traditional"
+              />
+              <ThemedText style={styles.cardTitle}>
+                No Saved Workouts
+              </ThemedText>
             </View>
             <ThemedText style={styles.emptyText}>
               Create and save your first workout to see it here.
@@ -100,14 +106,22 @@ export default function SavedWorkoutsScreen() {
           savedWorkouts.map((plan, idx) => (
             <View key={idx} style={styles.card}>
               <View style={styles.cardHeader}>
-                <IconSymbol size={24} color="gold" name="figure.strengthtraining.traditional" />
+                <IconSymbol
+                  size={24}
+                  color="gold"
+                  name="figure.strengthtraining.traditional"
+                />
                 <ThemedText style={styles.cardTitle}>{plan.name}</ThemedText>
                 <View style={styles.cardActions}>
                   <TouchableOpacity
                     onPress={() => handleEdit(plan, idx)}
                     style={styles.actionButton}
                   >
-                    <IconSymbol size={20} color={colors.primary} name="pencil" />
+                    <IconSymbol
+                      size={20}
+                      color={colors.primary}
+                      name="pencil"
+                    />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => handleDelete(idx)}
@@ -121,7 +135,8 @@ export default function SavedWorkoutsScreen() {
               <View style={styles.workoutDetails}>
                 <View style={styles.workoutSummary}>
                   <ThemedText style={styles.exerciseCount}>
-                    {plan.exercises.length} exercise{plan.exercises.length !== 1 ? "s" : ""}
+                    {plan.exercises.length} exercise
+                    {plan.exercises.length !== 1 ? "s" : ""}
                   </ThemedText>
                   <ThemedText style={styles.savedDate}>
                     Saved: {new Date(plan.savedAt).toLocaleDateString()}
@@ -129,36 +144,44 @@ export default function SavedWorkoutsScreen() {
                 </View>
 
                 <View style={styles.exercisesList}>
-                  {plan.exercises && plan.exercises.length > 0 ? plan.exercises.slice(0, 3).map((ex: any, i: number) => {
-                    const details = [];
-                    if (ex.sets && ex.sets.toString().trim()) details.push(`${ex.sets} sets`);
-                    if (ex.reps && ex.reps.toString().trim()) details.push(`${ex.reps} reps`);
-                    if (ex.weight && ex.weight.toString().trim()) details.push(`${ex.weight} lbs`);
-                    if (ex.workTime && ex.workTime.toString().trim()) details.push(`${ex.workTime}s work`);
-                    if (ex.restTime && ex.restTime.toString().trim()) details.push(`${ex.restTime}s rest`);
-                    
-                    const exerciseName = ex.exercise || `Exercise ${i + 1}`;
-                    
-                    return (
-                      <View key={i} style={styles.exerciseItem}>
-                        <ThemedText style={styles.exerciseName}>
-                          {exerciseName}
-                        </ThemedText>
-                        {details.length > 0 && (
-                          <ThemedText style={styles.exerciseDetails}>
-                            {details.join(" • ")}
+                  {plan.exercises && plan.exercises.length > 0 ? (
+                    plan.exercises.slice(0, 3).map((ex: any, i: number) => {
+                      const details = [];
+                      if (ex.sets && ex.sets.toString().trim())
+                        details.push(`${ex.sets} sets`);
+                      if (ex.reps && ex.reps.toString().trim())
+                        details.push(`${ex.reps} reps`);
+                      if (ex.weight && ex.weight.toString().trim())
+                        details.push(`${ex.weight} lbs`);
+                      if (ex.workTime && ex.workTime.toString().trim())
+                        details.push(`${ex.workTime}s work`);
+                      if (ex.restTime && ex.restTime.toString().trim())
+                        details.push(`${ex.restTime}s rest`);
+
+                      const exerciseName = ex.workout || `Exercise ${i + 1}`;
+
+                      return (
+                        <View key={i} style={styles.exerciseItem}>
+                          <ThemedText style={styles.exerciseName}>
+                            {exerciseName}
                           </ThemedText>
-                        )}
-                      </View>
-                    );
-                  }) : (
+                          {details.length > 0 && (
+                            <ThemedText style={styles.exerciseDetails}>
+                              {details.join(" • ")}
+                            </ThemedText>
+                          )}
+                        </View>
+                      );
+                    })
+                  ) : (
                     <ThemedText style={styles.emptyText}>
                       No exercises found in this workout
                     </ThemedText>
                   )}
                   {plan.exercises && plan.exercises.length > 3 && (
                     <ThemedText style={styles.moreExercises}>
-                      +{plan.exercises.length - 3} more exercise{plan.exercises.length - 3 !== 1 ? "s" : ""}
+                      +{plan.exercises.length - 3} more exercise
+                      {plan.exercises.length - 3 !== 1 ? "s" : ""}
                     </ThemedText>
                   )}
                 </View>
