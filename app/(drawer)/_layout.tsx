@@ -21,11 +21,16 @@ function DrawerNavigator() {
         drawerActiveTintColor: colors.primary,
         drawerLabelStyle: {
           fontSize: labelSize,
+          fontWeight: "500",
         },
         drawerStyle: {
           backgroundColor: colors.background,
+          width: isMobile ? '85%' : 320,
         },
-        overlayColor: "rgba(0, 0, 0, 0.5)",
+        overlayColor: "rgba(0, 0, 0, 0.6)",
+        drawerPosition: 'left',
+        swipeEnabled: true,
+        swipeEdgeWidth: 50,
       }}
     >
       <Drawer.Screen

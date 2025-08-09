@@ -2,10 +2,18 @@ import { Feather } from "@expo/vector-icons";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { usePathname, useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleProp, StyleSheet, Text, TextStyle, View } from "react-native";
+import {
+  Platform,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+  View,
+} from "react-native";
 
-import { useThemeColors } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useThemeColors } from "@/hooks/useTheme";
+import { ThemedText } from "./ThemedText";
 import { IconSymbol } from "./ui/IconSymbol";
 
 export function CustomDrawerContent(props: any) {
@@ -41,19 +49,33 @@ export function CustomDrawerContent(props: any) {
       (path === "/workouts" && pathname.startsWith(path));
     return {
       backgroundColor: isActive ? "rgba(255, 215, 0, 0.15)" : "transparent",
-      borderRadius: 10,
-      marginHorizontal: 10,
-      marginBottom: 5,
+      borderRadius: 12,
+      marginHorizontal: 12,
+      marginBottom: 6,
+      paddingVertical: 4,
+      borderWidth: isActive ? 1 : 0,
+      borderColor: isActive ? "rgba(255, 215, 0, 0.3)" : "transparent",
+      shadowColor: isActive ? "#FFD700" : "transparent",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: isActive ? 0.1 : 0,
+      shadowRadius: 4,
+      elevation: isActive ? 2 : 0,
     };
   };
 
   const getSubItemStyle = (path: string) => {
     const isActive = pathname === path;
     return {
-      backgroundColor: isActive ? "rgba(255, 215, 0, 0.1)" : "transparent",
-      borderRadius: 8,
-      marginHorizontal: 10,
-      marginBottom: 2,
+      backgroundColor: isActive
+        ? "rgba(255, 215, 0, 0.12)"
+        : colors.inputBackground,
+      borderRadius: 10,
+      marginHorizontal: 12,
+      marginBottom: 4,
+      paddingVertical: 2,
+      borderLeftWidth: isActive ? 3 : 0,
+      borderLeftColor: isActive ? "gold" : "transparent",
+      marginLeft: 20,
     };
   };
 
@@ -62,10 +84,30 @@ export function CustomDrawerContent(props: any) {
   const isTrackersPath = pathname.startsWith("/trackers");
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <View
+      style={[styles.drawerContainer, { backgroundColor: colors.background }]}
+    >
+      {/* Header Section */}
+      <View style={[styles.drawerHeader, { backgroundColor: colors.card }]}>
+        <View style={styles.headerContent}>
+          <View style={styles.logoContainer}>
+            <IconSymbol
+              name="figure.strengthtraining.traditional"
+              size={32}
+              color="gold"
+            />
+            <ThemedText style={styles.appTitle}>TrainSync</ThemedText>
+          </View>
+          <View
+            style={[styles.headerDivider, { backgroundColor: colors.border }]}
+          />
+        </View>
+      </View>
+
       <DrawerContentScrollView
         {...props}
-        contentContainerStyle={{ paddingTop: 20 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
         <DrawerItem
           style={getItemStyle("/")}
@@ -83,6 +125,11 @@ export function CustomDrawerContent(props: any) {
             setWorkoutsOpen(false);
             setTrackersOpen(false);
           }}
+        />
+
+        {/* Section Separator */}
+        <View
+          style={[styles.sectionSeparator, { backgroundColor: colors.border }]}
         />
 
         <DrawerItem
@@ -164,6 +211,11 @@ export function CustomDrawerContent(props: any) {
           </View>
         )}
 
+        {/* Section Separator */}
+        <View
+          style={[styles.sectionSeparator, { backgroundColor: colors.border }]}
+        />
+
         <DrawerItem
           style={getItemStyle("/workouts")}
           label={() => (
@@ -230,6 +282,11 @@ export function CustomDrawerContent(props: any) {
             />
           </View>
         )}
+
+        {/* Section Separator */}
+        <View
+          style={[styles.sectionSeparator, { backgroundColor: colors.border }]}
+        />
 
         <DrawerItem
           style={getItemStyle("/trackers")}
@@ -311,6 +368,48 @@ export function CustomDrawerContent(props: any) {
 }
 
 const styles = StyleSheet.create({
+  drawerContainer: {
+    flex: 1,
+  },
+  drawerHeader: {
+    paddingTop: Platform.OS === "ios" ? 50 : 30,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  headerContent: {
+    alignItems: "center",
+  },
+  logoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  appTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginLeft: 12,
+    color: "gold",
+  },
+  headerDivider: {
+    width: "80%",
+    height: 1,
+    opacity: 0.3,
+  },
+  scrollContent: {
+    paddingTop: 16,
+    paddingBottom: 20,
+  },
+  sectionSeparator: {
+    height: 1,
+    marginHorizontal: 20,
+    marginVertical: 12,
+    opacity: 0.2,
+  },
   collapsibleHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -323,14 +422,19 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: "500",
   },
-  collapsibleContent: {},
+  collapsibleContent: {
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
   collapsibleLabelContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
+    paddingRight: 8,
   },
   chevron: {
     marginLeft: "auto",
+    opacity: 0.7,
   },
 });

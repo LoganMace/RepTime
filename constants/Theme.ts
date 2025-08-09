@@ -1,5 +1,5 @@
 /**
- * Comprehensive theme file for RepTime fitness tracking app
+ * Comprehensive theme file for TrainSync fitness tracking app
  * Consolidates colors, typography, spacing, and component styles
  */
 

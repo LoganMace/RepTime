@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "rep-time",
-    "slug": "rep-time",
+    "name": "TrainSync",
+    "slug": "trainsync",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "reptime",
+    "scheme": "trainsync",
     "userInterfaceStyle": "dark",
     "statusBar": {
       "style": "light",
@@ -14,7 +14,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.rep-time",
+      "bundleIdentifier": "com.anonymous.trainsync",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "This app uses audio for workout timer sounds and notifications."
       }

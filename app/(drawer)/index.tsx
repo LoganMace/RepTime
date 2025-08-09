@@ -28,12 +28,12 @@ export default function HomeScreen() {
         }
       >
         <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Welcome to RepTime!</ThemedText>
+          <ThemedText type="title">Welcome to TrainSync!</ThemedText>
         </ThemedView>
         <ThemedView style={styles.stepContainer}>
           <ThemedText type="subtitle">Getting Started</ThemedText>
           <ThemedText>
-            Welcome to RepTime, your ultimate workout companion. Here&apos;s how
+            Welcome to TrainSync, your ultimate workout companion. Here&apos;s how
             to get started:
           </ThemedText>
         </ThemedView>
