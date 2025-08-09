@@ -1,4 +1,5 @@
 import { useWindowDimensions } from "react-native";
+import { useCallback } from "react";
 import { 
   getResponsiveComponentStyle, 
   getResponsiveTypography, 
@@ -26,9 +27,9 @@ export const useResponsiveStyles = () => {
    * @param tabletStyles The styles to apply on tablet.
    * @returns The appropriate style object.
    */
-  const getStyles = <T, U>(mobileStyles: T, tabletStyles: U): T | U => {
+  const getStyles = useCallback(<T, U>(mobileStyles: T, tabletStyles: U): T | U => {
     return isTablet ? tabletStyles : mobileStyles;
-  };
+  }, [isTablet]);
 
   /**
    * Get responsive component style from theme.

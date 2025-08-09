@@ -1,9 +1,16 @@
-import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useMemo, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import Clock from "@/components/Clock";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -23,7 +30,10 @@ const PRESET_TIMERS = [
 export default function QuickTimersScreen() {
   const { colors } = useTheme();
   const { getStyles, isMobile } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
+
+  const styles = useMemo(() => {
+    return getStyles(mobileStyles(colors), tabletStyles(colors));
+  }, [getStyles, colors]);
 
   const [clockVisible, setClockVisible] = useState(false);
   const [activeTimerData, setActiveTimerData] = useState<{
@@ -34,6 +44,11 @@ export default function QuickTimersScreen() {
   const handleStartTimer = (duration: number) => {
     setActiveTimerData({ workTime: duration });
     setClockVisible(true);
+  };
+
+  const handleRestartTimer = () => {
+    // The restart functionality is now handled directly by the Clock component
+    // using the handleReset function from useTimer hook
   };
 
   const renderTimerButton = (timer: {
@@ -81,13 +96,20 @@ export default function QuickTimersScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <ThemedText style={styles.subtitle}>
-          Tap a preset time to start instantly
-        </ThemedText>
-      </View>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Timer Buttons Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <IconSymbol size={20} color="gold" name="timer" />
+            <ThemedText style={styles.cardSubtitle}>Preset Times</ThemedText>
+          </View>
 
-      <View style={styles.grid}>{createRows()}</View>
+          <View style={styles.timersGrid}>{createRows()}</View>
+        </View>
+      </ScrollView>
 
       {activeTimerData && (
         <Clock
@@ -96,6 +118,7 @@ export default function QuickTimersScreen() {
             setClockVisible(false);
             setActiveTimerData(null);
           }}
+          onRestart={handleRestartTimer}
           rounds={1}
           workTime={activeTimerData.workTime}
           restTime={0}
@@ -109,111 +132,131 @@ export default function QuickTimersScreen() {
   );
 }
 
-const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    padding: 20,
-  },
-  headerContainer: {
-    alignItems: "center",
-    width: "100%",
-    paddingHorizontal: 20,
-    marginBottom: 40,
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: "center",
-    color: colors.textSecondary,
-    fontWeight: "400",
-    lineHeight: 22,
-  },
-  grid: {
-    width: "100%",
-    maxWidth: 800,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  timerButton: {
-    borderRadius: 12,
-    paddingVertical: 32,
-    paddingHorizontal: 16,
-    margin: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: 140,
-    width: "30%",
-    backgroundColor: colors.card,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  timerButtonPressed: {
-    transform: [{ scale: 0.96 }],
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  timerButtonText: {
-    fontSize: 36,
-    fontWeight: "900",
-    marginBottom: 4,
-    letterSpacing: -0.3,
-    textShadowColor: "rgba(0, 0, 0, 0.8)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    paddingHorizontal: 8,
-    marginBottom: 16,
-    width: "100%",
-    gap: 16,
-  },
-});
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingTop: 20,
+    },
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 16,
+    },
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 16,
+      gap: 8,
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      flex: 1,
+    },
+    cardSubtitle: {
+      fontSize: 16,
+      fontWeight: "600",
+      flex: 1,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      textAlign: "center",
+      marginTop: 8,
+    },
+    timersGrid: {
+      gap: 12,
+    },
+    timerButton: {
+      borderRadius: 12,
+      paddingVertical: 32,
+      paddingHorizontal: 16,
+      margin: 8,
+      justifyContent: "center",
+      alignItems: "center",
+      minHeight: 140,
+      width: "30%",
+      backgroundColor: colors.inputBackground,
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+    timerButtonPressed: {
+      transform: [{ scale: 0.96 }],
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    timerButtonText: {
+      fontSize: 36,
+      fontWeight: "900",
+      marginBottom: 4,
+      letterSpacing: -0.3,
+      textShadowColor: "rgba(0, 0, 0, 0.8)",
+      textShadowOffset: { width: 1, height: 1 },
+      textShadowRadius: 2,
+    },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-evenly",
+      alignItems: "center",
+      marginBottom: 16,
+      width: "100%",
+      gap: 16,
+    },
+  });
 
-const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
-  container: {
-    ...tablet.container,
-    padding: 15,
-  },
-  headerContainer: {
-    ...tablet.headerContainer,
-    marginBottom: 30,
-  },
-  subtitle: {
-    ...tablet.subtitle,
-    fontSize: 14,
-  },
-  grid: {
-    ...tablet.grid,
-    paddingHorizontal: 12,
-  },
-  timerButton: {
-    ...tablet.timerButton,
-    paddingVertical: 20,
-    margin: 6,
-    minHeight: 95,
-    width: "45%",
-    borderRadius: 12,
-  },
-  timerButtonText: {
-    ...tablet.timerButtonText,
-    fontSize: 24,
-  },
-  row: {
-    ...tablet.row,
-    justifyContent: "space-around",
-    marginBottom: 12,
-    gap: 12,
-  },
+    scrollView: {
+      ...tablet.scrollView,
+      paddingHorizontal: 16,
+      paddingTop: 16,
+    },
+    card: {
+      ...tablet.card,
+      padding: 16,
+      marginBottom: 12,
+    },
+    cardTitle: {
+      ...tablet.cardTitle,
+      fontSize: 16,
+    },
+    cardSubtitle: {
+      ...tablet.cardSubtitle,
+      fontSize: 14,
+    },
+    subtitle: {
+      ...tablet.subtitle,
+      fontSize: 12,
+    },
+    timerButton: {
+      ...tablet.timerButton,
+      paddingVertical: 20,
+      margin: 6,
+      minHeight: 95,
+      width: "45%",
+      borderRadius: 12,
+    },
+    timerButtonText: {
+      ...tablet.timerButtonText,
+      fontSize: 24,
+    },
+    row: {
+      ...tablet.row,
+      justifyContent: "space-around",
+      marginBottom: 12,
+      gap: 12,
+    },
   });
 };

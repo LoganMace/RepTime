@@ -9,7 +9,9 @@ import {
   MOCK_MEALS,
   type MealEntry,
 } from "@/components/meals/MealConstants";
+import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useMocksContext } from "@/contexts/MocksContext";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
@@ -26,12 +28,11 @@ import {
   type MealType,
   type MealEntry as StoredMealEntry,
 } from "@/utils/mealStorage";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -39,7 +40,9 @@ import {
 export default function MealsScreen() {
   const { getStyles } = useResponsiveStyles();
   const { colors } = useTheme();
-  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
+  const styles = useMemo(() => {
+    return getStyles(mobileStyles(colors), tabletStyles(colors));
+  }, [getStyles, colors]);
   const { useMocks } = useMocksContext();
 
   const [meals, setMeals] = useState<MealEntry[]>([]);
@@ -230,8 +233,11 @@ export default function MealsScreen() {
       };
 
       if (meal.isFavorite) {
-        // Remove from favorites
-        await removeFromFavorites(mealId);
+        // Remove from favorites - need to find the favorite ID first
+        const favoriteId = await getFavoriteId(mealEntry);
+        if (favoriteId) {
+          await removeFromFavorites(favoriteId);
+        }
       } else {
         // Add to favorites
         await addToFavorites(mealEntry);
@@ -312,33 +318,38 @@ export default function MealsScreen() {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {/* Date Selector */}
-        <View style={styles.dateSection}>
-          <Text style={styles.dateText}>
-            Today, {new Date().toLocaleDateString()}
-          </Text>
-          <View style={styles.dateActions}>
-            <TouchableOpacity style={styles.actionButton} onPress={viewHistory}>
-              <Text style={styles.actionButtonText}>View History</Text>
+        {/* Daily Summary Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <IconSymbol size={24} color="orange" name="chart.bar" />
+            <ThemedText style={styles.cardTitle}>
+              Today&apos;s Summary
+            </ThemedText>
+            <TouchableOpacity onPress={viewHistory} style={styles.headerAction}>
+              <ThemedText style={styles.headerActionText}>History</ThemedText>
+              <IconSymbol
+                size={16}
+                color={colors.textSecondary}
+                name="chevron.right"
+              />
             </TouchableOpacity>
           </View>
+          <DailySummary dailyTotals={dailyTotals} dailyGoals={DAILY_GOALS} />
         </View>
-
-        {/* Daily Summary */}
-        <DailySummary dailyTotals={dailyTotals} dailyGoals={DAILY_GOALS} />
 
         {/* Meal Categories */}
         {CATEGORIES.map((category) => (
-          <MealCategory
-            key={category.key}
-            category={category}
-            meals={meals}
-            favoriteMeals={favoriteMeals}
-            onAddMeal={openAddModal}
-            onAddFromFavorites={openFavoritesModal}
-            onToggleFavorite={toggleFavorite}
-            onDeleteMeal={deleteMeal}
-          />
+          <View key={category.key}>
+            <MealCategory
+              category={category}
+              meals={meals}
+              favoriteMeals={favoriteMeals}
+              onAddMeal={openAddModal}
+              onAddFromFavorites={openFavoritesModal}
+              onToggleFavorite={toggleFavorite}
+              onDeleteMeal={deleteMeal}
+            />
+          </View>
         ))}
       </ScrollView>
 
@@ -370,46 +381,46 @@ export default function MealsScreen() {
   );
 }
 
-const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 20,
-  },
-  dateSection: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-    paddingHorizontal: 4,
-  },
-  dateText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.text,
-  },
-  dateActions: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  actionButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: colors.card,
-    borderRadius: 8,
-  },
-  actionButtonText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: "500",
-  },
-});
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingTop: 20,
+    },
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 16,
+    },
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 16,
+      gap: 8,
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      flex: 1,
+    },
+    headerAction: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+    headerActionText: {
+      fontSize: 14,
+      fontWeight: "500",
+      color: colors.textSecondary,
+    },
+  });
 
-const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,
@@ -418,21 +429,18 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
       paddingHorizontal: 16,
       paddingTop: 16,
     },
-    dateSection: {
-      ...tablet.dateSection,
-      flexDirection: "column",
-      alignItems: "flex-start",
-      gap: 12,
+    card: {
+      ...tablet.card,
+      padding: 16,
+      marginBottom: 12,
     },
-    dateActions: {
-      ...tablet.dateActions,
-      alignSelf: "stretch",
-      justifyContent: "space-between",
+    cardTitle: {
+      ...tablet.cardTitle,
+      fontSize: 16,
     },
-    actionButton: {
-      ...tablet.actionButton,
-      flex: 1,
-      alignItems: "center",
+    headerActionText: {
+      ...tablet.headerActionText,
+      fontSize: 13,
     },
   });
 };

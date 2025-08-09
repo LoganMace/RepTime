@@ -1,6 +1,6 @@
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { useTheme } from "@/hooks/useTheme";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
+import { useTheme } from "@/hooks/useTheme";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { MealEntry } from "./MealConstants";
 
@@ -32,7 +32,7 @@ export default function MealItem({
           <IconSymbol
             name={meal.isFavorite ? "star.fill" : "star"}
             size={16}
-            color={meal.isFavorite ? colors.warning : colors.textSecondary}
+            color={meal.isFavorite ? colors.gold : colors.textSecondary}
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => onDelete(meal.id)}>
@@ -48,36 +48,37 @@ export default function MealItem({
   );
 }
 
-const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  mealItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  mealInfo: {
-    flex: 1,
-  },
-  mealName: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: colors.text,
-    marginBottom: 4,
-  },
-  mealNutrition: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  mealActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-});
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    mealItem: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    mealInfo: {
+      flex: 1,
+    },
+    mealName: {
+      fontSize: 16,
+      fontWeight: "500",
+      color: colors.text,
+      marginBottom: 4,
+    },
+    mealNutrition: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+    mealActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+  });
 
-const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
+const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const tablet = tabletStyles(colors);
   return StyleSheet.create({
     ...tablet,

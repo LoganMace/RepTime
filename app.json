@@ -14,7 +14,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.rep-time"
+      "bundleIdentifier": "com.anonymous.rep-time",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "This app uses audio for workout timer sounds and notifications."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -36,6 +39,12 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "audioMode": "playback"
         }
       ]
     ],

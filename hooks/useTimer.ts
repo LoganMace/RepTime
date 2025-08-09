@@ -1,4 +1,5 @@
-import { useAudioPlayer } from "expo-audio";
+import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
+import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -19,8 +20,17 @@ type TimerProps = {
   sets: number;
   setRestTime: number;
   skipGetReady?: boolean;
-  quickTimer?: boolean; // Optional prop for quick timers
+  quickTimer?: boolean;
 };
+
+// High-precision timer state
+interface TimerState {
+  phase: Phase;
+  startTime: number;
+  duration: number;
+  pausedTime: number;
+  totalPausedDuration: number;
+}
 
 export const useTimer = ({
   visible,
@@ -32,90 +42,390 @@ export const useTimer = ({
   skipGetReady = false,
   quickTimer = false,
 }: TimerProps) => {
+  // Configure audio session for iOS devices to play in silent mode
+  useEffect(() => {
+    const setupAudio = async () => {
+      try {
+        // Use expo-audio's native configuration - it DOES support silent mode!
+        await setAudioModeAsync({
+          playsInSilentMode: true, // This enables audio in silent mode!
+        });
+        console.log("✅ Audio session configured with expo-audio");
+        console.log("✅ Audio will play even when device is in silent mode!");
+      } catch (error) {
+        console.error("Error configuring audio session:", error);
+      }
+    };
+
+    setupAudio();
+  }, []);
+
+  // Audio players with error handling
   const lowBeep = useAudioPlayer(require("../assets/sounds/low-beep.mp3"));
   const highBeep = useAudioPlayer(require("../assets/sounds/high-beep.mp3"));
 
+  // Audio utility functions with error handling and haptic fallback
+  const playAudio = useCallback(
+    (player: typeof lowBeep, name: string, useHaptic: boolean = true) => {
+      try {
+        console.log(`Attempting to play ${name}`);
+        player.seekTo(0);
+        player.play();
+        console.log(`${name} played successfully`);
+
+        // Also trigger haptic feedback for silent mode
+        if (useHaptic) {
+          if (name.includes("high")) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          } else {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          }
+          console.log("Haptic feedback triggered");
+        }
+      } catch (error) {
+        console.error(`Error playing ${name}:`, error);
+        // Fallback to haptic only
+        if (useHaptic) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        }
+      }
+    },
+    []
+  );
+
+  // Audio test function (for debugging)
+  const testAudio = useCallback(() => {
+    console.log("Testing audio playback...");
+    playAudio(highBeep, "test high beep");
+    setTimeout(() => {
+      playAudio(lowBeep, "test low beep");
+    }, 1000);
+  }, [playAudio, highBeep, lowBeep]);
+
+  // Debug audio loading
+  useEffect(() => {
+    console.log("Audio players initialized");
+    // Test audio playback capability
+    if (lowBeep && highBeep) {
+      console.log("Audio players are ready");
+      // Uncomment the next line to test audio on load:
+      // testAudio();
+    }
+  }, [lowBeep, highBeep, testAudio]);
+
+  // Core state
   const [currentRound, setCurrentRound] = useState(1);
   const [currentSet, setCurrentSet] = useState(1);
   const [currentPhase, setCurrentPhase] = useState<Phase>("start");
   const [phaseBeforePause, setPhaseBeforePause] = useState<Phase>("start");
   const [timeLeft, setTimeLeft] = useState(0);
-  const [endTime, setEndTime] = useState<number | null>(null);
-  const [timeRemainingOnPause, setTimeRemainingOnPause] = useState(0);
   const [hasBeepedForCompletion, setHasBeepedForCompletion] = useState(false);
-  const intervalRef = useRef<number | null>(null);
+  
+  // Track countdown beeps to ensure they only play once per second
+  const countdownBeepsRef = useRef<{ [key: number]: boolean }>({});
 
-  const startTimer = useCallback(() => {
-    if (skipGetReady) {
+  // High-precision timing refs
+  const animationFrameRef = useRef<number | null>(null);
+  const timerStateRef = useRef<TimerState | null>(null);
+
+  // Precise timer update using requestAnimationFrame
+  const updateTimer = useCallback(() => {
+    const state = timerStateRef.current;
+
+    if (!state || state.phase === "start" || state.phase === "done") {
+      return;
+    }
+
+    if (state.phase === "paused") {
+      // Don't update during pause
+      animationFrameRef.current = requestAnimationFrame(updateTimer);
+      return;
+    }
+
+    const now = Date.now();
+    // Calculate elapsed time since phase started (excluding paused time)
+    const elapsedSinceStart = now - state.startTime - state.totalPausedDuration;
+    const remaining = Math.max(0, state.duration * 1000 - elapsedSinceStart);
+    const remainingSeconds = Math.ceil(remaining / 1000);
+
+    // Update time left
+    setTimeLeft(remainingSeconds);
+
+    // Check if phase is complete
+    if (remaining <= 0) {
+      console.log(`Phase ${state.phase} completed`);
+      timerStateRef.current = null;
+      setTimeLeft(0);
+      // Phase end will trigger in useEffect
+      return;
+    }
+
+    // Continue the loop
+    animationFrameRef.current = requestAnimationFrame(updateTimer);
+  }, []);
+
+  // Stop the animation frame loop
+  const stopTimer = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  }, []);
+
+  // Start a new phase with precise timing
+  const startPhase = useCallback(
+    (phase: Phase, duration: number) => {
+      console.log(`Starting phase: ${phase}, duration: ${duration}s`);
+
+      stopTimer();
+      
+      // Reset countdown beeps tracker for new phase
+      countdownBeepsRef.current = {};
+
+      const now = Date.now();
+      timerStateRef.current = {
+        phase,
+        startTime: now,
+        duration,
+        pausedTime: 0,
+        totalPausedDuration: 0,
+      };
+
+      setCurrentPhase(phase);
+      setTimeLeft(duration);
+
+      if (duration > 0 && phase !== "paused") {
+        // Start the update loop after a brief delay to ensure state is set
+        setTimeout(() => {
+          animationFrameRef.current = requestAnimationFrame(updateTimer);
+        }, 50);
+      }
+    },
+    [stopTimer, updateTimer]
+  );
+
+  // Handle phase transitions
+  const handlePhaseEnd = useCallback(() => {
+    console.log(
+      `Phase ended: ${currentPhase}, round: ${currentRound}, set: ${currentSet}`
+    );
+
+    if (currentPhase === "getReady") {
       if (workTime > 0) {
-        setCurrentPhase("work");
-        // Add 1 second to endTime to account for the 1-second display delay
-        const endTimeValue = Date.now() + (workTime + 1) * 1000;
-        setEndTime(endTimeValue);
-        setTimeLeft(workTime);
+        startPhase("work", workTime);
       } else if (restTime > 0) {
-        setCurrentPhase("rest");
-        const endTimeValue = Date.now() + (restTime + 1) * 1000;
-        setEndTime(endTimeValue);
-        setTimeLeft(restTime);
+        startPhase("rest", restTime);
       } else {
         setCurrentPhase("done");
-        setEndTime(null);
+        stopTimer();
       }
-    } else {
-      setCurrentPhase("getReady");
-      const endTimeValue = Date.now() + 11 * 1000; // 10 seconds + 1 second display delay
-      setEndTime(endTimeValue);
-      setTimeLeft(10);
-    }
-  }, [skipGetReady, workTime, restTime]);
+    } else if (currentPhase === "work") {
+      // Quick timer completion
+      if (quickTimer && !hasBeepedForCompletion) {
+        setHasBeepedForCompletion(true);
+        playAudio(highBeep, "high beep (completion)");
 
+        setTimeout(() => {
+          setCurrentPhase("start");
+          stopTimer();
+        }, 500);
+        return;
+      }
+
+      if (currentRound < rounds) {
+        if (restTime > 0) {
+          startPhase("rest", restTime);
+        } else {
+          setCurrentRound((prev) => prev + 1);
+          startPhase("work", workTime);
+        }
+      } else {
+        // End of rounds in this set
+        if (currentSet < sets) {
+          if (setRestTime > 0) {
+            startPhase("setRest", setRestTime);
+          } else {
+            setCurrentSet((prev) => prev + 1);
+            setCurrentRound(1);
+            startPhase("work", workTime);
+          }
+        } else {
+          setCurrentPhase("done");
+          stopTimer();
+        }
+      }
+    } else if (currentPhase === "rest") {
+      const nextRound = currentRound + 1;
+      setCurrentRound(nextRound);
+
+      if (nextRound <= rounds) {
+        if (workTime > 0) {
+          startPhase("work", workTime);
+        } else {
+          setCurrentPhase("done");
+          stopTimer();
+        }
+      } else {
+        // End of rounds, check for set rest
+        if (currentSet < sets) {
+          if (setRestTime > 0) {
+            startPhase("setRest", setRestTime);
+          } else {
+            setCurrentSet((prev) => prev + 1);
+            setCurrentRound(1);
+            startPhase("work", workTime);
+          }
+        } else {
+          setCurrentPhase("done");
+          stopTimer();
+        }
+      }
+    } else if (currentPhase === "setRest") {
+      setCurrentSet((prev) => prev + 1);
+      setCurrentRound(1);
+      if (workTime > 0) {
+        startPhase("work", workTime);
+      } else {
+        setCurrentPhase("done");
+        stopTimer();
+      }
+    }
+  }, [
+    currentPhase,
+    currentRound,
+    currentSet,
+    rounds,
+    sets,
+    workTime,
+    restTime,
+    setRestTime,
+    quickTimer,
+    hasBeepedForCompletion,
+    highBeep,
+    playAudio,
+    startPhase,
+    stopTimer,
+  ]);
+
+  // Handle phase end when timeLeft reaches 0
   useEffect(() => {
-    // --- Speech Announcements ---
+    if (
+      timeLeft === 0 &&
+      currentPhase !== "start" &&
+      currentPhase !== "paused" &&
+      currentPhase !== "done"
+    ) {
+      // Only handle phase end if timer state is null (meaning the timer completed naturally)
+      if (!timerStateRef.current) {
+        handlePhaseEnd();
+      }
+    }
+  }, [timeLeft, currentPhase, handlePhaseEnd]);
+
+  // Safe speech function with error handling
+  const speakSafely = useCallback(async (text: string) => {
+    try {
+      // Stop any ongoing speech to prevent queue buildup
+      await Speech.stop();
+      
+      // Small delay to ensure speech engine is ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Speak with error handling
+      await Speech.speak(text, {
+        language: 'en-US',
+        pitch: 1.0,
+        rate: 1.0,
+        // Add these options to improve reliability
+        onDone: () => console.log(`Speech completed: ${text}`),
+        onError: (error) => {
+          console.error(`Speech error for "${text}":`, error);
+          // Fallback to just audio beeps if speech fails
+          playAudio(highBeep, "speech fallback beep");
+        },
+      });
+    } catch (error) {
+      console.error(`Failed to speak "${text}":`, error);
+      // Fallback to audio beep
+      playAudio(highBeep, "speech error fallback");
+    }
+  }, [highBeep, playAudio]);
+
+  // Speech and sound effects
+  useEffect(() => {
     if (quickTimer) return;
+
     if (currentPhase === "getReady" && timeLeft === 10) {
-      Speech.speak("Get ready!");
+      speakSafely("Get ready!");
     } else if (currentPhase === "work" && timeLeft === workTime) {
-      Speech.speak(`Round ${currentRound}`);
+      speakSafely(`Round ${currentRound}`);
     } else if (currentPhase === "rest" && timeLeft === restTime) {
-      Speech.speak("Rest");
+      speakSafely("Rest");
     } else if (currentPhase === "setRest" && timeLeft === setRestTime) {
-      Speech.speak(`Set ${currentSet} complete. Rest.`);
+      speakSafely(`Set ${currentSet} complete. Rest.`);
     } else if (currentPhase === "done") {
-      Speech.speak("Workout complete!");
+      speakSafely("Workout complete!");
     }
 
+    // Work phase announcements
     if (currentPhase === "work") {
       if (timeLeft === 10 && workTime > 10) {
-        Speech.speak("Ten seconds");
+        speakSafely("Ten seconds");
       } else if (timeLeft === Math.floor(workTime / 2) && workTime > 20) {
-        Speech.speak("Half way there");
+        speakSafely("Half way there");
       } else if (workTime > 60 && timeLeft > 0 && timeLeft % 60 === 0) {
-        Speech.speak(`${timeLeft / 60} minute${timeLeft / 60 > 1 ? "s" : ""}`);
+        speakSafely(`${timeLeft / 60} minute${timeLeft / 60 > 1 ? "s" : ""}`);
       }
     }
 
-    // --- Sound Effects ---
+    // Countdown beeps for all phases (3, 2, 1) - only if phase duration > 9 seconds
     if (
-      !quickTimer &&
-      ((currentPhase === "work" && timeLeft === workTime && workTime > 0) ||
-        (currentPhase === "rest" && timeLeft === restTime && restTime > 0) ||
-        (currentPhase === "setRest" &&
-          timeLeft === setRestTime &&
-          setRestTime > 0))
+      currentPhase === "work" ||
+      currentPhase === "rest" ||
+      currentPhase === "setRest" ||
+      currentPhase === "getReady"
     ) {
-      highBeep.seekTo(0);
-      highBeep.play();
+      // Determine the initial phase duration
+      let phaseDuration = 0;
+      if (currentPhase === "work") phaseDuration = workTime;
+      else if (currentPhase === "rest") phaseDuration = restTime;
+      else if (currentPhase === "setRest") phaseDuration = setRestTime;
+      else if (currentPhase === "getReady") phaseDuration = 10;
+      
+      // Only play countdown if phase is longer than 9 seconds
+      if (phaseDuration > 9) {
+        // Only play each countdown beep once
+        if (timeLeft === 3 && !countdownBeepsRef.current[3]) {
+          countdownBeepsRef.current[3] = true;
+          playAudio(lowBeep, "countdown 3");
+        } else if (timeLeft === 2 && !countdownBeepsRef.current[2]) {
+          countdownBeepsRef.current[2] = true;
+          playAudio(lowBeep, "countdown 2");
+        } else if (timeLeft === 1 && !countdownBeepsRef.current[1]) {
+          countdownBeepsRef.current[1] = true;
+          playAudio(lowBeep, "countdown 1");
+        }
+      }
     }
 
+    // Sound effects for phase starts
     if (
-      !quickTimer &&
+      (currentPhase === "work" && timeLeft === workTime && workTime > 0) ||
+      (currentPhase === "rest" && timeLeft === restTime && restTime > 0) ||
+      (currentPhase === "setRest" &&
+        timeLeft === setRestTime &&
+        setRestTime > 0)
+    ) {
+      playAudio(highBeep, `high beep (${currentPhase} start)`);
+    }
+
+    // Halfway beep for work
+    if (
       currentPhase === "work" &&
       timeLeft === Math.floor(workTime / 2) &&
       workTime > 20
     ) {
-      lowBeep.seekTo(0);
-      lowBeep.play();
+      playAudio(lowBeep, "low beep (halfway)");
     }
   }, [
     currentPhase,
@@ -128,236 +438,114 @@ export const useTimer = ({
     highBeep,
     lowBeep,
     quickTimer,
+    playAudio,
+    speakSafely,
   ]);
 
-  const handlePhaseEnd = useCallback(() => {
-    if (currentPhase === "getReady") {
+  // Main timer start function
+  const handleStart = useCallback(() => {
+    if (skipGetReady) {
       if (workTime > 0) {
-        setCurrentPhase("work");
-        const endTimeValue = Date.now() + (workTime + 1) * 1000;
-        setEndTime(endTimeValue);
-        setTimeLeft(workTime);
+        startPhase("work", workTime);
       } else if (restTime > 0) {
-        setCurrentPhase("rest");
-        const endTimeValue = Date.now() + (restTime + 1) * 1000;
-        setEndTime(endTimeValue);
-        setTimeLeft(restTime);
-      } else {
-        setCurrentRound((r) => r + 1);
-        setCurrentPhase("work");
-        const endTimeValue = Date.now() + (workTime + 1) * 1000;
-        setEndTime(endTimeValue);
-        setTimeLeft(workTime);
-      }
-    } else if (currentPhase === "work") {
-      // Quick timer completion beep
-      if (quickTimer && !hasBeepedForCompletion) {
-        setHasBeepedForCompletion(true);
-        highBeep.seekTo(0);
-        highBeep.play();
-
-        // For quick timers, auto-close after beep instead of showing completion screen
-        setTimeout(() => {
-          setCurrentPhase("start");
-        }, 500); // Small delay to let the beep play
-        return;
-      }
-
-      if (currentRound < rounds) {
-        if (restTime > 0) {
-          setCurrentPhase("rest");
-          const endTimeValue = Date.now() + (restTime + 1) * 1000;
-          setEndTime(endTimeValue);
-          setTimeLeft(restTime);
-        } else {
-          const nextRound = currentRound + 1;
-          setCurrentRound(nextRound);
-          if (workTime > 0) {
-            setCurrentPhase("work");
-            const endTimeValue = Date.now() + (workTime + 1) * 1000;
-            setEndTime(endTimeValue);
-            setTimeLeft(workTime);
-          } else {
-            setCurrentPhase("done");
-            setEndTime(null);
-          }
-        }
-      } else {
-        // End of a set
-        if (currentSet < sets) {
-          if (setRestTime > 0) {
-            setCurrentPhase("setRest");
-            const endTimeValue = Date.now() + (setRestTime + 1) * 1000;
-            setEndTime(endTimeValue);
-            setTimeLeft(setRestTime);
-          } else {
-            setCurrentSet((s) => s + 1);
-            setCurrentRound(1);
-            setCurrentPhase("work");
-            const endTimeValue = Date.now() + (workTime + 1) * 1000;
-            setEndTime(endTimeValue);
-            setTimeLeft(workTime);
-          }
-        } else {
-          setCurrentPhase("done");
-          setEndTime(null);
-        }
-      }
-    } else if (currentPhase === "rest") {
-      const nextRound = currentRound + 1;
-      setCurrentRound(nextRound);
-      if (nextRound <= rounds) {
-        if (workTime > 0) {
-          setCurrentPhase("work");
-          const endTimeValue = Date.now() + (workTime + 1) * 1000;
-          setEndTime(endTimeValue);
-          setTimeLeft(workTime);
-        } else if (restTime > 0) {
-          setCurrentPhase("rest");
-          const endTimeValue = Date.now() + (restTime + 1) * 1000;
-          setEndTime(endTimeValue);
-          setTimeLeft(restTime);
-        } else {
-          setCurrentPhase("done");
-          setEndTime(null);
-        }
-      } else {
-        // This part might be redundant if the logic in "work" phase end is correct
-        if (currentSet < sets) {
-          if (setRestTime > 0) {
-            setCurrentPhase("setRest");
-            const endTimeValue = Date.now() + (setRestTime + 1) * 1000;
-            setEndTime(endTimeValue);
-            setTimeLeft(setRestTime);
-          } else {
-            setCurrentSet((s) => s + 1);
-            setCurrentRound(1);
-            setCurrentPhase("work");
-            const endTimeValue = Date.now() + (workTime + 1) * 1000;
-            setEndTime(endTimeValue);
-            setTimeLeft(workTime);
-          }
-        } else {
-          setCurrentPhase("done");
-          setEndTime(null);
-        }
-      }
-    } else if (currentPhase === "setRest") {
-      setCurrentSet((s) => s + 1);
-      setCurrentRound(1);
-      if (workTime > 0) {
-        setCurrentPhase("work");
-        const endTimeValue = Date.now() + (workTime + 1) * 1000;
-        setEndTime(endTimeValue);
-        setTimeLeft(workTime);
-      } else if (restTime > 0) {
-        setCurrentPhase("rest");
-        const endTimeValue = Date.now() + (restTime + 1) * 1000;
-        setEndTime(endTimeValue);
-        setTimeLeft(restTime);
+        startPhase("rest", restTime);
       } else {
         setCurrentPhase("done");
-        setEndTime(null);
       }
+    } else {
+      startPhase("getReady", 10);
     }
-  }, [
-    currentPhase,
-    currentRound,
-    rounds,
-    workTime,
-    restTime,
-    currentSet,
-    sets,
-    setRestTime,
-    quickTimer,
-    highBeep,
-    hasBeepedForCompletion,
-  ]);
+  }, [skipGetReady, workTime, restTime, startPhase]);
 
-  const handleStart = useCallback(() => {
-    startTimer();
-  }, [startTimer]);
+  // Pause function with high precision
+  const handlePause = useCallback(() => {
+    const state = timerStateRef.current;
+    if (!state || state.phase === "paused") return;
 
-  const handlePause = () => {
-    if (intervalRef.current !== null) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-      setPhaseBeforePause(currentPhase);
-      setCurrentPhase("paused");
-      if (endTime) {
-        setTimeRemainingOnPause(endTime - Date.now());
-      }
+    console.log("Pausing timer");
+    stopTimer();
+    
+    // Stop any ongoing speech
+    Speech.stop();
+
+    const now = Date.now();
+    state.pausedTime = now;
+
+    setPhaseBeforePause(currentPhase);
+    setCurrentPhase("paused");
+
+    // Update timer state to paused
+    timerStateRef.current = {
+      ...state,
+      phase: "paused",
+    };
+  }, [currentPhase, stopTimer]);
+
+  // Resume function with high precision
+  const handleResume = useCallback(() => {
+    const state = timerStateRef.current;
+    if (!state || state.phase !== "paused" || !state.pausedTime) return;
+
+    console.log("Resuming timer");
+
+    const now = Date.now();
+    const pauseDuration = now - state.pausedTime;
+
+    // Update state with accumulated pause time
+    timerStateRef.current = {
+      ...state,
+      phase: phaseBeforePause,
+      totalPausedDuration: state.totalPausedDuration + pauseDuration,
+      pausedTime: 0,
+    };
+
+    setCurrentPhase(phaseBeforePause);
+
+    // Resume the animation loop
+    animationFrameRef.current = requestAnimationFrame(updateTimer);
+  }, [phaseBeforePause, updateTimer]);
+
+  // Reset function
+  const handleReset = useCallback(() => {
+    console.log("Resetting timer");
+    stopTimer();
+
+    timerStateRef.current = null;
+    setCurrentRound(1);
+    setCurrentSet(1);
+    setCurrentPhase("start");
+    setTimeLeft(0);
+    setHasBeepedForCompletion(false);
+
+    if (quickTimer) {
+      handleStart();
     }
-  };
+  }, [stopTimer, quickTimer, handleStart]);
 
-  const handleResume = () => {
-    if (timeRemainingOnPause > 0) {
-      setEndTime(Date.now() + timeRemainingOnPause);
-      setCurrentPhase(phaseBeforePause);
-      setTimeRemainingOnPause(0);
-    }
-  };
-
+  // Initialize timer when modal becomes visible
   useEffect(() => {
     if (visible) {
+      stopTimer();
+      timerStateRef.current = null;
       setCurrentRound(1);
       setCurrentSet(1);
       setCurrentPhase("start");
       setTimeLeft(0);
-      setEndTime(null);
-      setTimeRemainingOnPause(0);
       setHasBeepedForCompletion(false);
-      if (intervalRef.current !== null) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+
       if (quickTimer) {
-        startTimer();
+        handleStart();
       }
     }
-  }, [visible, quickTimer, startTimer]);
+  }, [visible, quickTimer, handleStart, stopTimer]);
 
+  // Cleanup on unmount
   useEffect(() => {
-    if (
-      currentPhase !== "start" &&
-      currentPhase !== "paused" &&
-      currentPhase !== "done"
-    ) {
-      // Delay the first interval by 1 second so the initial number displays for a full second
-      const startDelay = setTimeout(() => {
-        intervalRef.current = setInterval(() => {
-          if (endTime) {
-            const remaining = Math.max(
-              0,
-              Math.floor((endTime - Date.now()) / 1000)
-            );
-            setTimeLeft(remaining);
-            if (remaining <= 0) {
-              handlePhaseEnd();
-            }
-          }
-        }, 100); // Smaller interval for precision, but using Math.floor for consistent display
-      }, 1000); // 1 second delay before starting the countdown
-
-      return () => {
-        clearTimeout(startDelay);
-        if (intervalRef.current !== null) {
-          clearInterval(intervalRef.current);
-        }
-      };
-    } else {
-      if (intervalRef.current !== null) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    }
-
     return () => {
-      if (intervalRef.current !== null) {
-        clearInterval(intervalRef.current);
-      }
+      stopTimer();
+      Speech.stop(); // Stop any ongoing speech
     };
-  }, [currentPhase, endTime, handlePhaseEnd]);
+  }, [stopTimer]);
 
   return {
     currentRound,
@@ -368,5 +556,6 @@ export const useTimer = ({
     handleStart,
     handlePause,
     handleResume,
+    handleReset,
   };
 };
