@@ -137,7 +137,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                       >
                         <View style={styles.exerciseHeader}>
                           <ThemedText style={styles.exerciseName}>
-                            {ex.workout || ex.exercise || `Exercise ${i + 1}`}
+                            {ex.exercise || `Exercise ${i + 1}`}
                           </ThemedText>
                           <View
                             style={[

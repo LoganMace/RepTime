@@ -33,8 +33,40 @@ export default function SavedWorkoutsScreen() {
   const loadWorkouts = useCallback(async () => {
     try {
       const data = await AsyncStorage.getItem("workoutPlans");
-      setSavedWorkouts(data ? JSON.parse(data) : []);
-    } catch {
+      const workoutPlans = data ? JSON.parse(data) : [];
+      
+      // Debug: Log the structure to see what fields are being used
+      if (workoutPlans.length > 0) {
+        console.log("Loaded workout plans:", JSON.stringify(workoutPlans[0], null, 2));
+        if (workoutPlans[0].exercises?.length > 0) {
+          console.log("First exercise fields:", Object.keys(workoutPlans[0].exercises[0]));
+        }
+      }
+      
+      // Migrate old data format (workout -> exercise)
+      let needsUpdate = false;
+      const migratedPlans = workoutPlans.map((plan: any) => {
+        const migratedExercises = plan.exercises?.map((ex: any) => {
+          if (ex.workout && !ex.exercise) {
+            console.log(`Migrating exercise: ${ex.workout} -> exercise field`);
+            needsUpdate = true;
+            return { ...ex, exercise: ex.workout };
+          }
+          return ex;
+        });
+        
+        return { ...plan, exercises: migratedExercises };
+      });
+      
+      // Save migrated data back to storage
+      if (needsUpdate) {
+        console.log("Updating workout plans to use 'exercise' field");
+        await AsyncStorage.setItem("workoutPlans", JSON.stringify(migratedPlans));
+      }
+      
+      setSavedWorkouts(migratedPlans);
+    } catch (error) {
+      console.error("Error loading workouts:", error);
       setSavedWorkouts([]);
     }
   }, []);
@@ -158,7 +190,8 @@ export default function SavedWorkoutsScreen() {
                       if (ex.restTime && ex.restTime.toString().trim())
                         details.push(`${ex.restTime}s rest`);
 
-                      const exerciseName = ex.workout || `Exercise ${i + 1}`;
+                      const exerciseName =
+                        ex.exercise || `Exercise ${i + 1}`;
 
                       return (
                         <View key={i} style={styles.exerciseItem}>
