@@ -9,9 +9,9 @@ import Svg, {
   Stop,
   Text as SvgText,
 } from "react-native-svg";
-import { useResponsiveStyles } from "../hooks/useResponsiveStyles";
-import { useTheme } from "../hooks/useTheme";
-import { ThemedText } from "./ThemedText";
+import { useResponsiveStyles } from "../../hooks/useResponsiveStyles";
+import { useTheme } from "../../hooks/useTheme";
+import { ThemedText } from "../ThemedText";
 
 interface WeightEntry {
   id: string;

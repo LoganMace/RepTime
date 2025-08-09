@@ -14,10 +14,10 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { ScrollView } from "react-native-gesture-handler";
 
-import Clock from "@/components/Clock";
+import Clock from "@/components/timer/Clock";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import TimePicker from "@/components/TimePicker";
+import TimePicker from "@/components/timer/TimePicker";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useLocalSearchParams, useRouter } from "expo-router";
 

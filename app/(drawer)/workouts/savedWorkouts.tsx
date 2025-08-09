@@ -13,7 +13,7 @@ import {
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import WorkoutViewModal from "@/components/WorkoutViewModal";
+import WorkoutViewModal from "@/components/workout/WorkoutViewModal";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
 

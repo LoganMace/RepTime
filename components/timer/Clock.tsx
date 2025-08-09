@@ -9,9 +9,9 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { useTimer } from "../hooks/useTimer";
+import { useTimer } from "../../hooks/useTimer";
 import AnimatedCircleProgress from "./AnimatedCircleProgress";
-import { IconSymbol } from "./ui/IconSymbol";
+import { IconSymbol } from "../ui/IconSymbol";
 
 type ClockProps = {
   visible: boolean;

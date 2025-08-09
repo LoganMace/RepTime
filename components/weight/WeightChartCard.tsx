@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { useTheme } from "../../hooks/useTheme";
 import { useResponsiveStyles } from "../../hooks/useResponsiveStyles";
 import { ThemedText } from "../ThemedText";
-import { WeightTrendChart } from "../WeightTrendChart";
+import { WeightTrendChart } from "./WeightTrendChart";
 import { WeightEntry } from "./WeightConstants";
 
 interface WeightChartCardProps {

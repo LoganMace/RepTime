@@ -7,9 +7,9 @@ import {
   View,
 } from "react-native";
 
-import Clock from "@/components/Clock";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import Clock from "@/components/timer/Clock";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
@@ -103,7 +103,7 @@ export default function QuickTimersScreen() {
         {/* Timer Buttons Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <IconSymbol size={20} color="gold" name="timer" />
+            <IconSymbol size={20} color="lime" name="timer" />
             <ThemedText style={styles.cardSubtitle}>Preset Times</ThemedText>
           </View>
 

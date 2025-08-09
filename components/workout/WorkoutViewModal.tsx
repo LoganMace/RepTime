@@ -10,14 +10,14 @@ import {
   View,
 } from "react-native";
 
-import Clock from "@/components/Clock";
+import Clock from "@/components/timer/Clock";
 import { ThemedText } from "@/components/ThemedText";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 
 // Import refactored components
-import { WorkoutHeader } from "./workout-modal/WorkoutHeader";
-import { ExerciseCard } from "./workout-modal/ExerciseCard";
-import { EditExerciseModal } from "./workout-modal/EditExerciseModal";
+import { WorkoutHeader } from "./WorkoutHeader";
+import { ExerciseCard } from "./ExerciseCard";
+import { EditExerciseModal } from "./EditExerciseModal";
 
 interface WorkoutViewModalProps {
   visible: boolean;
