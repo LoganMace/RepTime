@@ -1,11 +1,12 @@
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  Alert,
   Modal,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -13,16 +14,23 @@ import Clock from "@/components/Clock";
 import { ThemedText } from "@/components/ThemedText";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 
+// Import refactored components
+import { WorkoutHeader } from "./workout-modal/WorkoutHeader";
+import { ExerciseCard } from "./workout-modal/ExerciseCard";
+import { EditExerciseModal } from "./workout-modal/EditExerciseModal";
+
 interface WorkoutViewModalProps {
   visible: boolean;
   workout: any | null;
   onClose: () => void;
+  onWorkoutUpdate?: (updatedWorkout: any) => void;
 }
 
 const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
   visible,
   workout,
   onClose,
+  onWorkoutUpdate,
 }) => {
   const { colors } = useTheme();
   const [completed, setCompleted] = useState<number[]>([]);
@@ -40,6 +48,11 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
     quickTimer?: boolean;
     skipGetReady?: boolean;
   } | null>(null);
+
+  // Edit state management
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingExerciseIndex, setEditingExerciseIndex] = useState<number | null>(null);
+  const [editingExercise, setEditingExercise] = useState<any>(null);
 
   const styles = useMemo(() => {
     return getStyles(mobileStyles(colors), tabletStyles(colors));
@@ -113,107 +126,72 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
     );
   };
 
+  // Edit functionality
+  const handleEditExercise = (exerciseIndex: number, event: any) => {
+    event.stopPropagation(); // Prevent triggering active state
+    const exercise = workout.exercises[exerciseIndex];
+    setEditingExerciseIndex(exerciseIndex);
+    setEditingExercise({ ...exercise }); // Create a copy to edit
+    setEditModalVisible(true);
+  };
+
+  const handleSaveExercise = async () => {
+    if (!editingExercise || editingExerciseIndex === null || !workout) return;
+
+    try {
+      // Load all workouts from storage
+      const data = await AsyncStorage.getItem("workoutPlans");
+      const workoutPlans = data ? JSON.parse(data) : [];
+
+      // Find the workout index in storage by comparing name and savedAt
+      const workoutIndex = workoutPlans.findIndex(
+        (plan: any) =>
+          plan.name === workout.name && plan.savedAt === workout.savedAt
+      );
+
+      if (workoutIndex === -1) {
+        Alert.alert("Error", "Could not find workout to update");
+        return;
+      }
+
+      // Update the specific exercise
+      workoutPlans[workoutIndex].exercises[editingExerciseIndex] = editingExercise;
+
+      // Save back to storage
+      await AsyncStorage.setItem("workoutPlans", JSON.stringify(workoutPlans));
+
+      // Update the local workout state if callback provided
+      if (onWorkoutUpdate) {
+        onWorkoutUpdate(workoutPlans[workoutIndex]);
+      }
+
+      // Close edit modal
+      setEditModalVisible(false);
+      setEditingExerciseIndex(null);
+      setEditingExercise(null);
+
+      Alert.alert("Success", "Exercise updated successfully!");
+    } catch (error) {
+      console.error("Error updating exercise:", error);
+      Alert.alert("Error", "Failed to update exercise");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditModalVisible(false);
+    setEditingExerciseIndex(null);
+    setEditingExercise(null);
+  };
+
   // Filter exercises by type
-  const warmupExercises =
-    workout?.exercises?.filter((ex: any) => ex.warmup) || [];
-  const cooldownExercises =
-    workout?.exercises?.filter((ex: any) => ex.cooldown) || [];
-  const mainExercises =
-    workout?.exercises?.filter((ex: any) => !ex.warmup && !ex.cooldown) || [];
+  const warmupExercises = workout?.exercises?.filter((ex: any) => ex.warmup) || [];
+  const cooldownExercises = workout?.exercises?.filter((ex: any) => ex.cooldown) || [];
+  const mainExercises = workout?.exercises?.filter((ex: any) => !ex.warmup && !ex.cooldown) || [];
 
   const progress =
     workout && workout.exercises && workout.exercises.length > 0
       ? completed.length / workout.exercises.length
       : 0;
-
-  // Helper function to render exercise items
-  const renderExerciseItem = (ex: any, originalIndex: number) => (
-    <TouchableOpacity
-      key={originalIndex}
-      style={[
-        styles.exerciseItem,
-        completed.includes(originalIndex) && styles.exerciseItemCompleted,
-        activeExercise === originalIndex && styles.exerciseItemActive,
-      ]}
-      onPress={() => handleSetActive(originalIndex)}
-      activeOpacity={0.7}
-    >
-      <View style={styles.exerciseHeader}>
-        <ThemedText style={styles.exerciseName}>
-          {ex.exercise || `Exercise ${originalIndex + 1}`}
-        </ThemedText>
-        <View style={styles.exerciseHeaderActions}>
-          {hasTimerData(ex) && (
-            <TouchableOpacity
-              style={styles.timerButton}
-              onPress={(e) => {
-                e.stopPropagation(); // Prevent completion toggle
-                handleStartTimer(ex);
-              }}
-              activeOpacity={0.7}
-            >
-              <IconSymbol size={16} color="gold" name="clock.fill" />
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity
-            style={[
-              styles.checkbox,
-              completed.includes(originalIndex) && styles.checkboxCompleted,
-            ]}
-            onPress={(e) => handleComplete(originalIndex, e)}
-            activeOpacity={0.7}
-          >
-            {completed.includes(originalIndex) && (
-              <IconSymbol
-                size={16}
-                color={colors.textInverse}
-                name="checkmark"
-              />
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.exerciseDetails}>
-        {ex.sets && ex.sets.toString().trim() && (
-          <View style={styles.detailItem}>
-            <ThemedText style={styles.detailLabel}>Sets</ThemedText>
-            <ThemedText style={styles.detailValue}>{ex.sets}</ThemedText>
-          </View>
-        )}
-        {ex.reps && ex.reps.toString().trim() && (
-          <View style={styles.detailItem}>
-            <ThemedText style={styles.detailLabel}>Reps</ThemedText>
-            <ThemedText style={styles.detailValue}>{ex.reps}</ThemedText>
-          </View>
-        )}
-        {ex.weight && ex.weight.toString().trim() && (
-          <View style={styles.detailItem}>
-            <ThemedText style={styles.detailLabel}>Weight</ThemedText>
-            <ThemedText style={styles.detailValue}>{ex.weight} lbs</ThemedText>
-          </View>
-        )}
-        {ex.workTime && ex.workTime.toString().trim() && (
-          <View style={styles.detailItem}>
-            <ThemedText style={styles.detailLabel}>Work</ThemedText>
-            <ThemedText style={styles.detailValue}>{ex.workTime}s</ThemedText>
-          </View>
-        )}
-        {ex.restTime && ex.restTime.toString().trim() && (
-          <View style={styles.detailItem}>
-            <ThemedText style={styles.detailLabel}>Rest</ThemedText>
-            <ThemedText style={styles.detailValue}>{ex.restTime}s</ThemedText>
-          </View>
-        )}
-        {ex.setRest && ex.setRest.toString().trim() && (
-          <View style={styles.detailItem}>
-            <ThemedText style={styles.detailLabel}>Set Rest</ThemedText>
-            <ThemedText style={styles.detailValue}>{ex.setRest}s</ThemedText>
-          </View>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
 
   return (
     <Modal
@@ -224,58 +202,13 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          {/* Header Card */}
-          <View style={styles.headerCard}>
-            <View style={styles.cardHeader}>
-              <IconSymbol
-                size={24}
-                color="gold"
-                name="figure.strengthtraining.traditional"
-              />
-              <ThemedText style={styles.cardTitle}>
-                {workout?.name || "Workout"}
-              </ThemedText>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <IconSymbol
-                  size={20}
-                  color={colors.textSecondary}
-                  name="xmark"
-                />
-              </TouchableOpacity>
-            </View>
-
-            {workout && (
-              <View style={styles.workoutSummary}>
-                <ThemedText style={styles.exerciseCount}>
-                  {workout.exercises.length} exercise
-                  {workout.exercises.length !== 1 ? "s" : ""}
-                </ThemedText>
-                <ThemedText style={styles.savedDate}>
-                  Saved: {new Date(workout.savedAt).toLocaleDateString()}
-                </ThemedText>
-              </View>
-            )}
-
-            {/* Progress Section */}
-            {workout && workout.exercises && workout.exercises.length > 0 && (
-              <View style={styles.progressSection}>
-                <View style={styles.progressContainer}>
-                  <View style={styles.progressBar}>
-                    <View
-                      style={[
-                        styles.progressFill,
-                        { width: `${progress * 100}%` },
-                      ]}
-                    />
-                  </View>
-                  <ThemedText style={styles.progressText}>
-                    {Math.round(progress * 100)}% Complete ({completed.length}/
-                    {workout?.exercises?.length || 0})
-                  </ThemedText>
-                </View>
-              </View>
-            )}
-          </View>
+          {/* Header */}
+          <WorkoutHeader
+            workout={workout}
+            progress={progress}
+            completedCount={completed.length}
+            onClose={onClose}
+          />
 
           {workout && workout.exercises && workout.exercises.length > 0 && (
             <ScrollView
@@ -284,124 +217,52 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
               showsVerticalScrollIndicator={false}
             >
               {/* Warmup Card */}
-              {warmupExercises.length > 0 && (
-                <View style={styles.card}>
-                  <View style={styles.cardHeader}>
-                    <IconSymbol size={20} color="orange" name="flame" />
-                    <ThemedText style={styles.cardSubtitle}>Warmup</ThemedText>
-                  </View>
-
-                  {/* Column Headers for Warmup */}
-                  <View style={styles.columnHeaders}>
-                    <View style={styles.exerciseNameHeader}>
-                      <ThemedText style={styles.activeColumnHeaderText}>
-                        Tap to set as active
-                      </ThemedText>
-                    </View>
-                    <View style={styles.columnActionsHeader}>
-                      {warmupExercises.some((ex: any) => hasTimerData(ex)) && (
-                        <ThemedText style={styles.columnHeaderText}>
-                          Start{"\n"}Timer
-                        </ThemedText>
-                      )}
-                      <ThemedText style={styles.columnHeaderText}>
-                        Mark{"\n"}Complete
-                      </ThemedText>
-                    </View>
-                  </View>
-
-                  <View style={styles.exercisesList}>
-                    {warmupExercises.map((ex: any, i: number) => {
-                      const originalIndex = workout.exercises.findIndex(
-                        (originalEx: any) => originalEx === ex
-                      );
-                      return renderExerciseItem(ex, originalIndex);
-                    })}
-                  </View>
-                </View>
-              )}
+              <ExerciseCard
+                title="Warmup"
+                icon="flame"
+                iconColor="orange"
+                exercises={warmupExercises}
+                allExercises={workout.exercises}
+                completed={completed}
+                activeExercise={activeExercise}
+                hasTimerData={hasTimerData}
+                onSetActive={handleSetActive}
+                onComplete={handleComplete}
+                onEdit={handleEditExercise}
+                onStartTimer={handleStartTimer}
+              />
 
               {/* Main Exercises Card */}
-              {mainExercises.length > 0 && (
-                <View style={styles.card}>
-                  <View style={styles.cardHeader}>
-                    <IconSymbol size={20} color="gold" name="list.bullet" />
-                    <ThemedText style={styles.cardSubtitle}>
-                      Exercises
-                    </ThemedText>
-                  </View>
-
-                  {/* Column Headers for Main Exercises */}
-                  <View style={styles.columnHeaders}>
-                    <View style={styles.exerciseNameHeader}>
-                      <ThemedText style={styles.activeColumnHeaderText}>
-                        Tap to set as active
-                      </ThemedText>
-                    </View>
-                    <View style={styles.columnActionsHeader}>
-                      {mainExercises.some((ex: any) => hasTimerData(ex)) && (
-                        <ThemedText style={styles.columnHeaderText}>
-                          Start{"\n"}Timer
-                        </ThemedText>
-                      )}
-                      <ThemedText style={styles.columnHeaderText}>
-                        Mark{"\n"}Complete
-                      </ThemedText>
-                    </View>
-                  </View>
-
-                  <View style={styles.exercisesList}>
-                    {mainExercises.map((ex: any, i: number) => {
-                      const originalIndex = workout.exercises.findIndex(
-                        (originalEx: any) => originalEx === ex
-                      );
-                      return renderExerciseItem(ex, originalIndex);
-                    })}
-                  </View>
-                </View>
-              )}
+              <ExerciseCard
+                title="Exercises"
+                icon="list.bullet"
+                iconColor="gold"
+                exercises={mainExercises}
+                allExercises={workout.exercises}
+                completed={completed}
+                activeExercise={activeExercise}
+                hasTimerData={hasTimerData}
+                onSetActive={handleSetActive}
+                onComplete={handleComplete}
+                onEdit={handleEditExercise}
+                onStartTimer={handleStartTimer}
+              />
 
               {/* Cooldown Card */}
-              {cooldownExercises.length > 0 && (
-                <View style={styles.card}>
-                  <View style={styles.cardHeader}>
-                    <IconSymbol size={20} color="cyan" name="snowflake" />
-                    <ThemedText style={styles.cardSubtitle}>
-                      Cooldown
-                    </ThemedText>
-                  </View>
-
-                  {/* Column Headers for Cooldown */}
-                  <View style={styles.columnHeaders}>
-                    <View style={styles.exerciseNameHeader}>
-                      <ThemedText style={styles.activeColumnHeaderText}>
-                        Tap to set as active
-                      </ThemedText>
-                    </View>
-                    <View style={styles.columnActionsHeader}>
-                      {cooldownExercises.some((ex: any) =>
-                        hasTimerData(ex)
-                      ) && (
-                        <ThemedText style={styles.columnHeaderText}>
-                          Start{"\n"}Timer
-                        </ThemedText>
-                      )}
-                      <ThemedText style={styles.columnHeaderText}>
-                        Mark{"\n"}Complete
-                      </ThemedText>
-                    </View>
-                  </View>
-
-                  <View style={styles.exercisesList}>
-                    {cooldownExercises.map((ex: any, i: number) => {
-                      const originalIndex = workout.exercises.findIndex(
-                        (originalEx: any) => originalEx === ex
-                      );
-                      return renderExerciseItem(ex, originalIndex);
-                    })}
-                  </View>
-                </View>
-              )}
+              <ExerciseCard
+                title="Cooldown"
+                icon="snowflake"
+                iconColor="cyan"
+                exercises={cooldownExercises}
+                allExercises={workout.exercises}
+                completed={completed}
+                activeExercise={activeExercise}
+                hasTimerData={hasTimerData}
+                onSetActive={handleSetActive}
+                onComplete={handleComplete}
+                onEdit={handleEditExercise}
+                onStartTimer={handleStartTimer}
+              />
 
               {/* Fallback for workouts with no exercises */}
               {warmupExercises.length === 0 &&
@@ -443,6 +304,15 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
           quickTimer={activeTimerData.quickTimer}
         />
       )}
+
+      {/* Edit Exercise Modal */}
+      <EditExerciseModal
+        visible={editModalVisible}
+        editingExercise={editingExercise}
+        onClose={handleCancelEdit}
+        onSave={handleSaveExercise}
+        onExerciseChange={setEditingExercise}
+      />
     </Modal>
   );
 };
@@ -457,55 +327,6 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       flex: 1,
       backgroundColor: colors.background,
     },
-    headerCard: {
-      backgroundColor: colors.card,
-      padding: 16,
-      paddingTop: 60, // Add extra padding for status bar
-    },
-    cardHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 8,
-      marginBottom: 12,
-    },
-    cardTitle: {
-      fontSize: 18,
-      fontWeight: "600",
-      flex: 1,
-    },
-    cardSubtitle: {
-      fontSize: 16,
-      fontWeight: "600",
-      flex: 1,
-    },
-    closeButton: {
-      padding: 8,
-      borderRadius: 8,
-      backgroundColor: colors.inputBackground,
-    },
-    workoutSummary: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      paddingTop: 8,
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
-    },
-    exerciseCount: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: colors.primary,
-    },
-    savedDate: {
-      fontSize: 12,
-      color: colors.textSecondary,
-    },
-    progressSection: {
-      paddingTop: 16,
-      marginTop: 16,
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
-    },
     scrollView: {
       flex: 1,
     },
@@ -519,144 +340,19 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       padding: 16,
       marginBottom: 16,
     },
-    progressContainer: {
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
       gap: 8,
+      marginBottom: 12,
     },
-    progressBar: {
-      height: 8,
-      backgroundColor: colors.inputBackground,
-      borderRadius: 4,
-      overflow: "hidden",
-    },
-    progressFill: {
-      height: "100%",
-      backgroundColor: "gold",
-      borderRadius: 4,
-    },
-    progressText: {
-      fontSize: 14,
+    cardSubtitle: {
+      fontSize: 16,
       fontWeight: "600",
-      color: colors.text,
-      textAlign: "center",
-    },
-    columnHeaders: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      paddingVertical: 8,
-      marginBottom: 8,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-    },
-    exerciseNameHeader: {
       flex: 1,
-      minWidth: 100, // Ensure enough space for "Tap to set as active" text
-    },
-    columnActionsHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 26, // Same gap as exerciseHeaderActions
-    },
-    columnHeaderText: {
-      fontSize: 11,
-      fontWeight: "600",
-      color: colors.textSecondary,
-      textAlign: "center",
-      width: 54, // Narrow width to force line breaks
-      lineHeight: 14,
-    },
-    activeColumnHeaderText: {
-      fontSize: 10,
-      fontWeight: "600",
-      color: colors.textSecondary,
-      textAlign: "left",
-      lineHeight: 13,
-      paddingRight: 8,
     },
     exercisesList: {
       gap: 12,
-    },
-    exerciseItem: {
-      backgroundColor: colors.inputBackground,
-      borderRadius: 8,
-      padding: 12,
-      borderWidth: 1,
-      borderColor: "transparent", // Transparent border to maintain consistent sizing
-    },
-    exerciseItemCompleted: {
-      backgroundColor: colors.primary + "20",
-      borderWidth: 1,
-      borderColor: "gold",
-    },
-    exerciseItemActive: {
-      // backgroundColor: colors.card,
-      borderWidth: 1,
-      borderColor: colors.success,
-    },
-    exerciseHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 8,
-    },
-    exerciseHeaderActions: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 44, // Increased spacing to accommodate column headers
-    },
-    timerButton: {
-      width: 32,
-      height: 32,
-      borderRadius: 6,
-      backgroundColor: colors.inputBackground,
-      borderWidth: 1,
-      borderColor: "gold",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    exerciseName: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: colors.text,
-      flex: 1,
-    },
-    checkbox: {
-      width: 32,
-      height: 32,
-      borderRadius: 6,
-      borderWidth: 2,
-      borderColor: colors.textSecondary,
-      backgroundColor: colors.inputBackground,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    checkboxCompleted: {
-      backgroundColor: "gold",
-      borderColor: "gold",
-    },
-    exerciseDetails: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: 8,
-    },
-    detailItem: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: colors.background,
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 6,
-      gap: 4,
-    },
-    detailLabel: {
-      fontSize: 11,
-      color: colors.textSecondary,
-      fontWeight: "500",
-    },
-    detailValue: {
-      fontSize: 12,
-      color: colors.text,
-      fontWeight: "600",
     },
     emptyText: {
       fontSize: 14,
@@ -670,24 +366,6 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const mobile = mobileStyles(colors);
   return StyleSheet.create({
     ...mobile,
-    modalOverlay: {
-      ...mobile.modalOverlay,
-    },
-    modalContent: {
-      ...mobile.modalContent,
-    },
-    headerCard: {
-      ...mobile.headerCard,
-      padding: 20,
-    },
-    cardTitle: {
-      ...mobile.cardTitle,
-      fontSize: 20,
-    },
-    cardSubtitle: {
-      ...mobile.cardSubtitle,
-      fontSize: 18,
-    },
     scrollContent: {
       ...mobile.scrollContent,
       padding: 20,
@@ -698,70 +376,9 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
       padding: 20,
       marginBottom: 20,
     },
-    progressText: {
-      ...mobile.progressText,
-      fontSize: 16,
-    },
-    exerciseItem: {
-      ...mobile.exerciseItem,
-      padding: 16,
-    },
-    exerciseItemActive: {
-      ...mobile.exerciseItemActive,
-    },
-    exerciseHeaderActions: {
-      ...mobile.exerciseHeaderActions,
-      gap: 52, // Larger gap for tablet
-    },
-    columnHeaders: {
-      ...mobile.columnHeaders,
-      paddingVertical: 10,
-    },
-    exerciseNameHeader: {
-      ...mobile.exerciseNameHeader,
-      minWidth: 120, // Slightly more space for tablet
-    },
-    columnActionsHeader: {
-      ...mobile.columnActionsHeader,
-      gap: 32, // Match the exerciseHeaderActions gap
-    },
-    columnHeaderText: {
-      ...mobile.columnHeaderText,
-      fontSize: 12,
-      width: 60, // Slightly wider for tablet but still narrow
-      lineHeight: 16,
-    },
-    activeColumnHeaderText: {
-      ...mobile.activeColumnHeaderText,
-      fontSize: 12,
-      lineHeight: 15,
-    },
-    timerButton: {
-      ...mobile.timerButton,
-      width: 36,
-      height: 36,
-    },
-    exerciseName: {
-      ...mobile.exerciseName,
+    cardSubtitle: {
+      ...mobile.cardSubtitle,
       fontSize: 18,
-    },
-    checkbox: {
-      ...mobile.checkbox,
-      width: 36,
-      height: 36,
-    },
-    detailItem: {
-      ...mobile.detailItem,
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-    },
-    detailLabel: {
-      ...mobile.detailLabel,
-      fontSize: 12,
-    },
-    detailValue: {
-      ...mobile.detailValue,
-      fontSize: 14,
     },
   });
 };
