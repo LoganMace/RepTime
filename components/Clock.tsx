@@ -573,10 +573,11 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
     doneContainer: {
       ...tablet.doneContainer,
       gap: 15,
+      paddingHorizontal: 20,
     },
     doneText: {
       ...tablet.doneText,
-      fontSize: 48,
+      fontSize: 36,
     },
     doneSubText: {
       ...tablet.doneSubText,
