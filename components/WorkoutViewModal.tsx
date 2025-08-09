@@ -586,12 +586,11 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     exerciseItemCompleted: {
       backgroundColor: colors.primary + "20",
       borderWidth: 1,
-      borderColor: "gold",
+      borderColor: colors.gold,
     },
     exerciseItemActive: {
-      // backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: colors.success,
+      borderColor: colors.primary,
     },
     exerciseHeader: {
       flexDirection: "row",
