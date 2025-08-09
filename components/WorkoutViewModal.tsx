@@ -52,7 +52,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      transparent={true}
+      transparent={false}
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
@@ -228,24 +228,16 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
   StyleSheet.create({
     modalOverlay: {
       flex: 1,
-      backgroundColor: colors.overlay,
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 16,
+      backgroundColor: colors.background,
     },
     modalContent: {
+      flex: 1,
       backgroundColor: colors.background,
-      borderRadius: 16,
-      width: "100%",
-      maxWidth: 600,
-      height: "90%",
-      overflow: "hidden",
     },
     headerCard: {
       backgroundColor: colors.card,
       padding: 16,
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
+      paddingTop: 60, // Add extra padding for status bar
     },
     cardHeader: {
       flexDirection: "row",
@@ -401,11 +393,9 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
     ...mobile,
     modalOverlay: {
       ...mobile.modalOverlay,
-      padding: 24,
     },
     modalContent: {
       ...mobile.modalContent,
-      maxWidth: 800,
     },
     headerCard: {
       ...mobile.headerCard,
