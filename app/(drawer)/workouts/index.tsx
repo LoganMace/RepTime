@@ -31,10 +31,11 @@ export default function WorkoutsScreen() {
     {
       exercise: "",
       sets: "",
-      reps: "",
+      reps: "1", // Default reps to 1
       weight: "",
       workTime: "",
       restTime: "",
+      setRest: "", // Add setRest field
     },
   ]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -44,7 +45,19 @@ export default function WorkoutsScreen() {
       const workoutToEdit = JSON.parse(params.workout as string);
       const index = parseInt(params.editIndex, 10);
       setWorkoutName(workoutToEdit.name);
-      setWorkouts(workoutToEdit.exercises);
+      
+      // Ensure all exercises have the required fields with defaults
+      const exercisesWithDefaults = workoutToEdit.exercises.map((ex: any) => ({
+        exercise: ex.exercise || "",
+        sets: ex.sets || "",
+        reps: ex.reps || "1", // Default reps to 1 for existing workouts
+        weight: ex.weight || "",
+        workTime: ex.workTime || "",
+        restTime: ex.restTime || "",
+        setRest: ex.setRest || "", // Add setRest field for existing workouts
+      }));
+      
+      setWorkouts(exercisesWithDefaults);
       setEditIndex(index);
     }
   }, [params.workout, params.editIndex]);
@@ -63,10 +76,11 @@ export default function WorkoutsScreen() {
       {
         exercise: "",
         sets: "",
-        reps: "",
+        reps: "1", // Default reps to 1
         weight: "",
         workTime: "",
         restTime: "",
+        setRest: "", // Add setRest field
       },
     ]);
   };
@@ -122,10 +136,11 @@ export default function WorkoutsScreen() {
       {
         exercise: "",
         sets: "",
-        reps: "",
+        reps: "1", // Default reps to 1
         weight: "",
         workTime: "",
         restTime: "",
+        setRest: "", // Add setRest field
       },
     ]);
     setEditIndex(null);
@@ -239,6 +254,17 @@ export default function WorkoutsScreen() {
                       onChangeText={(v) => handleChange(idx, "restTime", v)}
                     />
                   </View>
+                  <View style={[styles.inputGroup, styles.setRestGroup]}>
+                    <ThemedText style={styles.inputLabel}>Set Rest (s)</ThemedText>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="0"
+                      placeholderTextColor={colors.placeholder}
+                      keyboardType="numeric"
+                      value={row.setRest}
+                      onChangeText={(v) => handleChange(idx, "setRest", v)}
+                    />
+                  </View>
                 </View>
               ) : (
                 // Mobile layout: 3 columns, then 2 columns
@@ -300,6 +326,20 @@ export default function WorkoutsScreen() {
                         keyboardType="numeric"
                         value={row.restTime}
                         onChangeText={(v) => handleChange(idx, "restTime", v)}
+                      />
+                    </View>
+                  </View>
+
+                  <View style={styles.inputRow}>
+                    <View style={styles.inputGroup}>
+                      <ThemedText style={styles.inputLabel}>Set Rest (s)</ThemedText>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="0"
+                        placeholderTextColor={colors.placeholder}
+                        keyboardType="numeric"
+                        value={row.setRest}
+                        onChangeText={(v) => handleChange(idx, "setRest", v)}
                       />
                     </View>
                   </View>
@@ -412,6 +452,9 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => StyleShe
   restTimeGroup: {
     flex: 1.5, // Medium: Rest Time (seconds can be 2-3 digits)
   },
+  setRestGroup: {
+    flex: 1.5, // Medium: Set Rest Time (seconds can be 2-3 digits)
+  },
   inputLabel: {
     fontSize: 14,
     fontWeight: "500",
@@ -519,6 +562,9 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
       flex: 1,
     },
     restTimeGroup: {
+      flex: 1,
+    },
+    setRestGroup: {
       flex: 1,
     },
     inputLabel: {
