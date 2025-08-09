@@ -120,6 +120,9 @@ export const useTimer = ({
   const [phaseBeforePause, setPhaseBeforePause] = useState<Phase>("start");
   const [timeLeft, setTimeLeft] = useState(0);
   const [hasBeepedForCompletion, setHasBeepedForCompletion] = useState(false);
+  
+  // Track countdown beeps to ensure they only play once per second
+  const countdownBeepsRef = useRef<{ [key: number]: boolean }>({});
 
   // High-precision timing refs
   const animationFrameRef = useRef<number | null>(null);
@@ -175,6 +178,9 @@ export const useTimer = ({
       console.log(`Starting phase: ${phase}, duration: ${duration}s`);
 
       stopTimer();
+      
+      // Reset countdown beeps tracker for new phase
+      countdownBeepsRef.current = {};
 
       const now = Date.now();
       timerStateRef.current = {
@@ -372,19 +378,33 @@ export const useTimer = ({
       }
     }
 
-    // Countdown beeps for all phases (3, 2, 1)
+    // Countdown beeps for all phases (3, 2, 1) - only if phase duration > 9 seconds
     if (
       currentPhase === "work" ||
       currentPhase === "rest" ||
       currentPhase === "setRest" ||
       currentPhase === "getReady"
     ) {
-      if (timeLeft === 3) {
-        playAudio(lowBeep, "countdown 3");
-      } else if (timeLeft === 2) {
-        playAudio(lowBeep, "countdown 2");
-      } else if (timeLeft === 1) {
-        playAudio(lowBeep, "countdown 1");
+      // Determine the initial phase duration
+      let phaseDuration = 0;
+      if (currentPhase === "work") phaseDuration = workTime;
+      else if (currentPhase === "rest") phaseDuration = restTime;
+      else if (currentPhase === "setRest") phaseDuration = setRestTime;
+      else if (currentPhase === "getReady") phaseDuration = 10;
+      
+      // Only play countdown if phase is longer than 9 seconds
+      if (phaseDuration > 9) {
+        // Only play each countdown beep once
+        if (timeLeft === 3 && !countdownBeepsRef.current[3]) {
+          countdownBeepsRef.current[3] = true;
+          playAudio(lowBeep, "countdown 3");
+        } else if (timeLeft === 2 && !countdownBeepsRef.current[2]) {
+          countdownBeepsRef.current[2] = true;
+          playAudio(lowBeep, "countdown 2");
+        } else if (timeLeft === 1 && !countdownBeepsRef.current[1]) {
+          countdownBeepsRef.current[1] = true;
+          playAudio(lowBeep, "countdown 1");
+        }
       }
     }
 
