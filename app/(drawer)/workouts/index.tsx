@@ -36,6 +36,8 @@ export default function WorkoutsScreen() {
       workTime: "",
       restTime: "",
       setRest: "", // Add setRest field
+      warmup: false,
+      cooldown: false,
     },
   ]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -55,6 +57,8 @@ export default function WorkoutsScreen() {
         workTime: ex.workTime || "",
         restTime: ex.restTime || "",
         setRest: ex.setRest || "", // Add setRest field for existing workouts
+        warmup: ex.warmup || false,
+        cooldown: ex.cooldown || false,
       }));
       
       setWorkouts(exercisesWithDefaults);
@@ -70,6 +74,30 @@ export default function WorkoutsScreen() {
     });
   };
 
+  const handleWarmupCooldownChange = (index: number, field: 'warmup' | 'cooldown') => {
+    setWorkouts((prev) => {
+      const updated = [...prev];
+      const currentValue = updated[index][field];
+      
+      // Toggle the selected field and ensure the other is false
+      if (field === 'warmup') {
+        updated[index] = { 
+          ...updated[index], 
+          warmup: !currentValue,
+          cooldown: !currentValue ? false : updated[index].cooldown // If setting warmup to true, set cooldown to false
+        };
+      } else {
+        updated[index] = { 
+          ...updated[index], 
+          cooldown: !currentValue,
+          warmup: !currentValue ? false : updated[index].warmup // If setting cooldown to true, set warmup to false
+        };
+      }
+      
+      return updated;
+    });
+  };
+
   const addRow = () => {
     setWorkouts((prev) => [
       ...prev,
@@ -81,6 +109,8 @@ export default function WorkoutsScreen() {
         workTime: "",
         restTime: "",
         setRest: "", // Add setRest field
+        warmup: false,
+        cooldown: false,
       },
     ]);
   };
@@ -141,6 +171,8 @@ export default function WorkoutsScreen() {
         workTime: "",
         restTime: "",
         setRest: "", // Add setRest field
+        warmup: false,
+        cooldown: false,
       },
     ]);
     setEditIndex(null);
@@ -265,6 +297,40 @@ export default function WorkoutsScreen() {
                       onChangeText={(v) => handleChange(idx, "setRest", v)}
                     />
                   </View>
+                  <View style={[styles.inputGroup, styles.checkboxGroup]}>
+                    <TouchableOpacity
+                      style={styles.checkboxContainer}
+                      onPress={() => handleWarmupCooldownChange(idx, 'warmup')}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[
+                        styles.checkboxStyle,
+                        row.warmup && styles.checkboxChecked
+                      ]}>
+                        {row.warmup && (
+                          <ThemedText style={styles.checkmark}>✓</ThemedText>
+                        )}
+                      </View>
+                      <ThemedText style={styles.checkboxLabel}>Warmup</ThemedText>
+                    </TouchableOpacity>
+                  </View>
+                  <View style={[styles.inputGroup, styles.checkboxGroup]}>
+                    <TouchableOpacity
+                      style={styles.checkboxContainer}
+                      onPress={() => handleWarmupCooldownChange(idx, 'cooldown')}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[
+                        styles.checkboxStyle,
+                        row.cooldown && styles.checkboxChecked
+                      ]}>
+                        {row.cooldown && (
+                          <ThemedText style={styles.checkmark}>✓</ThemedText>
+                        )}
+                      </View>
+                      <ThemedText style={styles.checkboxLabel}>Cooldown</ThemedText>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               ) : (
                 // Mobile layout: 3 columns, then 2 columns
@@ -341,6 +407,43 @@ export default function WorkoutsScreen() {
                         value={row.setRest}
                         onChangeText={(v) => handleChange(idx, "setRest", v)}
                       />
+                    </View>
+                  </View>
+
+                  <View style={styles.inputRow}>
+                    <View style={styles.checkboxGroup}>
+                      <TouchableOpacity
+                        style={styles.checkboxContainer}
+                        onPress={() => handleWarmupCooldownChange(idx, 'warmup')}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[
+                          styles.checkboxStyle,
+                          row.warmup && styles.checkboxChecked
+                        ]}>
+                          {row.warmup && (
+                            <ThemedText style={styles.checkmark}>✓</ThemedText>
+                          )}
+                        </View>
+                        <ThemedText style={styles.checkboxLabel}>Warmup</ThemedText>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.checkboxGroup}>
+                      <TouchableOpacity
+                        style={styles.checkboxContainer}
+                        onPress={() => handleWarmupCooldownChange(idx, 'cooldown')}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[
+                          styles.checkboxStyle,
+                          row.cooldown && styles.checkboxChecked
+                        ]}>
+                          {row.cooldown && (
+                            <ThemedText style={styles.checkmark}>✓</ThemedText>
+                          )}
+                        </View>
+                        <ThemedText style={styles.checkboxLabel}>Cooldown</ThemedText>
+                      </TouchableOpacity>
                     </View>
                   </View>
                 </>
@@ -515,6 +618,43 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => StyleShe
     fontSize: 16,
     fontWeight: "600",
   },
+  checkboxGroup: {
+    flex: 1,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingBottom: 12, // Match input padding for alignment
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  checkboxStyle: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: colors.inputBorder,
+    backgroundColor: colors.inputBackground,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkboxChecked: {
+    borderColor: "gold",
+    backgroundColor: "gold",
+  },
+  checkmark: {
+    color: colors.textInverse,
+    fontSize: 12,
+    fontWeight: "bold",
+    textAlign: "center",
+    lineHeight: 12,
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.text,
+  },
 });
 
 const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
@@ -566,6 +706,22 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
     },
     setRestGroup: {
       flex: 1,
+    },
+    checkboxGroup: {
+      ...tablet.checkboxGroup,
+    },
+    checkboxContainer: {
+      ...tablet.checkboxContainer,
+      gap: 6,
+    },
+    checkboxStyle: {
+      ...tablet.checkboxStyle,
+      width: 18,
+      height: 18,
+    },
+    checkboxLabel: {
+      ...tablet.checkboxLabel,
+      fontSize: 13,
     },
     inputLabel: {
       ...tablet.inputLabel,

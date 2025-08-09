@@ -113,10 +113,107 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
     );
   };
 
+  // Filter exercises by type
+  const warmupExercises =
+    workout?.exercises?.filter((ex: any) => ex.warmup) || [];
+  const cooldownExercises =
+    workout?.exercises?.filter((ex: any) => ex.cooldown) || [];
+  const mainExercises =
+    workout?.exercises?.filter((ex: any) => !ex.warmup && !ex.cooldown) || [];
+
   const progress =
     workout && workout.exercises && workout.exercises.length > 0
       ? completed.length / workout.exercises.length
       : 0;
+
+  // Helper function to render exercise items
+  const renderExerciseItem = (ex: any, originalIndex: number) => (
+    <TouchableOpacity
+      key={originalIndex}
+      style={[
+        styles.exerciseItem,
+        completed.includes(originalIndex) && styles.exerciseItemCompleted,
+        activeExercise === originalIndex && styles.exerciseItemActive,
+      ]}
+      onPress={() => handleSetActive(originalIndex)}
+      activeOpacity={0.7}
+    >
+      <View style={styles.exerciseHeader}>
+        <ThemedText style={styles.exerciseName}>
+          {ex.exercise || `Exercise ${originalIndex + 1}`}
+        </ThemedText>
+        <View style={styles.exerciseHeaderActions}>
+          {hasTimerData(ex) && (
+            <TouchableOpacity
+              style={styles.timerButton}
+              onPress={(e) => {
+                e.stopPropagation(); // Prevent completion toggle
+                handleStartTimer(ex);
+              }}
+              activeOpacity={0.7}
+            >
+              <IconSymbol size={16} color="gold" name="clock.fill" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={[
+              styles.checkbox,
+              completed.includes(originalIndex) && styles.checkboxCompleted,
+            ]}
+            onPress={(e) => handleComplete(originalIndex, e)}
+            activeOpacity={0.7}
+          >
+            {completed.includes(originalIndex) && (
+              <IconSymbol
+                size={16}
+                color={colors.textInverse}
+                name="checkmark"
+              />
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.exerciseDetails}>
+        {ex.sets && ex.sets.toString().trim() && (
+          <View style={styles.detailItem}>
+            <ThemedText style={styles.detailLabel}>Sets</ThemedText>
+            <ThemedText style={styles.detailValue}>{ex.sets}</ThemedText>
+          </View>
+        )}
+        {ex.reps && ex.reps.toString().trim() && (
+          <View style={styles.detailItem}>
+            <ThemedText style={styles.detailLabel}>Reps</ThemedText>
+            <ThemedText style={styles.detailValue}>{ex.reps}</ThemedText>
+          </View>
+        )}
+        {ex.weight && ex.weight.toString().trim() && (
+          <View style={styles.detailItem}>
+            <ThemedText style={styles.detailLabel}>Weight</ThemedText>
+            <ThemedText style={styles.detailValue}>{ex.weight} lbs</ThemedText>
+          </View>
+        )}
+        {ex.workTime && ex.workTime.toString().trim() && (
+          <View style={styles.detailItem}>
+            <ThemedText style={styles.detailLabel}>Work</ThemedText>
+            <ThemedText style={styles.detailValue}>{ex.workTime}s</ThemedText>
+          </View>
+        )}
+        {ex.restTime && ex.restTime.toString().trim() && (
+          <View style={styles.detailItem}>
+            <ThemedText style={styles.detailLabel}>Rest</ThemedText>
+            <ThemedText style={styles.detailValue}>{ex.restTime}s</ThemedText>
+          </View>
+        )}
+        {ex.setRest && ex.setRest.toString().trim() && (
+          <View style={styles.detailItem}>
+            <ThemedText style={styles.detailLabel}>Set Rest</ThemedText>
+            <ThemedText style={styles.detailValue}>{ex.setRest}s</ThemedText>
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <Modal
@@ -186,15 +283,15 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
             >
-              {/* Exercises Card */}
-              <View style={styles.card}>
-                <View style={styles.cardHeader}>
-                  <IconSymbol size={20} color="gold" name="list.bullet" />
-                  <ThemedText style={styles.cardSubtitle}>Exercises</ThemedText>
-                </View>
+              {/* Warmup Card */}
+              {warmupExercises.length > 0 && (
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <IconSymbol size={20} color="orange" name="flame" />
+                    <ThemedText style={styles.cardSubtitle}>Warmup</ThemedText>
+                  </View>
 
-                {/* Column Headers */}
-                {workout?.exercises && workout.exercises.length > 0 && (
+                  {/* Column Headers for Warmup */}
                   <View style={styles.columnHeaders}>
                     <View style={styles.exerciseNameHeader}>
                       <ThemedText style={styles.activeColumnHeaderText}>
@@ -202,7 +299,87 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                       </ThemedText>
                     </View>
                     <View style={styles.columnActionsHeader}>
-                      {workout.exercises.some((ex: any) =>
+                      {warmupExercises.some((ex: any) => hasTimerData(ex)) && (
+                        <ThemedText style={styles.columnHeaderText}>
+                          Start{"\n"}Timer
+                        </ThemedText>
+                      )}
+                      <ThemedText style={styles.columnHeaderText}>
+                        Mark{"\n"}Complete
+                      </ThemedText>
+                    </View>
+                  </View>
+
+                  <View style={styles.exercisesList}>
+                    {warmupExercises.map((ex: any, i: number) => {
+                      const originalIndex = workout.exercises.findIndex(
+                        (originalEx: any) => originalEx === ex
+                      );
+                      return renderExerciseItem(ex, originalIndex);
+                    })}
+                  </View>
+                </View>
+              )}
+
+              {/* Main Exercises Card */}
+              {mainExercises.length > 0 && (
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <IconSymbol size={20} color="gold" name="list.bullet" />
+                    <ThemedText style={styles.cardSubtitle}>
+                      Exercises
+                    </ThemedText>
+                  </View>
+
+                  {/* Column Headers for Main Exercises */}
+                  <View style={styles.columnHeaders}>
+                    <View style={styles.exerciseNameHeader}>
+                      <ThemedText style={styles.activeColumnHeaderText}>
+                        Tap to set as active
+                      </ThemedText>
+                    </View>
+                    <View style={styles.columnActionsHeader}>
+                      {mainExercises.some((ex: any) => hasTimerData(ex)) && (
+                        <ThemedText style={styles.columnHeaderText}>
+                          Start{"\n"}Timer
+                        </ThemedText>
+                      )}
+                      <ThemedText style={styles.columnHeaderText}>
+                        Mark{"\n"}Complete
+                      </ThemedText>
+                    </View>
+                  </View>
+
+                  <View style={styles.exercisesList}>
+                    {mainExercises.map((ex: any, i: number) => {
+                      const originalIndex = workout.exercises.findIndex(
+                        (originalEx: any) => originalEx === ex
+                      );
+                      return renderExerciseItem(ex, originalIndex);
+                    })}
+                  </View>
+                </View>
+              )}
+
+              {/* Cooldown Card */}
+              {cooldownExercises.length > 0 && (
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <IconSymbol size={20} color="cyan" name="snowflake" />
+                    <ThemedText style={styles.cardSubtitle}>
+                      Cooldown
+                    </ThemedText>
+                  </View>
+
+                  {/* Column Headers for Cooldown */}
+                  <View style={styles.columnHeaders}>
+                    <View style={styles.exerciseNameHeader}>
+                      <ThemedText style={styles.activeColumnHeaderText}>
+                        Tap to set as active
+                      </ThemedText>
+                    </View>
+                    <View style={styles.columnActionsHeader}>
+                      {cooldownExercises.some((ex: any) =>
                         hasTimerData(ex)
                       ) && (
                         <ThemedText style={styles.columnHeaderText}>
@@ -214,133 +391,36 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                       </ThemedText>
                     </View>
                   </View>
-                )}
 
-                <View style={styles.exercisesList}>
-                  {workout?.exercises && workout.exercises.length > 0 ? (
-                    workout.exercises.map((ex: any, i: number) => (
-                      <TouchableOpacity
-                        key={i}
-                        style={[
-                          styles.exerciseItem,
-                          completed.includes(i) && styles.exerciseItemCompleted,
-                          activeExercise === i && styles.exerciseItemActive,
-                        ]}
-                        onPress={() => handleSetActive(i)}
-                        activeOpacity={0.7}
-                      >
-                        <View style={styles.exerciseHeader}>
-                          <ThemedText style={styles.exerciseName}>
-                            {ex.exercise || `Exercise ${i + 1}`}
-                          </ThemedText>
-                          <View style={styles.exerciseHeaderActions}>
-                            {hasTimerData(ex) && (
-                              <TouchableOpacity
-                                style={styles.timerButton}
-                                onPress={(e) => {
-                                  e.stopPropagation(); // Prevent completion toggle
-                                  handleStartTimer(ex);
-                                }}
-                                activeOpacity={0.7}
-                              >
-                                <IconSymbol
-                                  size={16}
-                                  color="gold"
-                                  name="clock.fill"
-                                />
-                              </TouchableOpacity>
-                            )}
-                            <TouchableOpacity
-                              style={[
-                                styles.checkbox,
-                                completed.includes(i) &&
-                                  styles.checkboxCompleted,
-                              ]}
-                              onPress={(e) => handleComplete(i, e)}
-                              activeOpacity={0.7}
-                            >
-                              {completed.includes(i) && (
-                                <IconSymbol
-                                  size={16}
-                                  color={colors.textInverse}
-                                  name="checkmark"
-                                />
-                              )}
-                            </TouchableOpacity>
-                          </View>
-                        </View>
-
-                        <View style={styles.exerciseDetails}>
-                          {ex.sets && ex.sets.toString().trim() && (
-                            <View style={styles.detailItem}>
-                              <ThemedText style={styles.detailLabel}>
-                                Sets
-                              </ThemedText>
-                              <ThemedText style={styles.detailValue}>
-                                {ex.sets}
-                              </ThemedText>
-                            </View>
-                          )}
-                          {ex.reps && ex.reps.toString().trim() && (
-                            <View style={styles.detailItem}>
-                              <ThemedText style={styles.detailLabel}>
-                                Reps
-                              </ThemedText>
-                              <ThemedText style={styles.detailValue}>
-                                {ex.reps}
-                              </ThemedText>
-                            </View>
-                          )}
-                          {ex.weight && ex.weight.toString().trim() && (
-                            <View style={styles.detailItem}>
-                              <ThemedText style={styles.detailLabel}>
-                                Weight
-                              </ThemedText>
-                              <ThemedText style={styles.detailValue}>
-                                {ex.weight} lbs
-                              </ThemedText>
-                            </View>
-                          )}
-                          {ex.workTime && ex.workTime.toString().trim() && (
-                            <View style={styles.detailItem}>
-                              <ThemedText style={styles.detailLabel}>
-                                Work
-                              </ThemedText>
-                              <ThemedText style={styles.detailValue}>
-                                {ex.workTime}s
-                              </ThemedText>
-                            </View>
-                          )}
-                          {ex.restTime && ex.restTime.toString().trim() && (
-                            <View style={styles.detailItem}>
-                              <ThemedText style={styles.detailLabel}>
-                                Rest
-                              </ThemedText>
-                              <ThemedText style={styles.detailValue}>
-                                {ex.restTime}s
-                              </ThemedText>
-                            </View>
-                          )}
-                          {ex.setRest && ex.setRest.toString().trim() && (
-                            <View style={styles.detailItem}>
-                              <ThemedText style={styles.detailLabel}>
-                                Set Rest
-                              </ThemedText>
-                              <ThemedText style={styles.detailValue}>
-                                {ex.setRest}s
-                              </ThemedText>
-                            </View>
-                          )}
-                        </View>
-                      </TouchableOpacity>
-                    ))
-                  ) : (
-                    <ThemedText style={styles.emptyText}>
-                      No exercises found
-                    </ThemedText>
-                  )}
+                  <View style={styles.exercisesList}>
+                    {cooldownExercises.map((ex: any, i: number) => {
+                      const originalIndex = workout.exercises.findIndex(
+                        (originalEx: any) => originalEx === ex
+                      );
+                      return renderExerciseItem(ex, originalIndex);
+                    })}
+                  </View>
                 </View>
-              </View>
+              )}
+
+              {/* Fallback for workouts with no exercises */}
+              {warmupExercises.length === 0 &&
+                mainExercises.length === 0 &&
+                cooldownExercises.length === 0 && (
+                  <View style={styles.card}>
+                    <View style={styles.cardHeader}>
+                      <IconSymbol size={20} color="gold" name="list.bullet" />
+                      <ThemedText style={styles.cardSubtitle}>
+                        Exercises
+                      </ThemedText>
+                    </View>
+                    <View style={styles.exercisesList}>
+                      <ThemedText style={styles.emptyText}>
+                        No exercises found
+                      </ThemedText>
+                    </View>
+                  </View>
+                )}
             </ScrollView>
           )}
         </View>
@@ -475,7 +555,7 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     columnActionsHeader: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 24, // Same gap as exerciseHeaderActions
+      gap: 26, // Same gap as exerciseHeaderActions
     },
     columnHeaderText: {
       fontSize: 11,
