@@ -112,6 +112,19 @@ export default function SavedWorkoutsScreen() {
     setViewModalVisible(true);
   };
 
+  const handleWorkoutUpdate = (updatedWorkout: any) => {
+    // Update the workout in the local state
+    setSavedWorkouts(prev => 
+      prev.map(workout => 
+        workout.name === updatedWorkout.name && workout.savedAt === updatedWorkout.savedAt 
+          ? updatedWorkout 
+          : workout
+      )
+    );
+    // Update the viewWorkout state as well
+    setViewWorkout(updatedWorkout);
+  };
+
   return (
     <ThemedView style={styles.container}>
       <ScrollView
@@ -237,6 +250,7 @@ export default function SavedWorkoutsScreen() {
         visible={viewModalVisible}
         workout={viewWorkout}
         onClose={() => setViewModalVisible(false)}
+        onWorkoutUpdate={handleWorkoutUpdate}
       />
     </ThemedView>
   );
