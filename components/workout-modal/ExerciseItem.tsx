@@ -34,7 +34,7 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
       style={[
         styles.exerciseItem,
         isCompleted && styles.exerciseItemCompleted,
-        isActive && styles.exerciseItemActive,
+        isActive && !isCompleted && styles.exerciseItemActive,
       ]}
       onPress={() => onSetActive(originalIndex)}
       activeOpacity={0.7}
@@ -155,7 +155,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 8,
+      marginBottom: 12,
     },
     exerciseHeaderActions: {
       flexDirection: "row",

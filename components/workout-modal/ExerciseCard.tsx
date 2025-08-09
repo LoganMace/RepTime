@@ -53,7 +53,6 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </ThemedText>
         </View>
         <View style={styles.columnActionsHeader}>
-          <ThemedText style={styles.activeColumnHeaderText}>Edit</ThemedText>
           {exercises.some((ex: any) => hasTimerData(ex)) && (
             <ThemedText style={styles.activeColumnHeaderText}>Timer</ThemedText>
           )}
@@ -123,7 +122,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     columnActionsHeader: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 16,
+      gap: 12,
     },
     activeColumnHeaderText: {
       fontSize: 10,
