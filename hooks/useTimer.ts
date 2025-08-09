@@ -316,30 +316,59 @@ export const useTimer = ({
     }
   }, [timeLeft, currentPhase, handlePhaseEnd]);
 
+  // Safe speech function with error handling
+  const speakSafely = useCallback(async (text: string) => {
+    try {
+      // Stop any ongoing speech to prevent queue buildup
+      await Speech.stop();
+      
+      // Small delay to ensure speech engine is ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Speak with error handling
+      await Speech.speak(text, {
+        language: 'en-US',
+        pitch: 1.0,
+        rate: 1.0,
+        // Add these options to improve reliability
+        onDone: () => console.log(`Speech completed: ${text}`),
+        onError: (error) => {
+          console.error(`Speech error for "${text}":`, error);
+          // Fallback to just audio beeps if speech fails
+          playAudio(highBeep, "speech fallback beep");
+        },
+      });
+    } catch (error) {
+      console.error(`Failed to speak "${text}":`, error);
+      // Fallback to audio beep
+      playAudio(highBeep, "speech error fallback");
+    }
+  }, [highBeep, playAudio]);
+
   // Speech and sound effects
   useEffect(() => {
     if (quickTimer) return;
 
     if (currentPhase === "getReady" && timeLeft === 10) {
-      Speech.speak("Get ready!");
+      speakSafely("Get ready!");
     } else if (currentPhase === "work" && timeLeft === workTime) {
-      Speech.speak(`Round ${currentRound}`);
+      speakSafely(`Round ${currentRound}`);
     } else if (currentPhase === "rest" && timeLeft === restTime) {
-      Speech.speak("Rest");
+      speakSafely("Rest");
     } else if (currentPhase === "setRest" && timeLeft === setRestTime) {
-      Speech.speak(`Set ${currentSet} complete. Rest.`);
+      speakSafely(`Set ${currentSet} complete. Rest.`);
     } else if (currentPhase === "done") {
-      Speech.speak("Workout complete!");
+      speakSafely("Workout complete!");
     }
 
     // Work phase announcements
     if (currentPhase === "work") {
       if (timeLeft === 10 && workTime > 10) {
-        Speech.speak("Ten seconds");
+        speakSafely("Ten seconds");
       } else if (timeLeft === Math.floor(workTime / 2) && workTime > 20) {
-        Speech.speak("Half way there");
+        speakSafely("Half way there");
       } else if (workTime > 60 && timeLeft > 0 && timeLeft % 60 === 0) {
-        Speech.speak(`${timeLeft / 60} minute${timeLeft / 60 > 1 ? "s" : ""}`);
+        speakSafely(`${timeLeft / 60} minute${timeLeft / 60 > 1 ? "s" : ""}`);
       }
     }
 
@@ -390,6 +419,7 @@ export const useTimer = ({
     lowBeep,
     quickTimer,
     playAudio,
+    speakSafely,
   ]);
 
   // Main timer start function
@@ -414,6 +444,9 @@ export const useTimer = ({
 
     console.log("Pausing timer");
     stopTimer();
+    
+    // Stop any ongoing speech
+    Speech.stop();
 
     const now = Date.now();
     state.pausedTime = now;
@@ -490,6 +523,7 @@ export const useTimer = ({
   useEffect(() => {
     return () => {
       stopTimer();
+      Speech.stop(); // Stop any ongoing speech
     };
   }, [stopTimer]);
 
