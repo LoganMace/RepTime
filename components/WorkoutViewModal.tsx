@@ -26,6 +26,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const [completed, setCompleted] = useState<number[]>([]);
+  const [activeExercise, setActiveExercise] = useState<number | null>(null);
   const { getStyles } = useResponsiveStyles();
 
   // Timer state management
@@ -47,6 +48,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
   useEffect(() => {
     if (!visible) {
       setCompleted([]);
+      setActiveExercise(null);
       // Reset timer state when modal closes
       setClockVisible(false);
       setActiveTimerData(null);
@@ -100,7 +102,12 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
     return workTime > 0 || restTime > 0;
   };
 
-  const handleComplete = (idx: number) => {
+  const handleSetActive = (idx: number) => {
+    setActiveExercise(activeExercise === idx ? null : idx);
+  };
+
+  const handleComplete = (idx: number, event: any) => {
+    event.stopPropagation(); // Prevent triggering active state
     setCompleted((prev) =>
       prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
     );
@@ -189,7 +196,11 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                 {/* Column Headers */}
                 {workout?.exercises && workout.exercises.length > 0 && (
                   <View style={styles.columnHeaders}>
-                    <View style={styles.exerciseNameHeader} />
+                    <View style={styles.exerciseNameHeader}>
+                      <ThemedText style={styles.activeColumnHeaderText}>
+                        Tap to set as active
+                      </ThemedText>
+                    </View>
                     <View style={styles.columnActionsHeader}>
                       {workout.exercises.some((ex: any) =>
                         hasTimerData(ex)
@@ -213,8 +224,9 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                         style={[
                           styles.exerciseItem,
                           completed.includes(i) && styles.exerciseItemCompleted,
+                          activeExercise === i && styles.exerciseItemActive,
                         ]}
-                        onPress={() => handleComplete(i)}
+                        onPress={() => handleSetActive(i)}
                         activeOpacity={0.7}
                       >
                         <View style={styles.exerciseHeader}>
@@ -238,12 +250,14 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                                 />
                               </TouchableOpacity>
                             )}
-                            <View
+                            <TouchableOpacity
                               style={[
                                 styles.checkbox,
                                 completed.includes(i) &&
                                   styles.checkboxCompleted,
                               ]}
+                              onPress={(e) => handleComplete(i, e)}
+                              activeOpacity={0.7}
                             >
                               {completed.includes(i) && (
                                 <IconSymbol
@@ -252,7 +266,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                                   name="checkmark"
                                 />
                               )}
-                            </View>
+                            </TouchableOpacity>
                           </View>
                         </View>
 
@@ -456,6 +470,7 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     },
     exerciseNameHeader: {
       flex: 1,
+      minWidth: 100, // Ensure enough space for "Tap to set as active" text
     },
     columnActionsHeader: {
       flexDirection: "row",
@@ -469,6 +484,14 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       textAlign: "center",
       width: 54, // Narrow width to force line breaks
       lineHeight: 14,
+    },
+    activeColumnHeaderText: {
+      fontSize: 10,
+      fontWeight: "600",
+      color: colors.textSecondary,
+      textAlign: "left",
+      lineHeight: 13,
+      paddingRight: 8,
     },
     exercisesList: {
       gap: 12,
@@ -484,6 +507,11 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
       backgroundColor: colors.primary + "20",
       borderWidth: 1,
       borderColor: "gold",
+    },
+    exerciseItemActive: {
+      // backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.success,
     },
     exerciseHeader: {
       flexDirection: "row",
@@ -598,6 +626,9 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
       ...mobile.exerciseItem,
       padding: 16,
     },
+    exerciseItemActive: {
+      ...mobile.exerciseItemActive,
+    },
     exerciseHeaderActions: {
       ...mobile.exerciseHeaderActions,
       gap: 52, // Larger gap for tablet
@@ -608,6 +639,7 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
     },
     exerciseNameHeader: {
       ...mobile.exerciseNameHeader,
+      minWidth: 120, // Slightly more space for tablet
     },
     columnActionsHeader: {
       ...mobile.columnActionsHeader,
@@ -618,6 +650,11 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
       fontSize: 12,
       width: 60, // Slightly wider for tablet but still narrow
       lineHeight: 16,
+    },
+    activeColumnHeaderText: {
+      ...mobile.activeColumnHeaderText,
+      fontSize: 12,
+      lineHeight: 15,
     },
     timerButton: {
       ...mobile.timerButton,
