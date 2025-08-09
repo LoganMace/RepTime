@@ -1,7 +1,8 @@
-import React from "react";
-import { View } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useTheme } from "@/hooks/useTheme";
+import React, { useMemo } from "react";
+import { StyleSheet, View } from "react-native";
 import { ExerciseItem } from "./ExerciseItem";
 
 interface ExerciseCardProps {
@@ -12,8 +13,6 @@ interface ExerciseCardProps {
   allExercises: any[];
   completed: number[];
   activeExercise: number | null;
-  styles: any;
-  colors: any;
   hasTimerData: (exercise: any) => boolean;
   onSetActive: (index: number) => void;
   onComplete: (index: number, event: any) => void;
@@ -29,14 +28,14 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   allExercises,
   completed,
   activeExercise,
-  styles,
-  colors,
   hasTimerData,
   onSetActive,
   onComplete,
   onEdit,
   onStartTimer,
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   if (exercises.length === 0) return null;
 
   return (
@@ -54,31 +53,13 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </ThemedText>
         </View>
         <View style={styles.columnActionsHeader}>
-          <IconSymbol 
-            size={14} 
-            color={colors.textSecondary} 
-            name="pencil" 
-            style={{width: 36, opacity: 0.5}} 
-          />
+          <ThemedText style={styles.activeColumnHeaderText}>Edit</ThemedText>
           {exercises.some((ex: any) => hasTimerData(ex)) && (
-            <IconSymbol 
-              size={14} 
-              color={colors.textSecondary} 
-              name="play.fill" 
-              style={{width: 36, opacity: 0.5}} 
-            />
+            <ThemedText style={styles.activeColumnHeaderText}>Timer</ThemedText>
           )}
-          <View 
-            style={{
-              width: 28, 
-              height: 14, 
-              borderRadius: 4, 
-              borderWidth: 1.5, 
-              borderColor: colors.inputBorder, 
-              backgroundColor: colors.inputBackground, 
-              opacity: 0.6
-            }} 
-          />
+          <ThemedText style={styles.activeColumnHeaderText}>
+            Complete
+          </ThemedText>
         </View>
       </View>
 
@@ -95,8 +76,6 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
               isCompleted={completed.includes(originalIndex)}
               isActive={activeExercise === originalIndex}
               hasTimerData={hasTimerData(ex)}
-              styles={styles}
-              colors={colors}
               onSetActive={onSetActive}
               onComplete={onComplete}
               onEdit={onEdit}
@@ -108,3 +87,52 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     </View>
   );
 };
+
+const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 16,
+    },
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 12,
+    },
+    cardSubtitle: {
+      fontSize: 16,
+      fontWeight: "600",
+      flex: 1,
+    },
+    columnHeaders: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingVertical: 8,
+      marginBottom: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    exerciseNameHeader: {
+      flex: 1,
+      minWidth: 100,
+    },
+    columnActionsHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 16,
+    },
+    activeColumnHeaderText: {
+      fontSize: 10,
+      fontWeight: "600",
+      color: colors.textSecondary,
+      textAlign: "left",
+      lineHeight: 13,
+    },
+    exercisesList: {
+      gap: 12,
+    },
+  });

@@ -6,6 +6,7 @@ import {
   Alert,
   Modal,
   ScrollView,
+  StyleSheet,
   View,
 } from "react-native";
 
@@ -17,7 +18,6 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { WorkoutHeader } from "./workout-modal/WorkoutHeader";
 import { ExerciseCard } from "./workout-modal/ExerciseCard";
 import { EditExerciseModal } from "./workout-modal/EditExerciseModal";
-import { createMobileStyles, createTabletStyles } from "./workout-modal/styles";
 
 interface WorkoutViewModalProps {
   visible: boolean;
@@ -55,7 +55,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
   const [editingExercise, setEditingExercise] = useState<any>(null);
 
   const styles = useMemo(() => {
-    return getStyles(createMobileStyles(colors), createTabletStyles(colors));
+    return getStyles(mobileStyles(colors), tabletStyles(colors));
   }, [getStyles, colors]);
 
   useEffect(() => {
@@ -207,8 +207,6 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
             workout={workout}
             progress={progress}
             completedCount={completed.length}
-            styles={styles}
-            colors={colors}
             onClose={onClose}
           />
 
@@ -227,8 +225,6 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                 allExercises={workout.exercises}
                 completed={completed}
                 activeExercise={activeExercise}
-                styles={styles}
-                colors={colors}
                 hasTimerData={hasTimerData}
                 onSetActive={handleSetActive}
                 onComplete={handleComplete}
@@ -245,8 +241,6 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                 allExercises={workout.exercises}
                 completed={completed}
                 activeExercise={activeExercise}
-                styles={styles}
-                colors={colors}
                 hasTimerData={hasTimerData}
                 onSetActive={handleSetActive}
                 onComplete={handleComplete}
@@ -263,8 +257,6 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                 allExercises={workout.exercises}
                 completed={completed}
                 activeExercise={activeExercise}
-                styles={styles}
-                colors={colors}
                 hasTimerData={hasTimerData}
                 onSetActive={handleSetActive}
                 onComplete={handleComplete}
@@ -317,14 +309,78 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
       <EditExerciseModal
         visible={editModalVisible}
         editingExercise={editingExercise}
-        styles={styles}
-        colors={colors}
         onClose={handleCancelEdit}
         onSave={handleSaveExercise}
         onExerciseChange={setEditingExercise}
       />
     </Modal>
   );
+};
+
+const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    modalContent: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      padding: 16,
+      paddingTop: 16,
+    },
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 16,
+    },
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 12,
+    },
+    cardSubtitle: {
+      fontSize: 16,
+      fontWeight: "600",
+      flex: 1,
+    },
+    exercisesList: {
+      gap: 12,
+    },
+    emptyText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      textAlign: "center",
+      marginTop: 8,
+    },
+  });
+
+const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
+  const mobile = mobileStyles(colors);
+  return StyleSheet.create({
+    ...mobile,
+    scrollContent: {
+      ...mobile.scrollContent,
+      padding: 20,
+      paddingTop: 20,
+    },
+    card: {
+      ...mobile.card,
+      padding: 20,
+      marginBottom: 20,
+    },
+    cardSubtitle: {
+      ...mobile.cardSubtitle,
+      fontSize: 18,
+    },
+  });
 };
 
 export default WorkoutViewModal;

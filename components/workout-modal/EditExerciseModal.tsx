@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Modal,
   ScrollView,
+  StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
@@ -13,8 +14,6 @@ import { useTheme } from "@/hooks/useTheme";
 interface EditExerciseModalProps {
   visible: boolean;
   editingExercise: any;
-  styles: any;
-  colors: any;
   onClose: () => void;
   onSave: () => void;
   onExerciseChange: (exercise: any) => void;
@@ -23,12 +22,13 @@ interface EditExerciseModalProps {
 export const EditExerciseModal: React.FC<EditExerciseModalProps> = ({
   visible,
   editingExercise,
-  styles,
-  colors,
   onClose,
   onSave,
   onExerciseChange,
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  
   if (!editingExercise) return null;
 
   return (
@@ -279,3 +279,151 @@ export const EditExerciseModal: React.FC<EditExerciseModalProps> = ({
     </Modal>
   );
 };
+
+const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    editModalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 20,
+    },
+    editModalContent: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: 0,
+      width: "100%",
+      maxWidth: 420,
+      maxHeight: "85%",
+      overflow: "hidden",
+    },
+    editModalHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    editModalTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: colors.text,
+    },
+    editModalClose: {
+      padding: 4,
+      borderRadius: 8,
+      backgroundColor: colors.inputBackground,
+    },
+    editModalForm: {
+      paddingHorizontal: 20,
+      paddingVertical: 20,
+    },
+    editInputGroup: {
+      marginBottom: 0,
+      flex: 1,
+    },
+    editInputGroupThird: {
+      flex: 1,
+    },
+    editInputLabel: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: colors.textSecondary,
+      marginBottom: 4,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    editInput: {
+      backgroundColor: colors.inputBackground,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      fontSize: 14,
+      color: colors.inputText,
+    },
+    editInputRow: {
+      flexDirection: "row",
+      gap: 10,
+      marginBottom: 20,
+    },
+    editCheckboxRow: {
+      flexDirection: "row",
+      gap: 24,
+      marginTop: 4,
+      justifyContent: "center",
+      paddingVertical: 16,
+      backgroundColor: colors.inputBackground,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+    },
+    editCheckboxContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+    editCheckbox: {
+      width: 20,
+      height: 20,
+      borderRadius: 4,
+      borderWidth: 2,
+      borderColor: colors.inputBorder,
+      backgroundColor: colors.inputBackground,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    editCheckboxChecked: {
+      borderColor: "gold",
+      backgroundColor: "gold",
+    },
+    editCheckboxLabel: {
+      fontSize: 14,
+      fontWeight: "500",
+      color: colors.text,
+    },
+    editModalButtons: {
+      flexDirection: "row",
+      gap: 10,
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      backgroundColor: colors.card,
+    },
+    editModalCancelButton: {
+      flex: 1,
+      backgroundColor: colors.inputBackground,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingVertical: 14,
+      alignItems: "center",
+    },
+    editModalCancelText: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: colors.textSecondary,
+    },
+    editModalSaveButton: {
+      flex: 1,
+      backgroundColor: "gold",
+      borderRadius: 10,
+      paddingVertical: 14,
+      alignItems: "center",
+      shadowColor: "gold",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    editModalSaveText: {
+      fontSize: 15,
+      fontWeight: "700",
+      color: colors.textInverse,
+    },
+  });

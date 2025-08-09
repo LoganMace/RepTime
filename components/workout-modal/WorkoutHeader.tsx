@@ -1,14 +1,13 @@
-import React from "react";
-import { TouchableOpacity, View } from "react-native";
+import React, { useMemo } from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { useTheme } from "@/hooks/useTheme";
 
 interface WorkoutHeaderProps {
   workout: any;
   progress: number;
   completedCount: number;
-  styles: any;
-  colors: any;
   onClose: () => void;
 }
 
@@ -16,10 +15,10 @@ export const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
   workout,
   progress,
   completedCount,
-  styles,
-  colors,
   onClose,
 }) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.headerCard}>
       <View style={styles.cardHeader}>
@@ -74,3 +73,71 @@ export const WorkoutHeader: React.FC<WorkoutHeaderProps> = ({
     </View>
   );
 };
+
+const createStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+  StyleSheet.create({
+    headerCard: {
+      backgroundColor: colors.card,
+      padding: 16,
+      paddingTop: 60, // Add extra padding for status bar
+    },
+    cardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 12,
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      flex: 1,
+    },
+    closeButton: {
+      padding: 8,
+      borderRadius: 8,
+      backgroundColor: colors.inputBackground,
+    },
+    workoutSummary: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingTop: 8,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    exerciseCount: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.primary,
+    },
+    savedDate: {
+      fontSize: 12,
+      color: colors.textSecondary,
+    },
+    progressSection: {
+      paddingTop: 16,
+      marginTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    progressContainer: {
+      gap: 8,
+    },
+    progressBar: {
+      height: 8,
+      backgroundColor: colors.inputBackground,
+      borderRadius: 4,
+      overflow: "hidden",
+    },
+    progressFill: {
+      height: "100%",
+      backgroundColor: "gold",
+      borderRadius: 4,
+    },
+    progressText: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.text,
+      textAlign: "center",
+    },
+  });
