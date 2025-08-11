@@ -57,6 +57,12 @@ function DrawerNavigator() {
           title: "Trackers",
         }}
       />
+      <Drawer.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+        }}
+      />
     </Drawer>
   );
 }

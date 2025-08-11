@@ -29,6 +29,7 @@ export function CustomHeader() {
     if (pathname === "/trackers") return "Trackers";
     if (pathname === "/trackers/weight") return "Weight Tracker";
     if (pathname === "/trackers/meals") return "Meal Tracker";
+    if (pathname === "/profile") return "Profile";
     return "TrainSync";
   };
 
