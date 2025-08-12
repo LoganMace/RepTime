@@ -362,6 +362,28 @@ export function CustomDrawerContent(props: any) {
             />
           </View>
         )}
+
+        {/* Section Separator */}
+        <View style={[styles.sectionSeparator, { backgroundColor: colors.border }]} />
+
+        <DrawerItem
+          style={getItemStyle("/profile")}
+          label={() => <Text style={getLabelStyle("/profile")}>Profile</Text>}
+          icon={() => (
+            <IconSymbol
+              name="person.circle"
+              size={iconSize}
+              color={pathname === "/profile" ? colors.primary : colors.text}
+            />
+          )}
+          onPress={() => {
+            router.push("/profile");
+            setTimersOpen(false);
+            setWorkoutsOpen(false);
+            setTrackersOpen(false);
+            props.navigation.closeDrawer();
+          }}
+        />
       </DrawerContentScrollView>
     </View>
   );

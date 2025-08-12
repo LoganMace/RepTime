@@ -15,6 +15,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
+import { loadProfileData } from "@/utils/profileStorage";
 
 export default function WorkoutsScreen() {
   const { getStyles, isTablet } = useResponsiveStyles();
@@ -41,6 +42,20 @@ export default function WorkoutsScreen() {
     },
   ]);
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [workoutUnits, setWorkoutUnits] = useState<"metric" | "imperial">("imperial");
+
+  // Load workout units preference
+  useEffect(() => {
+    const loadWorkoutUnits = async () => {
+      try {
+        const profileData = await loadProfileData();
+        setWorkoutUnits(profileData.preferences.workoutUnits);
+      } catch (error) {
+        console.error("Error loading workout units:", error);
+      }
+    };
+    loadWorkoutUnits();
+  }, []);
 
   useEffect(() => {
     if (params.workout && typeof params.editIndex === "string") {
@@ -254,7 +269,9 @@ export default function WorkoutsScreen() {
                     />
                   </View>
                   <View style={[styles.inputGroup, styles.weightGroup]}>
-                    <ThemedText style={styles.inputLabel}>Weight (lbs)</ThemedText>
+                    <ThemedText style={styles.inputLabel}>
+                      Weight ({workoutUnits === "imperial" ? "lbs" : "kg"})
+                    </ThemedText>
                     <TextInput
                       style={styles.input}
                       placeholder="0"
@@ -359,7 +376,9 @@ export default function WorkoutsScreen() {
                       />
                     </View>
                     <View style={styles.inputGroup}>
-                      <ThemedText style={styles.inputLabel}>Weight (lbs)</ThemedText>
+                      <ThemedText style={styles.inputLabel}>
+                      Weight ({workoutUnits === "imperial" ? "lbs" : "kg"})
+                    </ThemedText>
                       <TextInput
                         style={styles.input}
                         placeholder="0"

@@ -12,6 +12,7 @@ import Svg, {
 import { useResponsiveStyles } from "../../hooks/useResponsiveStyles";
 import { useTheme } from "../../hooks/useTheme";
 import { ThemedText } from "../ThemedText";
+import { formatWeight } from "../../utils/profileStorage";
 
 interface WeightEntry {
   id: string;
@@ -23,6 +24,7 @@ interface WeightEntry {
 interface WeightTrendChartProps {
   data: WeightEntry[];
   goalWeight?: number;
+  units: "metric" | "imperial";
   width?: number;
   height?: number;
   showSmoothing?: boolean;
@@ -31,13 +33,14 @@ interface WeightTrendChartProps {
 export function WeightTrendChart({
   data,
   goalWeight,
+  units,
   width = Dimensions.get("window").width - 80,
   height = 240, // Increased to accommodate date labels
   showSmoothing = true,
 }: WeightTrendChartProps) {
   const { colors } = useTheme();
   const { getStyles, isMobile } = useResponsiveStyles();
-  const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
+  const styles = getStyles(mobileStyles(), tabletStyles());
 
   if (data.length === 0) {
     return (
@@ -52,27 +55,42 @@ export function WeightTrendChart({
   // Sort data by timestamp (oldest first for chart)
   const sortedData = [...data].sort((a, b) => a.timestamp - b.timestamp);
 
-  // Calculate chart dimensions
-  const padding = 40;
+  // Calculate chart dimensions - responsive padding for mobile vs tablet
+  const leftPadding = isMobile ? 60 : 80; // More space for weight labels with units
+  const rightPadding = isMobile ? 80 : 100; // More space for goal weight labels
+  const topPadding = 40;
   const bottomPadding = 60; // Extra space for date labels
-  const chartWidth = width - padding * 2;
-  const chartHeight = height - padding - bottomPadding;
+  const chartWidth = width - leftPadding - rightPadding;
+  const chartHeight = height - topPadding - bottomPadding;
 
-  // Calculate weight range
-  const weights = sortedData.map((entry) => entry.weight);
+  // Calculate weight range with bounds checking
+  const weights = sortedData.map((entry) => entry.weight).filter(weight => 
+    !isNaN(weight) && isFinite(weight) && weight > 0 && weight < 1000 // Sanity check for weights
+  );
+  
+  if (weights.length === 0) {
+    return (
+      <View style={[styles.container, { width, height }]}>
+        <ThemedText style={styles.noDataText}>
+          Invalid weight data
+        </ThemedText>
+      </View>
+    );
+  }
+  
   const minWeight = Math.min(...weights);
   const maxWeight = Math.max(...weights);
   const weightRange = maxWeight - minWeight;
-  const yPadding = weightRange * 0.1; // 10% padding
-  const yMin = minWeight - yPadding;
+  const yPadding = Math.max(0.5, weightRange * 0.1); // At least 0.5kg padding, 10% of range
+  const yMin = Math.max(0, minWeight - yPadding); // Don't go below 0
   const yMax = maxWeight + yPadding;
   const yRange = yMax - yMin;
 
   // Helper function to convert data to chart coordinates
   const getX = (index: number) =>
-    padding + (index / (sortedData.length - 1)) * chartWidth;
+    leftPadding + (index / (sortedData.length - 1)) * chartWidth;
   const getY = (weight: number) =>
-    padding + ((yMax - weight) / yRange) * chartHeight;
+    topPadding + ((yMax - weight) / yRange) * chartHeight;
 
   // Calculate moving average for smoothing
   const calculateMovingAverage = (
@@ -122,13 +140,15 @@ export function WeightTrendChart({
   // Calculate goal line Y position if goal weight is provided
   const goalY = goalWeight ? getY(goalWeight) : null;
 
-  // Generate Y-axis labels
+  // Generate Y-axis labels with proper rounding
   const yAxisLabels = [];
   const labelCount = 5;
   for (let i = 0; i < labelCount; i++) {
     const weight = yMin + (yRange * i) / (labelCount - 1);
-    const y = getY(weight);
-    yAxisLabels.push({ weight: weight.toFixed(1), y });
+    // Round to 1 decimal place to avoid floating point display issues
+    const roundedWeight = Math.round(weight * 10) / 10;
+    const y = getY(roundedWeight);
+    yAxisLabels.push({ weight: formatWeight(roundedWeight, units), y });
   }
 
   // Generate X-axis date labels
@@ -164,7 +184,7 @@ export function WeightTrendChart({
       // Show every nth entry based on step calculation
       return index % labelStep === 0;
     })
-    .map((entry, _, filteredArray) => {
+    .map((entry) => {
       const originalIndex = sortedData.findIndex(
         (item) => item.id === entry.id
       );
@@ -195,9 +215,9 @@ export function WeightTrendChart({
         {yAxisLabels.map((label, index) => (
           <Line
             key={index}
-            x1={padding}
+            x1={leftPadding}
             y1={label.y}
-            x2={width - padding}
+            x2={width - rightPadding}
             y2={label.y}
             stroke={colors.border}
             strokeWidth="0.5"
@@ -207,10 +227,10 @@ export function WeightTrendChart({
 
         {/* X-axis line */}
         <Line
-          x1={padding}
-          y1={padding + chartHeight}
-          x2={width - padding}
-          y2={padding + chartHeight}
+          x1={leftPadding}
+          y1={topPadding + chartHeight}
+          x2={width - rightPadding}
+          y2={topPadding + chartHeight}
           stroke={colors.border}
           strokeWidth="1"
         />
@@ -218,9 +238,9 @@ export function WeightTrendChart({
         {/* Goal weight line */}
         {goalY && (
           <Line
-            x1={padding}
+            x1={leftPadding}
             y1={goalY}
-            x2={width - padding}
+            x2={width - rightPadding}
             y2={goalY}
             stroke={colors.gold}
             strokeWidth="2"
@@ -264,7 +284,7 @@ export function WeightTrendChart({
         {yAxisLabels.map((label, index) => (
           <SvgText
             key={index}
-            x={padding - 10}
+            x={leftPadding - 10}
             y={label.y + 3}
             fontSize={isMobile ? "10" : "12"}
             fill={colors.textSecondary}
@@ -279,7 +299,7 @@ export function WeightTrendChart({
           <SvgText
             key={index}
             x={label.x}
-            y={padding + chartHeight + 25}
+            y={topPadding + chartHeight + 25}
             fontSize={isMobile ? "8" : "11"}
             fill={colors.textSecondary}
             textAnchor="middle"
@@ -291,13 +311,13 @@ export function WeightTrendChart({
         {/* Goal weight label */}
         {goalY && goalWeight && (
           <SvgText
-            x={width - padding + 5}
+            x={width - rightPadding + 10}
             y={goalY + 3}
             fontSize={isMobile ? "10" : "12"}
             fill={colors.gold}
             textAnchor="start"
           >
-            Goal: {goalWeight}
+            Goal: {formatWeight(goalWeight, units)}
           </SvgText>
         )}
       </Svg>
@@ -337,7 +357,7 @@ export function WeightTrendChart({
   );
 }
 
-const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
+const tabletStyles = () =>
   StyleSheet.create({
     container: {
       backgroundColor: "transparent",
@@ -372,8 +392,8 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     },
   });
 
-const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
-  const tablet = tabletStyles(colors);
+const mobileStyles = () => {
+  const tablet = tabletStyles();
   return StyleSheet.create({
     ...tablet,
     legend: {

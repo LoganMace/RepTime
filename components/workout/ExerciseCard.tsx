@@ -11,6 +11,7 @@ interface ExerciseCardProps {
   iconColor: string;
   exercises: any[];
   allExercises: any[];
+  units: "metric" | "imperial";
   completed: number[];
   activeExercise: number | null;
   hasTimerData: (exercise: any) => boolean;
@@ -26,6 +27,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   iconColor,
   exercises,
   allExercises,
+  units,
   completed,
   activeExercise,
   hasTimerData,
@@ -72,6 +74,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
               key={originalIndex}
               exercise={ex}
               originalIndex={originalIndex}
+              units={units}
               isCompleted={completed.includes(originalIndex)}
               isActive={activeExercise === originalIndex}
               hasTimerData={hasTimerData(ex)}

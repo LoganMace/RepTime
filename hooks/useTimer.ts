@@ -1,3 +1,4 @@
+import { loadProfileData } from "@/utils/profileStorage";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
@@ -42,6 +43,25 @@ export const useTimer = ({
   skipGetReady = false,
   quickTimer = false,
 }: TimerProps) => {
+  // Core state
+  const [currentRound, setCurrentRound] = useState(1);
+  const [currentSet, setCurrentSet] = useState(1);
+  const [currentPhase, setCurrentPhase] = useState<Phase>("start");
+  const [phaseBeforePause, setPhaseBeforePause] = useState<Phase>("start");
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [hasBeepedForCompletion, setHasBeepedForCompletion] = useState(false);
+
+  // Sound preferences state
+  const [muteSounds, setMuteSounds] = useState(false);
+  const [muteVoice, setMuteVoice] = useState(false);
+
+  // Track countdown beeps to ensure they only play once per second
+  const countdownBeepsRef = useRef<{ [key: number]: boolean }>({});
+
+  // Audio players with error handling
+  const lowBeep = useAudioPlayer(require("../assets/sounds/low-beep.mp3"));
+  const highBeep = useAudioPlayer(require("../assets/sounds/high-beep.mp3"));
+
   // Configure audio session for iOS devices to play in silent mode
   useEffect(() => {
     const setupAudio = async () => {
@@ -60,20 +80,21 @@ export const useTimer = ({
     setupAudio();
   }, []);
 
-  // Audio players with error handling
-  const lowBeep = useAudioPlayer(require("../assets/sounds/low-beep.mp3"));
-  const highBeep = useAudioPlayer(require("../assets/sounds/high-beep.mp3"));
-
   // Audio utility functions with error handling and haptic fallback
   const playAudio = useCallback(
     (player: typeof lowBeep, name: string, useHaptic: boolean = true) => {
       try {
-        console.log(`Attempting to play ${name}`);
-        player.seekTo(0);
-        player.play();
-        console.log(`${name} played successfully`);
+        // Check if sounds are muted in preferences
+        if (!muteSounds) {
+          console.log(`Attempting to play ${name}`);
+          player.seekTo(0);
+          player.play();
+          console.log(`${name} played successfully`);
+        } else {
+          console.log(`Skipping ${name} - sounds are muted in preferences`);
+        }
 
-        // Also trigger haptic feedback for silent mode
+        // Always trigger haptic feedback (even when sounds are muted)
         if (useHaptic) {
           if (name.includes("high")) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -90,7 +111,7 @@ export const useTimer = ({
         }
       }
     },
-    []
+    [muteSounds]
   );
 
   // Audio test function (for debugging)
@@ -113,16 +134,20 @@ export const useTimer = ({
     }
   }, [lowBeep, highBeep, testAudio]);
 
-  // Core state
-  const [currentRound, setCurrentRound] = useState(1);
-  const [currentSet, setCurrentSet] = useState(1);
-  const [currentPhase, setCurrentPhase] = useState<Phase>("start");
-  const [phaseBeforePause, setPhaseBeforePause] = useState<Phase>("start");
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [hasBeepedForCompletion, setHasBeepedForCompletion] = useState(false);
-  
-  // Track countdown beeps to ensure they only play once per second
-  const countdownBeepsRef = useRef<{ [key: number]: boolean }>({});
+  // Load sound preferences when timer becomes visible
+  useEffect(() => {
+    if (visible) {
+      loadProfileData()
+        .then((profileData) => {
+          setMuteSounds(profileData.preferences.muteSounds);
+          setMuteVoice(profileData.preferences.muteVoice);
+        })
+        .catch((error) => {
+          console.error("Failed to load sound preferences:", error);
+          // Keep default values (false) if loading fails
+        });
+    }
+  }, [visible]);
 
   // High-precision timing refs
   const animationFrameRef = useRef<number | null>(null);
@@ -178,7 +203,7 @@ export const useTimer = ({
       console.log(`Starting phase: ${phase}, duration: ${duration}s`);
 
       stopTimer();
-      
+
       // Reset countdown beeps tracker for new phase
       countdownBeepsRef.current = {};
 
@@ -323,33 +348,44 @@ export const useTimer = ({
   }, [timeLeft, currentPhase, handlePhaseEnd]);
 
   // Safe speech function with error handling
-  const speakSafely = useCallback(async (text: string) => {
-    try {
-      // Stop any ongoing speech to prevent queue buildup
-      await Speech.stop();
-      
-      // Small delay to ensure speech engine is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Speak with error handling
-      await Speech.speak(text, {
-        language: 'en-US',
-        pitch: 1.0,
-        rate: 1.0,
-        // Add these options to improve reliability
-        onDone: () => console.log(`Speech completed: ${text}`),
-        onError: (error) => {
-          console.error(`Speech error for "${text}":`, error);
-          // Fallback to just audio beeps if speech fails
-          playAudio(highBeep, "speech fallback beep");
-        },
-      });
-    } catch (error) {
-      console.error(`Failed to speak "${text}":`, error);
-      // Fallback to audio beep
-      playAudio(highBeep, "speech error fallback");
-    }
-  }, [highBeep, playAudio]);
+  const speakSafely = useCallback(
+    async (text: string) => {
+      try {
+        // Check if voice is muted in preferences
+        if (muteVoice) {
+          console.log(
+            `Skipping speech "${text}" - voice is muted in preferences`
+          );
+          return;
+        }
+
+        // Stop any ongoing speech to prevent queue buildup
+        await Speech.stop();
+
+        // Small delay to ensure speech engine is ready
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Speak with error handling
+        await Speech.speak(text, {
+          language: "en-US",
+          pitch: 1.0,
+          rate: 1.0,
+          // Add these options to improve reliability
+          onDone: () => console.log(`Speech completed: ${text}`),
+          onError: (error) => {
+            console.error(`Speech error for "${text}":`, error);
+            // Fallback to just audio beeps if speech fails
+            playAudio(highBeep, "speech fallback beep");
+          },
+        });
+      } catch (error) {
+        console.error(`Failed to speak "${text}":`, error);
+        // Fallback to audio beep
+        playAudio(highBeep, "speech error fallback");
+      }
+    },
+    [highBeep, playAudio, muteVoice]
+  );
 
   // Speech and sound effects
   useEffect(() => {
@@ -391,7 +427,7 @@ export const useTimer = ({
       else if (currentPhase === "rest") phaseDuration = restTime;
       else if (currentPhase === "setRest") phaseDuration = setRestTime;
       else if (currentPhase === "getReady") phaseDuration = 10;
-      
+
       // Only play countdown if phase is longer than 9 seconds
       if (phaseDuration > 9) {
         // Only play each countdown beep once
@@ -464,7 +500,7 @@ export const useTimer = ({
 
     console.log("Pausing timer");
     stopTimer();
-    
+
     // Stop any ongoing speech
     Speech.stop();
 
