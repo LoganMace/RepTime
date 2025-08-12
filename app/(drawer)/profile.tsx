@@ -1,76 +1,163 @@
-import { StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+import { UserInfoCard } from "@/components/profile/UserInfoCard";
+import { GoalsCard } from "@/components/profile/GoalsCard";
+import { PreferencesCard } from "@/components/profile/PreferencesCard";
+import { EditProfileModal } from "@/components/profile/EditProfileModal";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
+import {
+  ProfileData,
+  UserInfo,
+  Goals,
+  Preferences,
+  loadProfileData,
+  saveUserInfo,
+  saveGoals,
+  savePreferences,
+} from "@/utils/profileStorage";
 
 export default function ProfileScreen() {
   const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
   const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
 
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      const data = await loadProfileData();
+      setProfileData(data);
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateUserInfo = async (userInfo: UserInfo) => {
+    try {
+      await saveUserInfo(userInfo);
+      setProfileData(prev => prev ? { ...prev, userInfo } : null);
+    } catch (error) {
+      console.error("Error updating user info:", error);
+    }
+  };
+
+  const handleUpdateGoals = async (goals: Goals) => {
+    try {
+      await saveGoals(goals);
+      setProfileData(prev => prev ? { ...prev, goals } : null);
+    } catch (error) {
+      console.error("Error updating goals:", error);
+    }
+  };
+
+  const handleUpdatePreferences = async (preferences: Preferences) => {
+    try {
+      await savePreferences(preferences);
+      setProfileData(prev => prev ? { ...prev, preferences } : null);
+    } catch (error) {
+      console.error("Error updating preferences:", error);
+    }
+  };
+
+  if (loading || !profileData) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ThemedText>Loading profile...</ThemedText>
+      </View>
+    );
+  }
+
   return (
-    <View style={{ flex: 1 }}>
-      <ParallaxScrollView
-        headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-        headerImage={
-          <IconSymbol
-            size={310}
-            color={colors.primary}
-            name="person.circle"
-            style={styles.headerImage}
-          />
-        }
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Profile</ThemedText>
-        </ThemedView>
+        <UserInfoCard
+          userInfo={profileData.userInfo}
+          units={profileData.preferences.units}
+          onEdit={() => setEditModalVisible(true)}
+        />
 
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">User Profile</ThemedText>
-          <ThemedText>
-            Your profile and account settings will be available here.
+        <GoalsCard
+          goals={profileData.goals}
+          units={profileData.preferences.units}
+          currentWeight={profileData.userInfo.weight}
+          onUpdate={handleUpdateGoals}
+        />
+
+        <PreferencesCard
+          preferences={profileData.preferences}
+          onUpdate={handleUpdatePreferences}
+        />
+
+        <View style={styles.versionContainer}>
+          <ThemedText style={styles.versionText}>
+            TrainSync v1.0.0
           </ThemedText>
-        </ThemedView>
-
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">Coming Soon</ThemedText>
-          <ThemedText>• Account management</ThemedText>
-          <ThemedText>• App preferences and settings</ThemedText>
-          <ThemedText>• Data export and backup options</ThemedText>
-          <ThemedText>• Fitness goals and targets</ThemedText>
-        </ThemedView>
-
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">TrainSync</ThemedText>
-          <ThemedText>
-            Version 1.0.0 - Your ultimate workout companion
+          <ThemedText style={styles.versionSubtext}>
+            Your ultimate workout companion
           </ThemedText>
-        </ThemedView>
-      </ParallaxScrollView>
+        </View>
+      </ScrollView>
+
+      <EditProfileModal
+        visible={editModalVisible}
+        userInfo={profileData.userInfo}
+        units={profileData.preferences.units}
+        onSave={handleUpdateUserInfo}
+        onClose={() => setEditModalVisible(false)}
+      />
     </View>
   );
 }
 
 const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
   StyleSheet.create({
-    headerImage: {
-      color: colors.primary,
-      bottom: -90,
-      left: -35,
-      position: "absolute",
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
     },
-    titleContainer: {
-      flexDirection: "row",
-      gap: 8,
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
       alignItems: "center",
+      backgroundColor: colors.background,
     },
-    stepContainer: {
-      gap: 8,
-      marginBottom: 8,
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      padding: 16,
+      paddingTop: 16,
+      paddingBottom: 20,
+    },
+    versionContainer: {
+      alignItems: "center",
+      marginTop: 20,
+      paddingVertical: 20,
+    },
+    versionText: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      fontWeight: "600",
+    },
+    versionSubtext: {
+      fontSize: 12,
+      color: colors.textSecondary,
+      marginTop: 4,
     },
   });
 
@@ -78,19 +165,10 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
   const mobile = mobileStyles(colors);
   return StyleSheet.create({
     ...mobile,
-    headerImage: {
-      ...mobile.headerImage,
-      bottom: -120,
-      left: -50,
-    },
-    titleContainer: {
-      ...mobile.titleContainer,
-      gap: 12,
-    },
-    stepContainer: {
-      ...mobile.stepContainer,
-      gap: 12,
-      marginBottom: 16,
+    scrollContent: {
+      ...mobile.scrollContent,
+      padding: 24,
+      paddingTop: 20,
     },
   });
 };
