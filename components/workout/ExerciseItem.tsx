@@ -3,10 +3,12 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useTheme } from "@/hooks/useTheme";
 import React, { useMemo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { formatWeight } from "@/utils/profileStorage";
 
 interface ExerciseItemProps {
   exercise: any;
   originalIndex: number;
+  units: "metric" | "imperial";
   isCompleted: boolean;
   isActive: boolean;
   hasTimerData: boolean;
@@ -19,6 +21,7 @@ interface ExerciseItemProps {
 export const ExerciseItem: React.FC<ExerciseItemProps> = ({
   exercise,
   originalIndex,
+  units,
   isCompleted,
   isActive,
   hasTimerData,
@@ -100,7 +103,7 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
           <View style={styles.detailItem}>
             <ThemedText style={styles.detailLabel}>Weight</ThemedText>
             <ThemedText style={styles.detailValue}>
-              {exercise.weight} lbs
+              {formatWeight(parseFloat(exercise.weight), units)}
             </ThemedText>
           </View>
         )}

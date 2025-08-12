@@ -9,15 +9,18 @@ import {
   getChangeIcon,
   getTrendIcon,
 } from "./WeightConstants";
+import { formatWeight } from "../../utils/profileStorage";
 
 interface WeightHistoryCardProps {
   weightEntries: WeightEntry[];
+  units: "metric" | "imperial";
   showAllHistory: boolean;
   onToggleHistory: () => void;
 }
 
 export default function WeightHistoryCard({
   weightEntries,
+  units,
   showAllHistory,
   onToggleHistory,
 }: WeightHistoryCardProps) {
@@ -61,7 +64,7 @@ export default function WeightHistoryCard({
               </ThemedText>
               <View>
                 <ThemedText style={styles.historyWeight}>
-                  {entry.weight} lbs
+                  {formatWeight(entry.weight, units)}
                 </ThemedText>
                 <ThemedText style={styles.historyDate}>{entry.date}</ThemedText>
               </View>
@@ -74,7 +77,7 @@ export default function WeightHistoryCard({
                 ]}
               >
                 {getChangeIcon(change)}
-                {Math.abs(change).toFixed(1)}
+                {formatWeight(Math.abs(change), units)}
               </ThemedText>
             )}
           </View>

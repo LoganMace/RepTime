@@ -20,6 +20,7 @@ import {
   addWeightEntry as saveWeightEntry,
   setWeightGoal,
 } from "../../../utils/weightStorage";
+import { loadProfileData, lbsToKg, kgToLbs } from "../../../utils/profileStorage";
 
 export default function WeightTrackingScreen() {
   const { getStyles } = useResponsiveStyles();
@@ -36,11 +37,16 @@ export default function WeightTrackingScreen() {
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [units, setUnits] = useState<"metric" | "imperial">("imperial");
 
   // Load weight data from storage
   const loadWeightData = useCallback(async () => {
     try {
       setLoading(true);
+
+      // Load units preference
+      const profileData = await loadProfileData();
+      setUnits(profileData.preferences.units);
 
       // Initialize mock data if using mocks and no data exists
       if (useMocks) {
@@ -85,7 +91,12 @@ export default function WeightTrackingScreen() {
     }
 
     try {
-      await saveWeightEntry(parseFloat(newWeight));
+      let weightValue = parseFloat(newWeight);
+      // Convert to kg for storage if user entered imperial units
+      if (units === "imperial") {
+        weightValue = lbsToKg(weightValue);
+      }
+      await saveWeightEntry(weightValue);
       setNewWeight("");
       // Reload data to reflect changes
       await loadWeightData();
@@ -102,7 +113,11 @@ export default function WeightTrackingScreen() {
     }
 
     try {
-      const goal = parseFloat(newGoalWeight);
+      let goal = parseFloat(newGoalWeight);
+      // Convert to kg for storage if user entered imperial units
+      if (units === "imperial") {
+        goal = lbsToKg(goal);
+      }
       await setWeightGoal(goal);
       setGoalWeightState(goal);
       setNewGoalWeight("");
@@ -115,7 +130,9 @@ export default function WeightTrackingScreen() {
   };
 
   const openGoalModal = () => {
-    setNewGoalWeight(goalWeight.toString());
+    // Display goal weight in user's preferred units
+    const displayWeight = units === "imperial" ? kgToLbs(goalWeight) : goalWeight;
+    setNewGoalWeight(displayWeight.toString());
     setShowGoalModal(true);
   };
 
@@ -142,12 +159,14 @@ export default function WeightTrackingScreen() {
               currentWeight={currentWeight}
               weightChange={weightChange}
               goalWeight={goalWeight}
+              units={units}
               onEditGoal={openGoalModal}
             />
 
             {/* Quick Add Weight */}
             <AddWeightCard
               newWeight={newWeight}
+              units={units}
               onWeightChange={setNewWeight}
               onAddWeight={addWeightEntry}
             />
@@ -156,11 +175,13 @@ export default function WeightTrackingScreen() {
             <WeightChartCard
               weightEntries={weightEntries}
               goalWeight={goalWeight}
+              units={units}
             />
 
             {/* Weight History */}
             <WeightHistoryCard
               weightEntries={weightEntries}
+              units={units}
               showAllHistory={showAllHistory}
               onToggleHistory={() => setShowAllHistory(!showAllHistory)}
             />
@@ -173,6 +194,7 @@ export default function WeightTrackingScreen() {
         visible={showGoalModal}
         goalWeight={goalWeight}
         newGoalWeight={newGoalWeight}
+        units={units}
         onClose={() => setShowGoalModal(false)}
         onSave={updateGoalWeight}
         onGoalWeightChange={setNewGoalWeight}

@@ -6,12 +6,14 @@ import { ThemedText } from "../ThemedText";
 
 interface AddWeightCardProps {
   newWeight: string;
+  units: "metric" | "imperial";
   onWeightChange: (weight: string) => void;
   onAddWeight: () => void;
 }
 
 export default function AddWeightCard({
   newWeight,
+  units,
   onWeightChange,
   onAddWeight,
 }: AddWeightCardProps) {
@@ -25,7 +27,7 @@ export default function AddWeightCard({
       <View style={styles.addWeightForm}>
         <TextInput
           style={styles.weightInput}
-          placeholder="Enter weight (lbs)"
+          placeholder={`Enter weight (${units === "imperial" ? "lbs" : "kg"})`}
           placeholderTextColor={colors.placeholder}
           value={newWeight}
           onChangeText={onWeightChange}

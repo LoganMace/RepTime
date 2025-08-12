@@ -22,6 +22,7 @@ import { EditExerciseModal } from "./EditExerciseModal";
 interface WorkoutViewModalProps {
   visible: boolean;
   workout: any | null;
+  units: "metric" | "imperial";
   onClose: () => void;
   onWorkoutUpdate?: (updatedWorkout: any) => void;
 }
@@ -29,6 +30,7 @@ interface WorkoutViewModalProps {
 const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
   visible,
   workout,
+  units,
   onClose,
   onWorkoutUpdate,
 }) => {
@@ -223,6 +225,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                 iconColor="orange"
                 exercises={warmupExercises}
                 allExercises={workout.exercises}
+                units={units}
                 completed={completed}
                 activeExercise={activeExercise}
                 hasTimerData={hasTimerData}
@@ -239,6 +242,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                 iconColor="gold"
                 exercises={mainExercises}
                 allExercises={workout.exercises}
+                units={units}
                 completed={completed}
                 activeExercise={activeExercise}
                 hasTimerData={hasTimerData}
@@ -255,6 +259,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
                 iconColor="cyan"
                 exercises={cooldownExercises}
                 allExercises={workout.exercises}
+                units={units}
                 completed={completed}
                 activeExercise={activeExercise}
                 hasTimerData={hasTimerData}

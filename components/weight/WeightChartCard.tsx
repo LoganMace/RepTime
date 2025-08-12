@@ -9,11 +9,13 @@ import { WeightEntry } from "./WeightConstants";
 interface WeightChartCardProps {
   weightEntries: WeightEntry[];
   goalWeight: number;
+  units: "metric" | "imperial";
 }
 
 export default function WeightChartCard({
   weightEntries,
   goalWeight,
+  units,
 }: WeightChartCardProps) {
   const { colors } = useTheme();
   const { getStyles } = useResponsiveStyles();
@@ -25,6 +27,7 @@ export default function WeightChartCard({
       <WeightTrendChart
         data={weightEntries}
         goalWeight={goalWeight}
+        units={units}
         showSmoothing={true}
       />
       <View style={styles.chartDescription}>

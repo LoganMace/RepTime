@@ -16,6 +16,7 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import WorkoutViewModal from "@/components/workout/WorkoutViewModal";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
+import { loadProfileData, formatWeight } from "@/utils/profileStorage";
 
 export default function SavedWorkoutsScreen() {
   const { getStyles } = useResponsiveStyles();
@@ -29,9 +30,14 @@ export default function SavedWorkoutsScreen() {
   const [savedWorkouts, setSavedWorkouts] = useState<any[]>([]);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewWorkout, setViewWorkout] = useState<any | null>(null);
+  const [units, setUnits] = useState<"metric" | "imperial">("imperial");
 
   const loadWorkouts = useCallback(async () => {
     try {
+      // Load units preference
+      const profileData = await loadProfileData();
+      setUnits(profileData.preferences.units);
+
       const data = await AsyncStorage.getItem("workoutPlans");
       const workoutPlans = data ? JSON.parse(data) : [];
       
@@ -197,7 +203,7 @@ export default function SavedWorkoutsScreen() {
                       if (ex.reps && ex.reps.toString().trim())
                         details.push(`${ex.reps} reps`);
                       if (ex.weight && ex.weight.toString().trim())
-                        details.push(`${ex.weight} lbs`);
+                        details.push(formatWeight(parseFloat(ex.weight), units));
                       if (ex.workTime && ex.workTime.toString().trim())
                         details.push(`${ex.workTime}s work`);
                       if (ex.restTime && ex.restTime.toString().trim())
@@ -249,6 +255,7 @@ export default function SavedWorkoutsScreen() {
       <WorkoutViewModal
         visible={viewModalVisible}
         workout={viewWorkout}
+        units={units}
         onClose={() => setViewModalVisible(false)}
         onWorkoutUpdate={handleWorkoutUpdate}
       />

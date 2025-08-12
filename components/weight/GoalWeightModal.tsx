@@ -5,6 +5,7 @@ interface GoalWeightModalProps {
   visible: boolean;
   goalWeight: number;
   newGoalWeight: string;
+  units: "metric" | "imperial";
   onClose: () => void;
   onSave: () => void;
   onGoalWeightChange: (weight: string) => void;
@@ -14,6 +15,7 @@ export default function GoalWeightModal({
   visible,
   goalWeight,
   newGoalWeight,
+  units,
   onClose,
   onSave,
   onGoalWeightChange,
@@ -21,7 +23,7 @@ export default function GoalWeightModal({
   const inputs: FormInput[] = [
     {
       key: "goalWeight",
-      placeholder: "Goal weight (lbs)",
+      placeholder: `Goal weight (${units === "imperial" ? "lbs" : "kg"})`,
       value: newGoalWeight,
       onChangeText: onGoalWeightChange,
       keyboardType: "decimal-pad",

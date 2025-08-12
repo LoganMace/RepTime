@@ -4,11 +4,13 @@ import { useTheme } from "../../hooks/useTheme";
 import { useResponsiveStyles } from "../../hooks/useResponsiveStyles";
 import { ThemedText } from "../ThemedText";
 import { getChangeColor, getChangeIcon } from "./WeightConstants";
+import { formatWeight } from "../../utils/profileStorage";
 
 interface WeightSummaryCardProps {
   currentWeight: number;
   weightChange: number;
   goalWeight: number;
+  units: "metric" | "imperial";
   onEditGoal: () => void;
 }
 
@@ -16,6 +18,7 @@ export default function WeightSummaryCard({
   currentWeight,
   weightChange,
   goalWeight,
+  units,
   onEditGoal,
 }: WeightSummaryCardProps) {
   const { colors } = useTheme();
@@ -24,17 +27,17 @@ export default function WeightSummaryCard({
 
   return (
     <View style={styles.summaryCard}>
-      <ThemedText style={styles.currentWeight}>{currentWeight} lbs</ThemedText>
+      <ThemedText style={styles.currentWeight}>{formatWeight(currentWeight, units)}</ThemedText>
       <ThemedText
         style={[styles.weightChange, { color: getChangeColor(weightChange) }]}
       >
-        {getChangeIcon(weightChange)} {Math.abs(weightChange).toFixed(1)} lbs
+        {getChangeIcon(weightChange)} {formatWeight(Math.abs(weightChange), units)}
         since last entry
       </ThemedText>
       {goalWeight > 0 && (
         <ThemedText style={styles.goalProgress}>
-          Goal: {goalWeight} lbs •{" "}
-          {Math.abs(currentWeight - goalWeight).toFixed(1)} lbs to go
+          Goal: {formatWeight(goalWeight, units)} •{" "}
+          {formatWeight(Math.abs(currentWeight - goalWeight), units)} to go
         </ThemedText>
       )}
       <TouchableOpacity style={styles.editGoalButton} onPress={onEditGoal}>
