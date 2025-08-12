@@ -10,65 +10,65 @@ export interface WeightEntry {
 const WEIGHT_STORAGE_KEY = "weight_entries";
 const WEIGHT_GOAL_KEY = "weight_goal";
 
-// Mock data for testing
+// Mock data for testing (weights stored in kg, ~175-180 lbs range)
 export const MOCK_WEIGHT_ENTRIES: WeightEntry[] = [
   {
     id: "10",
-    weight: 175.6,
+    weight: 79.6, // ~175.5 lbs
     date: "2025-08-02",
     timestamp: Date.now(),
   },
   {
     id: "9",
-    weight: 176.2,
+    weight: 79.9, // ~176.2 lbs
     date: "2025-08-01",
     timestamp: Date.now() - 86400000,
   },
   {
     id: "8",
-    weight: 175.8,
+    weight: 79.7, // ~175.7 lbs
     date: "2025-07-31",
     timestamp: Date.now() - 172800000,
   },
   {
     id: "7",
-    weight: 178.0,
+    weight: 80.7, // ~178.0 lbs
     date: "2025-07-30",
     timestamp: Date.now() - 259200000,
   },
   {
     id: "6",
-    weight: 177.4,
+    weight: 80.4, // ~177.3 lbs
     date: "2025-07-29",
     timestamp: Date.now() - 345600000,
   },
   {
     id: "5",
-    weight: 179.1,
+    weight: 81.2, // ~179.0 lbs
     date: "2025-07-28",
     timestamp: Date.now() - 432000000,
   },
   {
     id: "4",
-    weight: 178.8,
+    weight: 81.0, // ~178.6 lbs
     date: "2025-07-27",
     timestamp: Date.now() - 518400000,
   },
   {
     id: "3",
-    weight: 180.2,
+    weight: 81.7, // ~180.1 lbs
     date: "2025-07-26",
     timestamp: Date.now() - 604800000,
   },
   {
     id: "2",
-    weight: 179.6,
+    weight: 81.4, // ~179.5 lbs
     date: "2025-07-25",
     timestamp: Date.now() - 691200000,
   },
   {
     id: "1",
-    weight: 181.3,
+    weight: 82.2, // ~181.2 lbs
     date: "2025-07-24",
     timestamp: Date.now() - 777600000,
   },

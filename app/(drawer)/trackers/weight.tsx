@@ -32,7 +32,7 @@ export default function WeightTrackingScreen() {
 
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
   const [newWeight, setNewWeight] = useState("");
-  const [goalWeight, setGoalWeightState] = useState<number>(165); // Default goal weight
+  const [goalWeight, setGoalWeightState] = useState<number>(77.0); // Default goal weight (~170 lbs in kg)
   const [newGoalWeight, setNewGoalWeight] = useState("");
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
