@@ -1,5 +1,6 @@
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
+import { initializeMockTimerData } from "@/utils/timerStorage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useMemo } from "react";
 import {
@@ -84,6 +85,9 @@ export default function SavedTimersScreen() {
 
   const loadTimers = async () => {
     try {
+      // Initialize mock timer data if not present
+      await initializeMockTimerData();
+      
       const timers = await AsyncStorage.getItem("timers");
       setSavedTimers(timers ? JSON.parse(timers) : []);
     } catch {

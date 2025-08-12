@@ -17,6 +17,7 @@ import WorkoutViewModal from "@/components/workout/WorkoutViewModal";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
 import { loadProfileData, formatWeight } from "@/utils/profileStorage";
+import { initializeMockWorkoutData } from "@/utils/workoutStorage";
 
 export default function SavedWorkoutsScreen() {
   const { getStyles } = useResponsiveStyles();
@@ -37,6 +38,9 @@ export default function SavedWorkoutsScreen() {
       // Load workout units preference
       const profileData = await loadProfileData();
       setWorkoutUnits(profileData.preferences.workoutUnits);
+
+      // Initialize mock workout data if not present
+      await initializeMockWorkoutData();
 
       const data = await AsyncStorage.getItem("workoutPlans");
       const workoutPlans = data ? JSON.parse(data) : [];

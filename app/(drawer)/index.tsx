@@ -1,4 +1,4 @@
-import { StyleSheet, Switch, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Switch, TouchableOpacity, View } from "react-native";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
@@ -7,12 +7,41 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useMocksContext } from "@/contexts/MocksContext";
 import { useResponsiveStyles } from "@/hooks/useResponsiveStyles";
 import { useTheme } from "@/hooks/useTheme";
+import { refreshMockWorkoutData } from "@/utils/workoutStorage";
+import { resetToMockWeightData } from "@/utils/weightStorage";
+import { resetToMockData } from "@/utils/mealStorage";
+import { refreshMockTimerData } from "@/utils/timerStorage";
 
 export default function HomeScreen() {
   const { colors } = useTheme();
   const { getStyles, isMobile } = useResponsiveStyles();
   const styles = getStyles(mobileStyles(colors), tabletStyles(colors));
   const { useMocks, toggleMocks } = useMocksContext();
+
+  const handleRefreshMocks = async () => {
+    try {
+      // Refresh all mock data
+      await Promise.all([
+        refreshMockWorkoutData(),
+        resetToMockWeightData(),
+        resetToMockData(), // Meal mock data
+        refreshMockTimerData(), // Timer mock data
+      ]);
+      
+      Alert.alert(
+        "Success",
+        "Mock data has been refreshed successfully!",
+        [{ text: "OK" }]
+      );
+    } catch (error) {
+      console.error("Error refreshing mock data:", error);
+      Alert.alert(
+        "Error",
+        "Failed to refresh mock data. Please try again.",
+        [{ text: "OK" }]
+      );
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -67,14 +96,31 @@ export default function HomeScreen() {
             <Switch
               value={useMocks}
               onValueChange={toggleMocks}
-              trackColor={{ false: colors.textSecondary, true: colors.primary }}
-              thumbColor={useMocks ? colors.text : colors.inputBackground}
+              trackColor={{ false: "#767577", true: "#4CAF50" }}
+              thumbColor={useMocks ? "#ffffff" : "#f4f3f4"}
             />
           </TouchableOpacity>
           <ThemedText style={styles.toggleDescription}>
             Toggle this to enable/disable mock data in trackers for development
             and testing.
           </ThemedText>
+          
+          {useMocks && (
+            <TouchableOpacity
+              style={styles.refreshButton}
+              onPress={handleRefreshMocks}
+              activeOpacity={0.7}
+            >
+              <IconSymbol
+                name="arrow.clockwise"
+                size={18}
+                color={colors.text}
+              />
+              <ThemedText style={styles.refreshButtonText}>
+                Refresh Mock Data
+              </ThemedText>
+            </TouchableOpacity>
+          )}
         </ThemedView>
       </ParallaxScrollView>
     </View>
@@ -118,6 +164,22 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     opacity: 0.7,
     lineHeight: 20,
   },
+  refreshButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  refreshButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.textInverse,
+  },
 });
 
 const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
@@ -140,6 +202,15 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>['colors']) => {
   toggleDescription: {
     ...tablet.toggleDescription,
     fontSize: 12,
+  },
+  refreshButton: {
+    ...tablet.refreshButton,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  refreshButtonText: {
+    ...tablet.refreshButtonText,
+    fontSize: 14,
   },
   });
 };
