@@ -5,7 +5,6 @@ import { useFocusEffect } from "expo-router";
 import { ThemedText } from "../../../components/ThemedText";
 import { ThemedView } from "../../../components/ThemedView";
 import AddWeightCard from "../../../components/weight/AddWeightCard";
-import GoalWeightModal from "../../../components/weight/GoalWeightModal";
 import WeightChartCard from "../../../components/weight/WeightChartCard";
 import { WeightEntry } from "../../../components/weight/WeightConstants";
 import WeightHistoryCard from "../../../components/weight/WeightHistoryCard";
@@ -19,9 +18,8 @@ import {
   initializeMockWeightData,
   loadWeightEntries,
   addWeightEntry as saveWeightEntry,
-  setWeightGoal,
 } from "../../../utils/weightStorage";
-import { loadProfileData, lbsToKg, kgToLbs } from "../../../utils/profileStorage";
+import { loadProfileData, lbsToKg } from "../../../utils/profileStorage";
 
 export default function WeightTrackingScreen() {
   const { getStyles } = useResponsiveStyles();
@@ -34,8 +32,6 @@ export default function WeightTrackingScreen() {
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>([]);
   const [newWeight, setNewWeight] = useState("");
   const [goalWeight, setGoalWeightState] = useState<number>(77.0); // Default goal weight (~170 lbs in kg)
-  const [newGoalWeight, setNewGoalWeight] = useState("");
-  const [showGoalModal, setShowGoalModal] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [loading, setLoading] = useState(true);
   const [weightUnits, setWeightUnits] = useState<"metric" | "imperial">("imperial");
@@ -125,35 +121,6 @@ export default function WeightTrackingScreen() {
     }
   };
 
-  const updateGoalWeight = async () => {
-    if (!newGoalWeight || isNaN(parseFloat(newGoalWeight))) {
-      Alert.alert("Error", "Please enter a valid goal weight");
-      return;
-    }
-
-    try {
-      let goal = parseFloat(newGoalWeight);
-      // Convert to kg for storage if user entered imperial units
-      if (weightUnits === "imperial") {
-        goal = lbsToKg(goal);
-      }
-      await setWeightGoal(goal);
-      setGoalWeightState(goal);
-      setNewGoalWeight("");
-      setShowGoalModal(false);
-      Alert.alert("Success", "Goal weight updated successfully!");
-    } catch (error) {
-      console.error("Error setting goal weight:", error);
-      Alert.alert("Error", "Failed to save goal weight");
-    }
-  };
-
-  const openGoalModal = () => {
-    // Display goal weight in user's preferred units
-    const displayWeight = weightUnits === "imperial" ? kgToLbs(goalWeight) : goalWeight;
-    setNewGoalWeight(displayWeight.toString());
-    setShowGoalModal(true);
-  };
 
   return (
     <ThemedView style={styles.container}>
@@ -179,7 +146,6 @@ export default function WeightTrackingScreen() {
               weightChange={weightChange}
               goalWeight={goalWeight}
               units={weightUnits}
-              onEditGoal={openGoalModal}
             />
 
             {/* Quick Add Weight */}
@@ -207,17 +173,6 @@ export default function WeightTrackingScreen() {
           </>
         )}
       </ScrollView>
-
-      {/* Goal Weight Modal */}
-      <GoalWeightModal
-        visible={showGoalModal}
-        goalWeight={goalWeight}
-        newGoalWeight={newGoalWeight}
-        units={weightUnits}
-        onClose={() => setShowGoalModal(false)}
-        onSave={updateGoalWeight}
-        onGoalWeightChange={setNewGoalWeight}
-      />
     </ThemedView>
   );
 }
