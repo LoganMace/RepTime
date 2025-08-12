@@ -87,13 +87,13 @@ export default function ProfileScreen() {
       >
         <UserInfoCard
           userInfo={profileData.userInfo}
-          units={profileData.preferences.units}
+          units={profileData.preferences.weightUnits}
           onEdit={() => setEditModalVisible(true)}
         />
 
         <GoalsCard
           goals={profileData.goals}
-          units={profileData.preferences.units}
+          units={profileData.preferences.weightUnits}
           currentWeight={profileData.userInfo.weight}
           onUpdate={handleUpdateGoals}
         />
@@ -116,7 +116,7 @@ export default function ProfileScreen() {
       <EditProfileModal
         visible={editModalVisible}
         userInfo={profileData.userInfo}
-        units={profileData.preferences.units}
+        units={profileData.preferences.weightUnits}
         onSave={handleUpdateUserInfo}
         onClose={() => setEditModalVisible(false)}
       />

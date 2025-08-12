@@ -14,6 +14,7 @@ import { useTheme } from "@/hooks/useTheme";
 interface EditExerciseModalProps {
   visible: boolean;
   editingExercise: any;
+  units: "metric" | "imperial";
   onClose: () => void;
   onSave: () => void;
   onExerciseChange: (exercise: any) => void;
@@ -22,6 +23,7 @@ interface EditExerciseModalProps {
 export const EditExerciseModal: React.FC<EditExerciseModalProps> = ({
   visible,
   editingExercise,
+  units,
   onClose,
   onSave,
   onExerciseChange,
@@ -113,7 +115,7 @@ export const EditExerciseModal: React.FC<EditExerciseModalProps> = ({
                 style={[styles.editInputGroup, styles.editInputGroupThird]}
               >
                 <ThemedText style={styles.editInputLabel}>
-                  Weight (lbs)
+                  Weight ({units === "imperial" ? "lbs" : "kg"})
                 </ThemedText>
                 <TextInput
                   style={styles.editInput}

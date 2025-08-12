@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { useFocusEffect } from "expo-router";
 
 import { ThemedText } from "../../../components/ThemedText";
 import { ThemedView } from "../../../components/ThemedView";
@@ -37,16 +38,17 @@ export default function WeightTrackingScreen() {
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [units, setUnits] = useState<"metric" | "imperial">("imperial");
+  const [weightUnits, setWeightUnits] = useState<"metric" | "imperial">("imperial");
 
   // Load weight data from storage
   const loadWeightData = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Load units preference
+      // Load weight units preference
       const profileData = await loadProfileData();
-      setUnits(profileData.preferences.units);
+      console.log("Loading weight units:", profileData.preferences.weightUnits);
+      setWeightUnits(profileData.preferences.weightUnits);
 
       // Initialize mock data if using mocks and no data exists
       if (useMocks) {
@@ -55,6 +57,16 @@ export default function WeightTrackingScreen() {
 
       // Load weight entries
       const entries = await loadWeightEntries();
+      
+      // Debug: Check for invalid weight data
+      console.log("Raw weight entries:", entries);
+      const invalidEntries = entries.filter(entry => 
+        !entry.weight || isNaN(entry.weight) || !isFinite(entry.weight) || entry.weight <= 0 || entry.weight > 1000
+      );
+      if (invalidEntries.length > 0) {
+        console.warn("Found invalid weight entries:", invalidEntries);
+      }
+      
       // Update date format for display
       const entriesWithDisplayDates = entries.map((entry) => ({
         ...entry,
@@ -80,6 +92,13 @@ export default function WeightTrackingScreen() {
     loadWeightData();
   }, [loadWeightData]);
 
+  // Reload data when screen comes into focus (e.g., returning from Profile page)
+  useFocusEffect(
+    useCallback(() => {
+      loadWeightData();
+    }, [loadWeightData])
+  );
+
   const currentWeight = weightEntries[0]?.weight || 0;
   const previousWeight = weightEntries[1]?.weight || currentWeight;
   const weightChange = currentWeight - previousWeight;
@@ -93,7 +112,7 @@ export default function WeightTrackingScreen() {
     try {
       let weightValue = parseFloat(newWeight);
       // Convert to kg for storage if user entered imperial units
-      if (units === "imperial") {
+      if (weightUnits === "imperial") {
         weightValue = lbsToKg(weightValue);
       }
       await saveWeightEntry(weightValue);
@@ -115,7 +134,7 @@ export default function WeightTrackingScreen() {
     try {
       let goal = parseFloat(newGoalWeight);
       // Convert to kg for storage if user entered imperial units
-      if (units === "imperial") {
+      if (weightUnits === "imperial") {
         goal = lbsToKg(goal);
       }
       await setWeightGoal(goal);
@@ -131,7 +150,7 @@ export default function WeightTrackingScreen() {
 
   const openGoalModal = () => {
     // Display goal weight in user's preferred units
-    const displayWeight = units === "imperial" ? kgToLbs(goalWeight) : goalWeight;
+    const displayWeight = weightUnits === "imperial" ? kgToLbs(goalWeight) : goalWeight;
     setNewGoalWeight(displayWeight.toString());
     setShowGoalModal(true);
   };
@@ -159,14 +178,14 @@ export default function WeightTrackingScreen() {
               currentWeight={currentWeight}
               weightChange={weightChange}
               goalWeight={goalWeight}
-              units={units}
+              units={weightUnits}
               onEditGoal={openGoalModal}
             />
 
             {/* Quick Add Weight */}
             <AddWeightCard
               newWeight={newWeight}
-              units={units}
+              units={weightUnits}
               onWeightChange={setNewWeight}
               onAddWeight={addWeightEntry}
             />
@@ -175,13 +194,13 @@ export default function WeightTrackingScreen() {
             <WeightChartCard
               weightEntries={weightEntries}
               goalWeight={goalWeight}
-              units={units}
+              units={weightUnits}
             />
 
             {/* Weight History */}
             <WeightHistoryCard
               weightEntries={weightEntries}
-              units={units}
+              units={weightUnits}
               showAllHistory={showAllHistory}
               onToggleHistory={() => setShowAllHistory(!showAllHistory)}
             />
@@ -194,7 +213,7 @@ export default function WeightTrackingScreen() {
         visible={showGoalModal}
         goalWeight={goalWeight}
         newGoalWeight={newGoalWeight}
-        units={units}
+        units={weightUnits}
         onClose={() => setShowGoalModal(false)}
         onSave={updateGoalWeight}
         onGoalWeightChange={setNewGoalWeight}

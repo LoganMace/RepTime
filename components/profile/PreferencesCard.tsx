@@ -17,10 +17,17 @@ export const PreferencesCard: React.FC<PreferencesCardProps> = ({
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
-  const handleUnitsToggle = () => {
+  const handleWeightUnitsToggle = () => {
     onUpdate({
       ...preferences,
-      units: preferences.units === "metric" ? "imperial" : "metric",
+      weightUnits: preferences.weightUnits === "metric" ? "imperial" : "metric",
+    });
+  };
+
+  const handleWorkoutUnitsToggle = () => {
+    onUpdate({
+      ...preferences,
+      workoutUnits: preferences.workoutUnits === "metric" ? "imperial" : "metric",
     });
   };
 
@@ -48,26 +55,49 @@ export const PreferencesCard: React.FC<PreferencesCardProps> = ({
       </View>
 
       <View style={styles.preferencesList}>
-        {/* Units Toggle */}
+        {/* Weight Units Toggle */}
         <View style={styles.preferenceItem}>
           <View style={styles.preferenceInfo}>
-            <IconSymbol name="ruler" size={20} color={colors.text} />
+            <IconSymbol name="scalemass" size={20} color={colors.text} />
             <View style={styles.textContainer}>
-              <ThemedText style={styles.preferenceLabel}>Units</ThemedText>
+              <ThemedText style={styles.preferenceLabel}>Weight Units</ThemedText>
               <ThemedText style={styles.preferenceValue}>
-                {preferences.units === "metric" ? "Metric (kg, cm)" : "Imperial (lbs, ft)"}
+                {preferences.weightUnits === "metric" ? "Metric (kg)" : "Imperial (lbs)"}
               </ThemedText>
             </View>
           </View>
           <View style={styles.toggleContainer}>
-            <ThemedText style={styles.toggleLabel}>Metric</ThemedText>
+            <ThemedText style={styles.toggleLabel}>kg</ThemedText>
             <Switch
-              value={preferences.units === "imperial"}
-              onValueChange={handleUnitsToggle}
+              value={preferences.weightUnits === "imperial"}
+              onValueChange={handleWeightUnitsToggle}
               trackColor={{ false: "#767577", true: "#4CAF50" }}
-              thumbColor={preferences.units === "imperial" ? "#ffffff" : "#f4f3f4"}
+              thumbColor={preferences.weightUnits === "imperial" ? "#ffffff" : "#f4f3f4"}
             />
-            <ThemedText style={styles.toggleLabel}>Imperial</ThemedText>
+            <ThemedText style={styles.toggleLabel}>lbs</ThemedText>
+          </View>
+        </View>
+
+        {/* Workout Units Toggle */}
+        <View style={styles.preferenceItem}>
+          <View style={styles.preferenceInfo}>
+            <IconSymbol name="dumbbell" size={20} color={colors.text} />
+            <View style={styles.textContainer}>
+              <ThemedText style={styles.preferenceLabel}>Workout Units</ThemedText>
+              <ThemedText style={styles.preferenceValue}>
+                {preferences.workoutUnits === "metric" ? "Metric (kg)" : "Imperial (lbs)"}
+              </ThemedText>
+            </View>
+          </View>
+          <View style={styles.toggleContainer}>
+            <ThemedText style={styles.toggleLabel}>kg</ThemedText>
+            <Switch
+              value={preferences.workoutUnits === "imperial"}
+              onValueChange={handleWorkoutUnitsToggle}
+              trackColor={{ false: "#767577", true: "#4CAF50" }}
+              thumbColor={preferences.workoutUnits === "imperial" ? "#ffffff" : "#f4f3f4"}
+            />
+            <ThemedText style={styles.toggleLabel}>lbs</ThemedText>
           </View>
         </View>
 

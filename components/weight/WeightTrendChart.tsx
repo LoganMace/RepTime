@@ -63,13 +63,26 @@ export function WeightTrendChart({
   const chartWidth = width - leftPadding - rightPadding;
   const chartHeight = height - topPadding - bottomPadding;
 
-  // Calculate weight range
-  const weights = sortedData.map((entry) => entry.weight);
+  // Calculate weight range with bounds checking
+  const weights = sortedData.map((entry) => entry.weight).filter(weight => 
+    !isNaN(weight) && isFinite(weight) && weight > 0 && weight < 1000 // Sanity check for weights
+  );
+  
+  if (weights.length === 0) {
+    return (
+      <View style={[styles.container, { width, height }]}>
+        <ThemedText style={styles.noDataText}>
+          Invalid weight data
+        </ThemedText>
+      </View>
+    );
+  }
+  
   const minWeight = Math.min(...weights);
   const maxWeight = Math.max(...weights);
   const weightRange = maxWeight - minWeight;
-  const yPadding = weightRange * 0.1; // 10% padding
-  const yMin = minWeight - yPadding;
+  const yPadding = Math.max(0.5, weightRange * 0.1); // At least 0.5kg padding, 10% of range
+  const yMin = Math.max(0, minWeight - yPadding); // Don't go below 0
   const yMax = maxWeight + yPadding;
   const yRange = yMax - yMin;
 
@@ -127,13 +140,15 @@ export function WeightTrendChart({
   // Calculate goal line Y position if goal weight is provided
   const goalY = goalWeight ? getY(goalWeight) : null;
 
-  // Generate Y-axis labels
+  // Generate Y-axis labels with proper rounding
   const yAxisLabels = [];
   const labelCount = 5;
   for (let i = 0; i < labelCount; i++) {
     const weight = yMin + (yRange * i) / (labelCount - 1);
-    const y = getY(weight);
-    yAxisLabels.push({ weight: formatWeight(weight, units), y });
+    // Round to 1 decimal place to avoid floating point display issues
+    const roundedWeight = Math.round(weight * 10) / 10;
+    const y = getY(roundedWeight);
+    yAxisLabels.push({ weight: formatWeight(roundedWeight, units), y });
   }
 
   // Generate X-axis date labels

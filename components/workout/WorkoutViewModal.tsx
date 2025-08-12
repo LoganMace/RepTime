@@ -314,6 +314,7 @@ const WorkoutViewModal: React.FC<WorkoutViewModalProps> = ({
       <EditExerciseModal
         visible={editModalVisible}
         editingExercise={editingExercise}
+        units={units}
         onClose={handleCancelEdit}
         onSave={handleSaveExercise}
         onExerciseChange={setEditingExercise}

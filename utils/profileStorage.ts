@@ -20,7 +20,8 @@ export interface Goals {
 }
 
 export interface Preferences {
-  units: "metric" | "imperial";
+  weightUnits: "metric" | "imperial";
+  workoutUnits: "metric" | "imperial";
   muteSounds: boolean;
   muteVoice: boolean;
 }
@@ -46,7 +47,8 @@ const defaultGoals: Goals = {
 };
 
 const defaultPreferences: Preferences = {
-  units: "imperial",
+  weightUnits: "imperial",
+  workoutUnits: "imperial",
   muteSounds: false,
   muteVoice: false,
 };
@@ -76,10 +78,26 @@ export const loadProfileData = async (): Promise<ProfileData> => {
       AsyncStorage.getItem(PREFERENCES_KEY),
     ]);
 
+    // Parse preferences with migration support
+    let preferences = preferencesStr ? JSON.parse(preferencesStr) : defaultPreferences;
+    
+    // Migration: Convert old "units" format to separate weight/workout units
+    if (preferences.units && !preferences.weightUnits) {
+      preferences = {
+        ...preferences,
+        weightUnits: preferences.units,
+        workoutUnits: preferences.units,
+      };
+      // Remove old units field
+      delete preferences.units;
+      // Save migrated preferences
+      await savePreferences(preferences);
+    }
+
     return {
       userInfo: userInfoStr ? JSON.parse(userInfoStr) : defaultUserInfo,
       goals: goalsStr ? JSON.parse(goalsStr) : defaultGoals,
-      preferences: preferencesStr ? JSON.parse(preferencesStr) : defaultPreferences,
+      preferences,
     };
   } catch (error) {
     console.error("Error loading profile data:", error);
@@ -173,7 +191,8 @@ export const formatWeight = (weightKg: number, units: "metric" | "imperial"): st
   if (units === "imperial") {
     return `${kgToLbs(weightKg)} lbs`;
   }
-  return `${weightKg} kg`;
+  // Round to 1 decimal place to avoid floating point precision issues
+  return `${Math.round(weightKg * 10) / 10} kg`;
 };
 
 export const formatHeight = (heightCm: number, units: "metric" | "imperial"): string => {

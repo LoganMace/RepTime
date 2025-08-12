@@ -30,13 +30,13 @@ export default function SavedWorkoutsScreen() {
   const [savedWorkouts, setSavedWorkouts] = useState<any[]>([]);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewWorkout, setViewWorkout] = useState<any | null>(null);
-  const [units, setUnits] = useState<"metric" | "imperial">("imperial");
+  const [workoutUnits, setWorkoutUnits] = useState<"metric" | "imperial">("imperial");
 
   const loadWorkouts = useCallback(async () => {
     try {
-      // Load units preference
+      // Load workout units preference
       const profileData = await loadProfileData();
-      setUnits(profileData.preferences.units);
+      setWorkoutUnits(profileData.preferences.workoutUnits);
 
       const data = await AsyncStorage.getItem("workoutPlans");
       const workoutPlans = data ? JSON.parse(data) : [];
@@ -203,7 +203,7 @@ export default function SavedWorkoutsScreen() {
                       if (ex.reps && ex.reps.toString().trim())
                         details.push(`${ex.reps} reps`);
                       if (ex.weight && ex.weight.toString().trim())
-                        details.push(formatWeight(parseFloat(ex.weight), units));
+                        details.push(formatWeight(parseFloat(ex.weight), workoutUnits));
                       if (ex.workTime && ex.workTime.toString().trim())
                         details.push(`${ex.workTime}s work`);
                       if (ex.restTime && ex.restTime.toString().trim())
@@ -255,7 +255,7 @@ export default function SavedWorkoutsScreen() {
       <WorkoutViewModal
         visible={viewModalVisible}
         workout={viewWorkout}
-        units={units}
+        units={workoutUnits}
         onClose={() => setViewModalVisible(false)}
         onWorkoutUpdate={handleWorkoutUpdate}
       />
