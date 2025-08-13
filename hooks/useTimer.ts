@@ -347,9 +347,9 @@ export const useTimer = ({
     }
   }, [timeLeft, currentPhase, handlePhaseEnd]);
 
-  // Safe speech function with error handling
+  // Safe speech function with error handling and priority system
   const speakSafely = useCallback(
-    async (text: string) => {
+    async (text: string, priority: "critical" | "normal" = "normal") => {
       try {
         // Check if voice is muted in preferences
         if (muteVoice) {
@@ -359,8 +359,25 @@ export const useTimer = ({
           return;
         }
 
-        // Stop any ongoing speech to prevent queue buildup
-        await Speech.stop();
+        // Check if speech is currently playing
+        const isSpeaking = await Speech.isSpeakingAsync();
+
+        // For critical messages, wait for current speech to finish
+        // For normal messages, stop current speech only if necessary
+        if (isSpeaking) {
+          if (priority === "critical") {
+            // Wait a bit for current speech to finish (max 2 seconds)
+            let waitTime = 0;
+            while ((await Speech.isSpeakingAsync()) && waitTime < 2000) {
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              waitTime += 100;
+            }
+          } else {
+            // Only stop if we really need to speak something new
+            console.log(`Interrupting current speech for: "${text}"`);
+            await Speech.stop();
+          }
+        }
 
         // Small delay to ensure speech engine is ready
         await new Promise((resolve) => setTimeout(resolve, 100));
@@ -398,9 +415,9 @@ export const useTimer = ({
     } else if (currentPhase === "rest" && timeLeft === restTime) {
       speakSafely("Rest");
     } else if (currentPhase === "setRest" && timeLeft === setRestTime) {
-      speakSafely(`Set ${currentSet} complete. Rest.`);
+      speakSafely(`Set ${currentSet} complete. Rest.`, "critical"); // Critical priority
     } else if (currentPhase === "done") {
-      speakSafely("Workout complete!");
+      speakSafely("Workout complete!", "critical"); // Critical priority
     }
 
     // Work phase announcements
@@ -408,7 +425,7 @@ export const useTimer = ({
       if (timeLeft === 10 && workTime > 10) {
         speakSafely("Ten seconds");
       } else if (timeLeft === Math.floor(workTime / 2) && workTime > 20) {
-        speakSafely("Half way there");
+        speakSafely("Half way there", "critical"); // Critical priority for halfway
       } else if (workTime > 60 && timeLeft > 0 && timeLeft % 60 === 0) {
         speakSafely(`${timeLeft / 60} minute${timeLeft / 60 > 1 ? "s" : ""}`);
       }
@@ -430,16 +447,26 @@ export const useTimer = ({
 
       // Only play countdown if phase is longer than 9 seconds
       if (phaseDuration > 9) {
+        // Add a small delay for countdown beeps to avoid interrupting speech
+        const playCountdownBeep = async () => {
+          // Check if speech is playing and wait a moment if it is
+          const isSpeaking = await Speech.isSpeakingAsync();
+          if (isSpeaking) {
+            await new Promise((resolve) => setTimeout(resolve, 200));
+          }
+          playAudio(lowBeep, `countdown ${timeLeft}`);
+        };
+
         // Only play each countdown beep once
         if (timeLeft === 3 && !countdownBeepsRef.current[3]) {
           countdownBeepsRef.current[3] = true;
-          playAudio(lowBeep, "countdown 3");
+          playCountdownBeep();
         } else if (timeLeft === 2 && !countdownBeepsRef.current[2]) {
           countdownBeepsRef.current[2] = true;
-          playAudio(lowBeep, "countdown 2");
+          playCountdownBeep();
         } else if (timeLeft === 1 && !countdownBeepsRef.current[1]) {
           countdownBeepsRef.current[1] = true;
-          playAudio(lowBeep, "countdown 1");
+          playCountdownBeep();
         }
       }
     }
