@@ -31,13 +31,15 @@ export default function AddMealModal({
   const inputs: FormInput[] = [
     {
       key: "name",
-      placeholder: "Food name",
+      label: "Food Name",
+      placeholder: "e.g., Grilled Chicken Breast",
       value: newMeal.name,
       onChangeText: (text) => onMealChange("name", text),
     },
     {
       key: "servings",
-      placeholder: "Servings",
+      label: "Number of Servings",
+      placeholder: "1",
       value: newMeal.servings,
       onChangeText: (text) => {
         // Only allow positive numbers with up to 2 decimal places
@@ -52,7 +54,8 @@ export default function AddMealModal({
     },
     {
       key: "calories", 
-      placeholder: "Calories (per serving)",
+      label: "Calories per Serving",
+      placeholder: "e.g., 250",
       value: newMeal.calories,
       onChangeText: (text) => {
         // Only allow positive integers, max 9999 calories
@@ -64,7 +67,8 @@ export default function AddMealModal({
     },
     {
       key: "protein",
-      placeholder: "Protein (g per serving)", 
+      label: "Protein per Serving (grams)",
+      placeholder: "e.g., 25.5",
       value: newMeal.protein,
       onChangeText: (text) => {
         // Only allow positive numbers with up to 1 decimal place, max 999g

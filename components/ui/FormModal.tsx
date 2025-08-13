@@ -13,6 +13,7 @@ import { useResponsiveStyles } from "../../hooks/useResponsiveStyles";
 
 export interface FormInput {
   key: string;
+  label?: string;
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
@@ -84,19 +85,23 @@ export default function FormModal({
       <View style={styles.modalForm}>
         {/* Render inputs if provided */}
         {inputs.map((input) => (
-          <TextInput
-            key={input.key}
-            style={[
-              styles.input,
-              input.textAlign === "center" && { textAlign: "center" },
-            ]}
-            placeholder={input.placeholder}
-            placeholderTextColor={colors.placeholder}
-            value={input.value}
-            onChangeText={input.onChangeText}
-            keyboardType={input.keyboardType || "default"}
-            multiline={input.multiline}
-          />
+          <View key={input.key} style={styles.inputGroup}>
+            {input.label && (
+              <Text style={styles.inputLabel}>{input.label}</Text>
+            )}
+            <TextInput
+              style={[
+                styles.input,
+                input.textAlign === "center" && { textAlign: "center" },
+              ]}
+              placeholder={input.placeholder}
+              placeholderTextColor={colors.placeholder}
+              value={input.value}
+              onChangeText={input.onChangeText}
+              keyboardType={input.keyboardType || "default"}
+              multiline={input.multiline}
+            />
+          </View>
         ))}
         
         {/* Custom children content */}
@@ -218,6 +223,16 @@ const tabletStyles = (colors: ReturnType<typeof useTheme>["colors"]) =>
     modalForm: {
       gap: 16,
     },
+    inputGroup: {
+      gap: 8,
+    },
+    inputLabel: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.textSecondary,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
     input: {
       backgroundColor: colors.inputBackground,
       borderWidth: 1,
@@ -292,6 +307,10 @@ const mobileStyles = (colors: ReturnType<typeof useTheme>["colors"]) => {
     modalTitle: {
       ...tablet.modalTitle,
       fontSize: 18,
+    },
+    inputLabel: {
+      ...tablet.inputLabel,
+      fontSize: 13,
     },
     input: {
       ...tablet.input,
