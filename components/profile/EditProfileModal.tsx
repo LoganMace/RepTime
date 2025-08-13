@@ -104,7 +104,12 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <TextInput
                 style={styles.input}
                 value={age}
-                onChangeText={setAge}
+                onChangeText={(text) => {
+                  // Only allow positive integers, max 150 years old
+                  const numericValue = text.replace(/[^0-9]/g, '');
+                  if (parseInt(numericValue) > 150) return;
+                  setAge(numericValue);
+                }}
                 keyboardType="numeric"
                 placeholder="Enter your age"
                 placeholderTextColor={colors.textSecondary}
@@ -119,7 +124,17 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <TextInput
                 style={styles.input}
                 value={weight}
-                onChangeText={setWeight}
+                onChangeText={(text) => {
+                  // Only allow positive numbers with up to 1 decimal place
+                  const numericValue = text.replace(/[^0-9.]/g, '');
+                  const parts = numericValue.split('.');
+                  if (parts.length > 2) return; // Prevent multiple decimal points
+                  if (parts[1] && parts[1].length > 1) return; // Limit to 1 decimal place
+                  // Set reasonable weight limits: 50-1000 lbs or 25-500 kg
+                  const maxWeight = units === "imperial" ? 1000 : 500;
+                  if (parseFloat(numericValue) > maxWeight) return;
+                  setWeight(numericValue);
+                }}
                 keyboardType="decimal-pad"
                 placeholder={`Enter weight in ${units === "imperial" ? "lbs" : "kg"}`}
                 placeholderTextColor={colors.textSecondary}
@@ -136,7 +151,12 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   <TextInput
                     style={[styles.input, styles.heightInput]}
                     value={height.feet}
-                    onChangeText={(text) => setHeight({ ...height, feet: text })}
+                    onChangeText={(text) => {
+                      // Only allow positive integers, max 8 feet
+                      const numericValue = text.replace(/[^0-9]/g, '');
+                      if (parseInt(numericValue) > 8) return;
+                      setHeight({ ...height, feet: numericValue });
+                    }}
                     keyboardType="numeric"
                     placeholder="Feet"
                     placeholderTextColor={colors.textSecondary}
@@ -145,7 +165,12 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   <TextInput
                     style={[styles.input, styles.heightInput]}
                     value={height.inches}
-                    onChangeText={(text) => setHeight({ ...height, inches: text })}
+                    onChangeText={(text) => {
+                      // Only allow positive integers, max 11 inches
+                      const numericValue = text.replace(/[^0-9]/g, '');
+                      if (parseInt(numericValue) > 11) return;
+                      setHeight({ ...height, inches: numericValue });
+                    }}
                     keyboardType="numeric"
                     placeholder="Inches"
                     placeholderTextColor={colors.textSecondary}
@@ -156,7 +181,12 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 <TextInput
                   style={styles.input}
                   value={height.cm}
-                  onChangeText={(text) => setHeight({ cm: text })}
+                  onChangeText={(text) => {
+                    // Only allow positive integers, max 250 cm
+                    const numericValue = text.replace(/[^0-9]/g, '');
+                    if (parseInt(numericValue) > 250) return;
+                    setHeight({ cm: numericValue });
+                  }}
                   keyboardType="numeric"
                   placeholder="Enter height in cm"
                   placeholderTextColor={colors.textSecondary}

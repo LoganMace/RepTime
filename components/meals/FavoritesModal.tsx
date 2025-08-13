@@ -157,10 +157,16 @@ export default function FavoritesModal({
                   <TextInput
                     style={styles.servingsInput}
                     value={servingsMap[favorite.id] || "1"}
-                    onChangeText={(text) => 
-                      setServingsMap({ ...servingsMap, [favorite.id]: text })
-                    }
-                    keyboardType="numeric"
+                    onChangeText={(text) => {
+                      // Only allow positive numbers with up to 2 decimal places
+                      const numericValue = text.replace(/[^0-9.]/g, '');
+                      const parts = numericValue.split('.');
+                      if (parts.length > 2) return; // Prevent multiple decimal points
+                      if (parts[1] && parts[1].length > 2) return; // Limit to 2 decimal places
+                      if (parseFloat(numericValue) > 99) return; // Max 99 servings
+                      setServingsMap({ ...servingsMap, [favorite.id]: numericValue });
+                    }}
+                    keyboardType="decimal-pad"
                     placeholder="1"
                     placeholderTextColor={colors.placeholder}
                   />

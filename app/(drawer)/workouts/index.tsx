@@ -82,6 +82,27 @@ export default function WorkoutsScreen() {
   }, [params.workout, params.editIndex]);
 
   const handleChange = (index: number, field: string, value: string) => {
+    // Apply input validation for numeric fields
+    if (field === "sets" || field === "reps") {
+      // Sets and reps: only positive integers, max 999
+      const numericValue = value.replace(/[^0-9]/g, '');
+      if (parseInt(numericValue) > 999) return;
+      value = numericValue;
+    } else if (field === "weight") {
+      // Weight: only positive numbers with up to 1 decimal place, max 9999
+      const numericValue = value.replace(/[^0-9.]/g, '');
+      const parts = numericValue.split('.');
+      if (parts.length > 2) return; // Prevent multiple decimal points
+      if (parts[1] && parts[1].length > 1) return; // Limit to 1 decimal place
+      if (parseFloat(numericValue) > 9999) return; // Max 9999 lbs/kg
+      value = numericValue;
+    } else if (field === "workTime" || field === "restTime" || field === "setRest") {
+      // Time fields: only positive integers (seconds), max 9999
+      const numericValue = value.replace(/[^0-9]/g, '');
+      if (parseInt(numericValue) > 9999) return; // Max ~2.7 hours
+      value = numericValue;
+    }
+    
     setWorkouts((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };

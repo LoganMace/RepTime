@@ -93,8 +93,18 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
               <TextInput
                 style={styles.input}
                 value={tempValue}
-                onChangeText={setTempValue}
-                keyboardType="numeric"
+                onChangeText={(text) => {
+                  // Only allow positive numbers with up to 1 decimal place
+                  const numericValue = text.replace(/[^0-9.]/g, '');
+                  const parts = numericValue.split('.');
+                  if (parts.length > 2) return; // Prevent multiple decimal points
+                  if (parts[1] && parts[1].length > 1) return; // Limit to 1 decimal place
+                  // Set reasonable weight limits: 50-1000 lbs or 25-500 kg
+                  const maxWeight = units === "imperial" ? 1000 : 500;
+                  if (parseFloat(numericValue) > maxWeight) return;
+                  setTempValue(numericValue);
+                }}
+                keyboardType="decimal-pad"
                 autoFocus
                 placeholder={`Enter weight in ${units === "imperial" ? "lbs" : "kg"}`}
                 placeholderTextColor={colors.textSecondary}
@@ -133,7 +143,12 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
               <TextInput
                 style={styles.input}
                 value={tempValue}
-                onChangeText={setTempValue}
+                onChangeText={(text) => {
+                  // Only allow positive integers, max 9999 calories
+                  const numericValue = text.replace(/[^0-9]/g, '');
+                  if (parseInt(numericValue) > 9999) return;
+                  setTempValue(numericValue);
+                }}
                 keyboardType="numeric"
                 autoFocus
                 placeholder="Enter calories"
@@ -166,7 +181,12 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
               <TextInput
                 style={styles.input}
                 value={tempValue}
-                onChangeText={setTempValue}
+                onChangeText={(text) => {
+                  // Only allow positive integers, max 999 grams protein
+                  const numericValue = text.replace(/[^0-9]/g, '');
+                  if (parseInt(numericValue) > 999) return;
+                  setTempValue(numericValue);
+                }}
                 keyboardType="numeric"
                 autoFocus
                 placeholder="Enter grams"

@@ -152,7 +152,17 @@ export default function WeightTrackingScreen() {
             <AddWeightCard
               newWeight={newWeight}
               units={weightUnits}
-              onWeightChange={setNewWeight}
+              onWeightChange={(text) => {
+                // Only allow positive numbers with up to 1 decimal place
+                const numericValue = text.replace(/[^0-9.]/g, '');
+                const parts = numericValue.split('.');
+                if (parts.length > 2) return; // Prevent multiple decimal points
+                if (parts[1] && parts[1].length > 1) return; // Limit to 1 decimal place
+                // Set reasonable weight limits: 10-1000 lbs or 5-500 kg
+                const maxWeight = weightUnits === "imperial" ? 1000 : 500;
+                if (parseFloat(numericValue) > maxWeight) return;
+                setNewWeight(numericValue);
+              }}
               onAddWeight={addWeightEntry}
             />
 
