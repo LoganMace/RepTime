@@ -1,4 +1,3 @@
-import MealHistoryModal from "@/components/MealHistoryModal";
 import AddMealModal from "@/components/meals/AddMealModal";
 import DailySummary from "@/components/meals/DailySummary";
 import FavoritesModal from "@/components/meals/FavoritesModal";
@@ -9,6 +8,7 @@ import {
   MOCK_MEALS,
   type MealEntry,
 } from "@/components/meals/MealConstants";
+import MealHistoryModal from "@/components/meals/MealHistoryModal";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -57,6 +57,7 @@ export default function MealsScreen() {
     name: "",
     calories: "",
     protein: "",
+    servings: "1", // Default to 1 serving
   });
   const [currentDate] = useState(formatDateForStorage());
 
@@ -129,22 +130,27 @@ export default function MealsScreen() {
     }
 
     try {
+      const servings = parseFloat(newMeal.servings) || 1;
+      const caloriesPerServing = parseInt(newMeal.calories);
+      const proteinPerServing = parseFloat(newMeal.protein);
+
       if (useMocks) {
         // For mock mode, just add to local state
         const meal: MealEntry = {
           id: Date.now().toString(),
-          name: newMeal.name,
-          calories: parseInt(newMeal.calories),
-          protein: parseFloat(newMeal.protein),
+          name: servings > 1 ? `${newMeal.name} (${servings} servings)` : newMeal.name,
+          calories: Math.round(caloriesPerServing * servings),
+          protein: Math.round(proteinPerServing * servings * 10) / 10,
           category: selectedCategory,
         };
         setMeals([...meals, meal]);
       } else {
         // Save to AsyncStorage
         const mealForStorage: StoredMealEntry = {
-          name: newMeal.name,
-          calories: parseInt(newMeal.calories),
-          protein: parseFloat(newMeal.protein),
+          name: servings > 1 ? `${newMeal.name} (${servings} servings)` : newMeal.name,
+          calories: Math.round(caloriesPerServing * servings),
+          protein: Math.round(proteinPerServing * servings * 10) / 10,
+          servings: servings,
         };
 
         await addMealEntry(
@@ -157,7 +163,7 @@ export default function MealsScreen() {
         await loadMealsFromStorage();
       }
 
-      setNewMeal({ name: "", calories: "", protein: "" });
+      setNewMeal({ name: "", calories: "", protein: "", servings: "1" });
       setShowAddModal(false);
       setSelectedCategory(null);
     } catch (error) {
@@ -180,17 +186,21 @@ export default function MealsScreen() {
     setShowFavoritesModal(true);
   };
 
-  const addFromFavorites = async (favorite: FavoriteMeal) => {
+  const addFromFavorites = async (favorite: FavoriteMeal, servings: number = 1) => {
     try {
       if (!selectedCategory) return;
+
+      const totalCalories = Math.round(favorite.calories * servings);
+      const totalProtein = Math.round(favorite.protein * servings * 10) / 10;
+      const mealName = servings > 1 ? `${favorite.name} (${servings} servings)` : favorite.name;
 
       if (useMocks) {
         // For mock mode, just add to local state
         const meal: MealEntry = {
           id: Date.now().toString(),
-          name: favorite.name,
-          calories: favorite.calories,
-          protein: favorite.protein,
+          name: mealName,
+          calories: totalCalories,
+          protein: totalProtein,
           category: selectedCategory,
           isFavorite: true,
         };
@@ -198,9 +208,10 @@ export default function MealsScreen() {
       } else {
         // Save to AsyncStorage
         const mealForStorage: StoredMealEntry = {
-          name: favorite.name,
-          calories: favorite.calories,
-          protein: favorite.protein,
+          name: mealName,
+          calories: totalCalories,
+          protein: totalProtein,
+          servings: servings,
         };
 
         await addMealEntry(

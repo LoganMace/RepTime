@@ -2,11 +2,12 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import FormModal from "@/components/ui/FormModal";
 import { FavoriteMeal } from "@/utils/mealStorage";
 import { useTheme } from "@/hooks/useTheme";
-import React from "react";
+import React, { useState } from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -17,7 +18,7 @@ interface FavoritesModalProps {
   selectedCategory: MealEntry["category"] | null;
   favoriteMeals: FavoriteMeal[];
   onClose: () => void;
-  onAddFromFavorites: (favorite: FavoriteMeal) => void;
+  onAddFromFavorites: (favorite: FavoriteMeal, servings: number) => void;
 }
 
 export default function FavoritesModal({
@@ -29,6 +30,9 @@ export default function FavoritesModal({
 }: FavoritesModalProps) {
   const { colors } = useTheme();
   const categoryInfo = selectedCategory ? CATEGORIES.find(c => c.key === selectedCategory) : null;
+  
+  // Track servings for each favorite item
+  const [servingsMap, setServingsMap] = useState<{ [key: string]: string }>({});
 
   const styles = StyleSheet.create({
     favoritesScrollView: {
@@ -73,6 +77,39 @@ export default function FavoritesModal({
       fontSize: 14,
       color: colors.textSecondary,
     },
+    servingsContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 8,
+    },
+    servingsInput: {
+      backgroundColor: colors.inputBackground,
+      borderWidth: 1,
+      borderColor: colors.inputBorder,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      fontSize: 14,
+      color: colors.inputText,
+      width: 60,
+      textAlign: "center",
+    },
+    servingsLabel: {
+      fontSize: 14,
+      color: colors.text,
+    },
+    addButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 8,
+    },
+    addButtonText: {
+      color: colors.textInverse,
+      fontSize: 14,
+      fontWeight: "600",
+    },
   });
 
   const renderFavoritesList = () => (
@@ -88,33 +125,59 @@ export default function FavoritesModal({
           </Text>
         </View>
       ) : (
-        favoriteMeals.map((favorite) => (
-          <TouchableOpacity
-            key={favorite.id}
-            style={[
-              styles.favoriteItem,
-              categoryInfo && {
-                backgroundColor: `${categoryInfo.lightColor}15`,
-                borderLeftWidth: 3,
-                borderLeftColor: categoryInfo.color,
-              },
-            ]}
-            onPress={() => onAddFromFavorites(favorite)}
-          >
-            <View style={styles.favoriteItemContent}>
-              <Text style={styles.favoriteItemName}>{favorite.name}</Text>
-              <View style={styles.favoriteItemDetails}>
-                <Text style={styles.favoriteItemDetail}>
-                  {favorite.calories} cal
-                </Text>
-                <Text style={styles.favoriteItemDetail}>
-                  {favorite.protein}g protein
-                </Text>
+        favoriteMeals.map((favorite) => {
+          const servings = parseFloat(servingsMap[favorite.id] || "1") || 1;
+          const totalCalories = Math.round(favorite.calories * servings);
+          const totalProtein = Math.round(favorite.protein * servings * 10) / 10;
+          
+          return (
+            <View
+              key={favorite.id}
+              style={[
+                styles.favoriteItem,
+                categoryInfo && {
+                  backgroundColor: `${categoryInfo.lightColor}15`,
+                  borderLeftWidth: 3,
+                  borderLeftColor: categoryInfo.color,
+                },
+              ]}
+            >
+              <View style={styles.favoriteItemContent}>
+                <Text style={styles.favoriteItemName}>{favorite.name}</Text>
+                <View style={styles.favoriteItemDetails}>
+                  <Text style={styles.favoriteItemDetail}>
+                    {favorite.calories} cal/serving
+                  </Text>
+                  <Text style={styles.favoriteItemDetail}>
+                    {favorite.protein}g protein/serving
+                  </Text>
+                </View>
+                <View style={styles.servingsContainer}>
+                  <Text style={styles.servingsLabel}>Servings:</Text>
+                  <TextInput
+                    style={styles.servingsInput}
+                    value={servingsMap[favorite.id] || "1"}
+                    onChangeText={(text) => 
+                      setServingsMap({ ...servingsMap, [favorite.id]: text })
+                    }
+                    keyboardType="numeric"
+                    placeholder="1"
+                    placeholderTextColor={colors.placeholder}
+                  />
+                  <Text style={styles.favoriteItemDetail}>
+                    = {totalCalories} cal, {totalProtein}g protein
+                  </Text>
+                </View>
               </View>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => onAddFromFavorites(favorite, servings)}
+              >
+                <Text style={styles.addButtonText}>Add</Text>
+              </TouchableOpacity>
             </View>
-            <IconSymbol name="plus" size={20} color={colors.primary} />
-          </TouchableOpacity>
-        ))
+          );
+        })
       )}
     </ScrollView>
   );

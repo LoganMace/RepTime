@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { IconSymbol } from "./ui/IconSymbol";
+import { IconSymbol } from "../ui/IconSymbol";
 
 interface MealHistoryModalProps {
   visible: boolean;
@@ -174,16 +174,11 @@ export default function MealHistoryModal({
                   </Text>
                 </View>
                 <View style={styles.categoryMeals}>
-                  {categoryMeals.slice(0, 2).map((meal, index) => (
+                  {categoryMeals.map((meal, index) => (
                     <Text key={index} style={styles.mealText}>
                       {meal.name}
                     </Text>
                   ))}
-                  {categoryMeals.length > 2 && (
-                    <Text style={styles.moreText}>
-                      +{categoryMeals.length - 2} more
-                    </Text>
-                  )}
                 </View>
               </View>
             );

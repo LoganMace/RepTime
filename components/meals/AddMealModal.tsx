@@ -11,6 +11,7 @@ interface AddMealModalProps {
     name: string;
     calories: string;
     protein: string;
+    servings: string;
   };
   onClose: () => void;
   onAddMeal: () => void;
@@ -35,15 +36,22 @@ export default function AddMealModal({
       onChangeText: (text) => onMealChange("name", text),
     },
     {
+      key: "servings",
+      placeholder: "Servings",
+      value: newMeal.servings,
+      onChangeText: (text) => onMealChange("servings", text),
+      keyboardType: "numeric",
+    },
+    {
       key: "calories", 
-      placeholder: "Calories",
+      placeholder: "Calories (per serving)",
       value: newMeal.calories,
       onChangeText: (text) => onMealChange("calories", text),
       keyboardType: "numeric",
     },
     {
       key: "protein",
-      placeholder: "Protein (g)", 
+      placeholder: "Protein (g per serving)", 
       value: newMeal.protein,
       onChangeText: (text) => onMealChange("protein", text),
       keyboardType: "decimal-pad",

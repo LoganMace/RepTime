@@ -7,6 +7,7 @@ export interface MealEntry {
   name: string;
   calories: number;
   protein: number;
+  servings?: number; // Optional for backward compatibility, defaults to 1
 }
 
 export interface FavoriteMeal {
@@ -48,6 +49,7 @@ const MOCK_MEALS_DATA: MealsData = {
     snacks: [
       { name: "Protein Shake", calories: 160, protein: 25 },
       { name: "Mixed Nuts (1 oz)", calories: 170, protein: 6 },
+      { name: "Boiled Egg", calories: 70, protein: 6, servings: 2 },
     ],
   },
   "2025-08-01": {
