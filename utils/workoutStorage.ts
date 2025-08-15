@@ -39,9 +39,9 @@ export const MOCK_WORKOUT_A: WorkoutPlan = {
     {
       exercise: "Arm circles",
       sets: "1",
-      reps: "10",
+      reps: "2",
       weight: "",
-      workTime: "",
+      workTime: "30",
       restTime: "30",
       setRest: "",
       warmup: true,
@@ -58,11 +58,22 @@ export const MOCK_WORKOUT_A: WorkoutPlan = {
       warmup: true,
       cooldown: false,
     },
+    {
+      exercise: "Light Dumbbell Shoulder Press",
+      sets: "1",
+      reps: "10",
+      weight: "",
+      workTime: "",
+      restTime: "30",
+      setRest: "",
+      warmup: true,
+      cooldown: false,
+    },
     // Main Workout exercises
     {
       exercise: "Goblet Squat",
-      sets: "3",
-      reps: "10",
+      sets: "4",
+      reps: "10-12",
       weight: "11.34", // 25 lbs in kg (exact: 11.3398)
       workTime: "",
       restTime: "30",
@@ -71,9 +82,31 @@ export const MOCK_WORKOUT_A: WorkoutPlan = {
       cooldown: false,
     },
     {
-      exercise: "Dumbbell Bench Press",
-      sets: "3",
-      reps: "10",
+      exercise: "Dumbbell Romanian Deadlift",
+      sets: "4",
+      reps: "10-12",
+      weight: "6.804", // 15 lbs in kg (exact: 6.80389)
+      workTime: "",
+      restTime: "30",
+      setRest: "",
+      warmup: false,
+      cooldown: false,
+    },
+    {
+      exercise: "Flat Dumbbell Bench Press",
+      sets: "4",
+      reps: "8-10",
+      weight: "6.804", // 15 lbs in kg (exact: 6.80389)
+      workTime: "",
+      restTime: "30",
+      setRest: "",
+      warmup: false,
+      cooldown: false,
+    },
+    {
+      exercise: "Seated Dumbbell Shoulder Press",
+      sets: "4",
+      reps: "8-10",
       weight: "6.804", // 15 lbs in kg (exact: 6.80389)
       workTime: "",
       restTime: "30",
@@ -83,7 +116,7 @@ export const MOCK_WORKOUT_A: WorkoutPlan = {
     },
     {
       exercise: "1-Arm Dumbbell Row (bench-supported)",
-      sets: "3",
+      sets: "4",
       reps: "10", // each arm
       weight: "11.34", // 25 lbs in kg (exact: 11.3398)
       workTime: "",
@@ -93,20 +126,9 @@ export const MOCK_WORKOUT_A: WorkoutPlan = {
       cooldown: false,
     },
     {
-      exercise: "Seated Dumbbell Shoulder Press",
-      sets: "3",
-      reps: "8",
-      weight: "6.804", // 15 lbs in kg (exact: 6.80389)
-      workTime: "",
-      restTime: "30",
-      setRest: "",
-      warmup: false,
-      cooldown: false,
-    },
-    {
       exercise: "Incline Dumbbell Curl",
-      sets: "2",
-      reps: "10",
+      sets: "3",
+      reps: "10-12",
       weight: "6.804", // 15 lbs in kg (exact: 6.80389)
       workTime: "",
       restTime: "30",
@@ -116,22 +138,45 @@ export const MOCK_WORKOUT_A: WorkoutPlan = {
     },
     {
       exercise: "Plank",
-      sets: "2",
+      sets: "3",
       reps: "1",
       weight: "",
       workTime: "30", // 30-45 sec, using 30s
-      restTime: "30",
+      restTime: "20",
       setRest: "",
       warmup: false,
       cooldown: true,
     },
     {
       exercise: "Jump rope",
-      sets: "2",
-      reps: "1",
+      sets: "1",
+      reps: "6",
       weight: "",
       workTime: "30", // 30s on
       restTime: "30", // 30s off
+      setRest: "",
+      warmup: false,
+      cooldown: true,
+    },
+    // Cool-Down exercises
+    {
+      exercise: "Stretch hamstrings, chest, shoulders",
+      sets: "1",
+      reps: "1",
+      weight: "",
+      workTime: "120", // 2-3 min, using 2 min (120s)
+      restTime: "",
+      setRest: "",
+      warmup: false,
+      cooldown: true,
+    },
+    {
+      exercise: "Deep breathing",
+      sets: "1",
+      reps: "1",
+      weight: "",
+      workTime: "60", // 1 min
+      restTime: "",
       setRest: "",
       warmup: false,
       cooldown: true,
@@ -146,12 +191,12 @@ export const MOCK_WORKOUT_B: WorkoutPlan = {
   exercises: [
     // Warm-Up exercises
     {
-      exercise: "Jump rope or march",
+      exercise: "Jump Rope",
       sets: "1",
-      reps: "1",
+      reps: "3",
       weight: "",
-      workTime: "120", // 2-3 min, using 2 min (120s)
-      restTime: "",
+      workTime: "30", // 2-3 min, using 2 min (120s)
+      restTime: "30",
       setRest: "",
       warmup: true,
       cooldown: false,
@@ -167,10 +212,32 @@ export const MOCK_WORKOUT_B: WorkoutPlan = {
       warmup: true,
       cooldown: false,
     },
+    {
+      exercise: "Push-ups",
+      sets: "1",
+      reps: "10",
+      weight: "",
+      workTime: "",
+      restTime: "30",
+      setRest: "",
+      warmup: true,
+      cooldown: false,
+    },
+    {
+      exercise: "Light Dumbbell Curls",
+      sets: "1",
+      reps: "10",
+      weight: "",
+      workTime: "",
+      restTime: "30",
+      setRest: "",
+      warmup: true,
+      cooldown: false,
+    },
     // Main Workout exercises
     {
       exercise: "Dumbbell Reverse Lunge",
-      sets: "3",
+      sets: "4",
       reps: "8", // each leg
       weight: "6.804", // 15 lbs in kg
       workTime: "",
@@ -180,7 +247,7 @@ export const MOCK_WORKOUT_B: WorkoutPlan = {
       cooldown: false,
     },
     {
-      exercise: "Dumbbell Romanian Deadlift",
+      exercise: "Dumbbell Step-Ups (each leg)",
       sets: "3",
       reps: "10",
       weight: "11.34", // 25 lbs in kg
@@ -192,8 +259,8 @@ export const MOCK_WORKOUT_B: WorkoutPlan = {
     },
     {
       exercise: "Incline Dumbbell Chest Press",
-      sets: "3",
-      reps: "10",
+      sets: "4",
+      reps: "8-10",
       weight: "6.804", // 15 lbs in kg
       workTime: "",
       restTime: "30",
@@ -204,7 +271,7 @@ export const MOCK_WORKOUT_B: WorkoutPlan = {
     {
       exercise: "Dumbbell Curl to Arnold Press",
       sets: "3",
-      reps: "8",
+      reps: "8-10",
       weight: "6.804", // 15 lbs in kg
       workTime: "",
       restTime: "30",
@@ -214,7 +281,7 @@ export const MOCK_WORKOUT_B: WorkoutPlan = {
     },
     {
       exercise: "Russian Twists",
-      sets: "2",
+      sets: "3",
       reps: "20", // total
       weight: "4.536", // 10 lbs in kg (optional)
       workTime: "",
@@ -224,12 +291,12 @@ export const MOCK_WORKOUT_B: WorkoutPlan = {
       cooldown: false,
     },
     {
-      exercise: "Jump rope",
-      sets: "3",
-      reps: "1",
+      exercise: "Jump Rope",
+      sets: "1",
+      reps: "12",
       weight: "",
-      workTime: "30", // 30s on
-      restTime: "30", // 30s off
+      workTime: "45", // 45s on
+      restTime: "20", // 20s off
       setRest: "",
       warmup: false,
       cooldown: false,
@@ -332,9 +399,8 @@ export const addMockWorkoutData = async (): Promise<void> => {
 
     // Remove existing mocks if present
     const filteredPlans = workoutPlans.filter(
-      (plan: WorkoutPlan) => 
-        plan.name !== MOCK_WORKOUT_A.name &&
-        plan.name !== MOCK_WORKOUT_B.name
+      (plan: WorkoutPlan) =>
+        plan.name !== MOCK_WORKOUT_A.name && plan.name !== MOCK_WORKOUT_B.name
     );
 
     // Add fresh mock workouts
